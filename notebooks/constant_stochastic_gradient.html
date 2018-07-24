@@ -1,0 +1,971 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Constant Stochastic Gradient &#8212; PyMC3 3.5 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="shortcut icon" href="../_static/PyMC3.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Stochastic Gradient Fisher Scoring" href="sgfs_simple_optimization.html" />
+    <link rel="prev" title="Normalizing Flows Overview" href="normalizing_flows_overview.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #303F9F;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #D84315;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 8ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #cfcfcf;
+    border-radius: 2px;
+    background: #f7f7f7;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.pngmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+</style>
+<div class="section" id="Constant-Stochastic-Gradient">
+<h1>Constant Stochastic Gradient<a class="headerlink" href="#Constant-Stochastic-Gradient" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Can we approximately sample from a Bayesian posterior distribution if we are only allowed to touch a small mini-batch of data-items for every sample we generate ?
+</pre></div>
+</div>
+<p>Based on results from a recent paper, a simple implementation of
+constant stochastic gradient is presented as an approximate bayesian
+sampling algorithm. The objective of the notebook is to compare the
+approximate distribution to iterates from NUTS and SGFS.</p>
+<p>Ref: <a class="reference external" href="https://arxiv.org/abs/1704.04289">https://arxiv.org/abs/1704.04289</a></p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">pymc3</span> <span class="kn">as</span> <span class="nn">pm</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">theano</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">theano.tensor</span> <span class="kn">as</span> <span class="nn">tt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="kn">as</span> <span class="nn">sns</span>
+</pre></div>
+</div>
+</div>
+<p>We will take a regression on a protein dataset that is used to show
+results in Figure 1. It is a multivariate regression problem on the
+Protein Structure Properties dataset available at the <a class="reference external" href="https://archive.ics.uci.edu/ml/datasets/Physicochemical+Properties+of+Protein+Tertiary+Structure">uci
+repo</a>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">!</span>wget https://archive.ics.uci.edu/ml/machine-learning-databases/00265/CASP.csv --directory-prefix<span class="o">=</span>/tmp/
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+--2017-11-26 17:48:19--  https://archive.ics.uci.edu/ml/machine-learning-databases/00265/CASP.csv
+Resolving archive.ics.uci.edu... 128.195.10.249
+Connecting to archive.ics.uci.edu|128.195.10.249|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 3528710 (3.4M) [text/csv]
+Saving to: ‘/tmp/CASP.csv.4’
+
+CASP.csv.4          100%[===================&gt;]   3.37M  1.41MB/s    in 2.4s
+
+2017-11-26 17:48:22 (1.41 MB/s) - ‘/tmp/CASP.csv.4’ saved [3528710/3528710]
+
+</pre></div></div>
+</div>
+<div class="section" id="Load-dataset">
+<h2>Load dataset<a class="headerlink" href="#Load-dataset" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;/tmp/CASP.csv&#39;</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="p">(</span><span class="n">raw_data</span> <span class="o">-</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="o">/</span><span class="n">raw_data</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+<span class="n">q_size</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span>
+<span class="n">q_name</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;F1&#39;</span><span class="p">,</span> <span class="s1">&#39;F2&#39;</span><span class="p">,</span> <span class="s1">&#39;F3&#39;</span><span class="p">,</span> <span class="s1">&#39;F4&#39;</span><span class="p">,</span> <span class="s1">&#39;F5&#39;</span><span class="p">,</span> <span class="s1">&#39;F6&#39;</span><span class="p">,</span> <span class="s1">&#39;F7&#39;</span><span class="p">,</span> <span class="s1">&#39;F8&#39;</span><span class="p">,</span> <span class="s1">&#39;F9&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">data_N</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+<span class="n">train_test_split</span> <span class="o">=</span> <span class="mf">0.95</span>
+<span class="n">ixs</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">data_N</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">data_N</span><span class="o">*</span><span class="n">train_test_split</span><span class="p">))</span>
+<span class="n">neg_ixs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">data_N</span><span class="p">))</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">ixs</span><span class="p">))</span>
+<span class="n">train_df</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">ixs</span><span class="p">]</span>
+<span class="n">test_df</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">neg_ixs</span><span class="p">]</span>
+
+<span class="n">N</span> <span class="o">=</span> <span class="n">train_df</span><span class="o">.</span><span class="n">size</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+<span class="n">n_test</span> <span class="o">=</span> <span class="n">test_df</span><span class="o">.</span><span class="n">size</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">train_X</span> <span class="o">=</span> <span class="n">train_df</span><span class="p">[</span><span class="n">q_name</span><span class="p">]</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">()</span>
+<span class="n">train_Y</span> <span class="o">=</span> <span class="n">train_df</span><span class="p">[</span><span class="s1">&#39;RMSD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">()</span>
+
+<span class="n">test_X</span> <span class="o">=</span> <span class="n">test_df</span><span class="p">[</span><span class="n">q_name</span><span class="p">]</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">()</span>
+<span class="n">test_Y</span> <span class="o">=</span> <span class="n">test_df</span><span class="p">[</span><span class="s1">&#39;RMSD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>Let’s try regression models from sklearn to construct the best pymc3
+model</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">linear_model</span>
+<span class="n">sklearn_regression_model</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;Ridge&#39;</span><span class="p">:</span> <span class="n">linear_model</span><span class="o">.</span><span class="n">Ridge</span> <span class="p">(</span><span class="n">alpha</span> <span class="o">=</span> <span class="o">.</span><span class="mi">5</span><span class="p">),</span>
+    <span class="s1">&#39;Lasso&#39;</span><span class="p">:</span> <span class="n">linear_model</span><span class="o">.</span><span class="n">Lasso</span><span class="p">(</span><span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">),</span>
+    <span class="s1">&#39;BayesianRidge&#39;</span><span class="p">:</span> <span class="n">linear_model</span><span class="o">.</span><span class="n">BayesianRidge</span><span class="p">(),</span>
+    <span class="s1">&#39;OLS&#39;</span><span class="p">:</span> <span class="n">linear_model</span><span class="o">.</span><span class="n">LinearRegression</span><span class="p">(),</span>
+<span class="p">}</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">reg</span> <span class="ow">in</span> <span class="n">sklearn_regression_model</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">reg</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train_X</span><span class="p">,</span> <span class="n">train_Y</span><span class="p">)</span>
+    <span class="n">pred</span> <span class="o">=</span> <span class="n">reg</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">test_X</span><span class="p">)</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">pred</span><span class="o">-</span><span class="n">test_Y</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;The {} Mean Absolute Error is {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">diff</span><span class="p">))</span><span class="o">/</span><span class="n">test_Y</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The BayesianRidge Mean Absolute Error is 0.705775225403
+The OLS Mean Absolute Error is 0.705739946132
+The Ridge Mean Absolute Error is 0.705748180444
+The Lasso Mean Absolute Error is 0.798798476908
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+/Users/shashank/.virtualenvs/pymc3-dev/lib/python2.7/site-packages/scipy/linalg/basic.py:1226: RuntimeWarning: internal gelsd driver lwork query error, required iwork dimension not returned. This is likely the result of LAPACK bug 0038, fixed in LAPACK 3.2.2 (released July 21, 2010). Falling back to &#39;gelss&#39; driver.
+  warnings.warn(mesg, RuntimeWarning)
+</pre></div></div>
+</div>
+<p>OLS fit has the minimum mean absolute error so we will select normal
+priors on the model parameters</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">model_input</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">shared</span><span class="p">(</span><span class="n">train_X</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">)</span>
+<span class="n">model_output</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">shared</span><span class="p">(</span><span class="n">train_Y</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Y&#39;</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">b0</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;Intercept&quot;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">b1</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;Slope&quot;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">q_size</span><span class="p">,))</span>
+    <span class="n">std</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfNormal</span><span class="p">(</span><span class="s2">&quot;std&quot;</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">b0</span> <span class="o">+</span> <span class="n">theano</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">model_input</span><span class="p">,</span> <span class="n">b1</span><span class="p">)</span>
+    <span class="n">y_obs</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;y_obs&quot;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">std</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">model_output</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">find_MAP</span><span class="p">()</span>
+
+<span class="n">map_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">test_X</span><span class="p">,</span> <span class="n">start</span><span class="p">[</span><span class="s1">&#39;Slope&#39;</span><span class="p">]</span> <span class="p">)</span> <span class="o">+</span> <span class="n">start</span><span class="p">[</span><span class="s1">&#39;Intercept&#39;</span><span class="p">]</span>
+<span class="n">map_diff</span> <span class="o">=</span> <span class="n">map_pred</span><span class="o">-</span><span class="n">test_Y</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;The {} Mean Absolute Error is {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;OLS MAP Estimate&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">map_diff</span><span class="p">))</span><span class="o">/</span><span class="n">test_Y</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Warning: Desired error not necessarily achieved due to precision loss.
+         Current function value: 54415.487519
+         Iterations: 20
+         Function evaluations: 70
+         Gradient evaluations: 61
+The OLS MAP Estimate Mean Absolute Error is 0.70575174425
+</pre></div></div>
+</div>
+<p>Now we will to proceed perform bayesian sampling to calculate the
+posterior on the OLS pymc3 model.</p>
+<p>Make model and minibatches input for the stochastic sampler</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">draws</span> <span class="o">=</span> <span class="mi">10000</span>
+<span class="k">with</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">nuts_trace</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">draws</span><span class="o">=</span><span class="n">draws</span><span class="p">,</span> <span class="n">tune</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+100%|██████████| 10500/10500 [11:20&lt;00:00, 15.44it/s]
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Generator that returns mini-batches in each iteration</span>
+<span class="k">def</span> <span class="nf">create_minibatches</span><span class="p">(</span><span class="n">batch_size</span><span class="p">):</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="c1"># Return random data samples of set size 100 each iteration</span>
+        <span class="n">ixs</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="p">(</span><span class="n">train_X</span><span class="p">[</span><span class="n">ixs</span><span class="p">],</span> <span class="n">train_Y</span><span class="p">[</span><span class="n">ixs</span><span class="p">])</span>
+
+<span class="c1"># Tensors and RV that wil l be using mini-batches</span>
+<span class="n">batch_size</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="n">minibatches</span> <span class="o">=</span> <span class="n">create_minibatches</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">model_input</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">shared</span><span class="p">(</span><span class="n">train_X</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">)</span>
+<span class="n">model_output</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">shared</span><span class="p">(</span><span class="n">train_Y</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Y&#39;</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">b0</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;Intercept&quot;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">b1</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;Slope&quot;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">q_size</span><span class="p">,))</span>
+    <span class="n">std</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfNormal</span><span class="p">(</span><span class="s2">&quot;std&quot;</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">b0</span> <span class="o">+</span> <span class="n">theano</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">model_input</span><span class="p">,</span> <span class="n">b1</span><span class="p">)</span>
+    <span class="n">y_obs</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;y_obs&quot;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">std</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">model_output</span><span class="p">)</span>
+
+<span class="n">minibatch_tensors</span> <span class="o">=</span> <span class="p">[</span><span class="n">model_input</span><span class="p">,</span> <span class="n">model_output</span><span class="p">]</span>
+
+<span class="n">draws</span> <span class="o">=</span> <span class="mi">10000</span><span class="o">*</span><span class="mi">5</span>
+<span class="k">with</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">csg_step_method</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">step_methods</span><span class="o">.</span><span class="n">CSG</span><span class="p">(</span><span class="nb">vars</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">vars</span><span class="p">,</span>
+                                          <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+                                          <span class="n">total_size</span><span class="o">=</span><span class="n">N</span><span class="p">,</span>
+                                          <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+                                          <span class="n">minibatches</span><span class="o">=</span><span class="n">minibatches</span><span class="p">,</span>
+                                          <span class="n">minibatch_tensors</span><span class="o">=</span><span class="n">minibatch_tensors</span><span class="p">)</span>
+    <span class="n">csg_trace</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">draws</span><span class="o">=</span><span class="n">draws</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">csg_step_method</span><span class="p">,</span> <span class="n">tune</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="s1">&#39;map&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+/Users/shashank/.virtualenvs/pymc3-dev/lib/python2.7/site-packages/pymc3-3.1-py2.7.egg/pymc3/step_methods/sgmcmc.py:112: UserWarning: Warning: Stochastic Gradient based sampling methods are experimental step methods and not yet recommended for use in PyMC3!
+100%|██████████| 50500/50500 [01:17&lt;00:00, 651.88it/s]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">model_input</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">shared</span><span class="p">(</span><span class="n">train_X</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">)</span>
+<span class="n">model_output</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">shared</span><span class="p">(</span><span class="n">train_Y</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Y&#39;</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">b0</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;Intercept&quot;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">b1</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;Slope&quot;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">q_size</span><span class="p">,))</span>
+    <span class="n">std</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfNormal</span><span class="p">(</span><span class="s2">&quot;std&quot;</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">b0</span> <span class="o">+</span> <span class="n">theano</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">model_input</span><span class="p">,</span> <span class="n">b1</span><span class="p">)</span>
+    <span class="n">y_obs</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;y_obs&quot;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">std</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">model_output</span><span class="p">)</span>
+
+<span class="n">minibatch_tensors</span> <span class="o">=</span> <span class="p">[</span><span class="n">model_input</span><span class="p">,</span> <span class="n">model_output</span><span class="p">]</span>
+
+<span class="n">draws</span> <span class="o">=</span> <span class="mi">10000</span><span class="o">*</span><span class="mi">5</span>
+<span class="k">with</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">sgfs_step_method</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">step_methods</span><span class="o">.</span><span class="n">SGFS</span><span class="p">(</span><span class="nb">vars</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">vars</span><span class="p">,</span>
+                                            <span class="n">step_size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+                                            <span class="n">step_size_decay</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+                                            <span class="n">total_size</span><span class="o">=</span><span class="n">N</span><span class="p">,</span>
+                                            <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+                                            <span class="n">minibatches</span><span class="o">=</span><span class="n">minibatches</span><span class="p">,</span>
+                                            <span class="n">minibatch_tensors</span><span class="o">=</span><span class="n">minibatch_tensors</span><span class="p">)</span>
+    <span class="n">sgfs_trace</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">draws</span><span class="o">=</span><span class="n">draws</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">sgfs_step_method</span><span class="p">,</span> <span class="n">tune</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="s1">&#39;map&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+100%|██████████| 50500/50500 [01:17&lt;00:00, 650.24it/s]
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="NUTS-Trace-Plot">
+<h2>NUTS Trace Plot<a class="headerlink" href="#NUTS-Trace-Plot" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pm</span><span class="o">.</span><span class="n">traceplot</span><span class="p">(</span><span class="n">nuts_trace</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[15]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>array([[&lt;matplotlib.axes._subplots.AxesSubplot object at 0x120ed9fd0&gt;,
+        &lt;matplotlib.axes._subplots.AxesSubplot object at 0x1271bc190&gt;],
+       [&lt;matplotlib.axes._subplots.AxesSubplot object at 0x1275bf5d0&gt;,
+        &lt;matplotlib.axes._subplots.AxesSubplot object at 0x1275ce790&gt;],
+       [&lt;matplotlib.axes._subplots.AxesSubplot object at 0x127712690&gt;,
+        &lt;matplotlib.axes._subplots.AxesSubplot object at 0x12775f110&gt;]], dtype=object)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_constant_stochastic_gradient_23_1.png" src="../_images/notebooks_constant_stochastic_gradient_23_1.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Preconditioned-CSG-Trace-Plot">
+<h2>Preconditioned CSG Trace Plot<a class="headerlink" href="#Preconditioned-CSG-Trace-Plot" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pm</span><span class="o">.</span><span class="n">traceplot</span><span class="p">(</span><span class="n">csg_trace</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[16]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>array([[&lt;matplotlib.axes._subplots.AxesSubplot object at 0x127cf7d90&gt;,
+        &lt;matplotlib.axes._subplots.AxesSubplot object at 0x128202150&gt;],
+       [&lt;matplotlib.axes._subplots.AxesSubplot object at 0x128246710&gt;,
+        &lt;matplotlib.axes._subplots.AxesSubplot object at 0x12828bad0&gt;],
+       [&lt;matplotlib.axes._subplots.AxesSubplot object at 0x11ce0d750&gt;,
+        &lt;matplotlib.axes._subplots.AxesSubplot object at 0x11f7ff2d0&gt;]], dtype=object)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_constant_stochastic_gradient_25_1.png" src="../_images/notebooks_constant_stochastic_gradient_25_1.png" />
+</div>
+</div>
+</div>
+<div class="section" id="SGFS-Trace-Plot">
+<h2>SGFS Trace Plot<a class="headerlink" href="#SGFS-Trace-Plot" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pm</span><span class="o">.</span><span class="n">traceplot</span><span class="p">(</span><span class="n">sgfs_trace</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[17]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>array([[&lt;matplotlib.axes._subplots.AxesSubplot object at 0x1210e01d0&gt;,
+        &lt;matplotlib.axes._subplots.AxesSubplot object at 0x124d78e90&gt;],
+       [&lt;matplotlib.axes._subplots.AxesSubplot object at 0x11fd4f210&gt;,
+        &lt;matplotlib.axes._subplots.AxesSubplot object at 0x11cbe5190&gt;],
+       [&lt;matplotlib.axes._subplots.AxesSubplot object at 0x124ba7590&gt;,
+        &lt;matplotlib.axes._subplots.AxesSubplot object at 0x11cb443d0&gt;]], dtype=object)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_constant_stochastic_gradient_27_1.png" src="../_images/notebooks_constant_stochastic_gradient_27_1.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Mean-Absolute-Error-on-Test-Dataset">
+<h2>Mean Absolute Error on Test Dataset<a class="headerlink" href="#Mean-Absolute-Error-on-Test-Dataset" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Replace shared variables with testing set</span>
+<span class="n">model_input</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">test_X</span><span class="p">)</span>
+<span class="n">model_output</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">test_Y</span><span class="p">)</span>
+
+<span class="n">samples</span> <span class="o">=</span> <span class="mi">1000</span>
+
+<span class="c1"># Creater posterior predictive samples</span>
+<span class="n">sgfs_ppc</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample_ppc</span><span class="p">(</span><span class="n">sgfs_trace</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="n">samples</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">sgfs_pred</span> <span class="o">=</span> <span class="n">sgfs_ppc</span><span class="p">[</span><span class="s1">&#39;y_obs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># Creater posterior predictive samples</span>
+<span class="n">csg_ppc</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample_ppc</span><span class="p">(</span><span class="n">csg_trace</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="n">samples</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">csg_pred</span> <span class="o">=</span> <span class="n">csg_ppc</span><span class="p">[</span><span class="s1">&#39;y_obs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># Nuts predictive samples</span>
+<span class="n">nuts_ppc</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample_ppc</span><span class="p">(</span><span class="n">nuts_trace</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="n">samples</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">nuts_pred</span> <span class="o">=</span> <span class="n">nuts_ppc</span><span class="p">[</span><span class="s1">&#39;y_obs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">sgfs_diff</span> <span class="o">=</span> <span class="n">sgfs_pred</span><span class="o">-</span><span class="n">test_Y</span>
+<span class="n">csg_diff</span> <span class="o">=</span> <span class="n">csg_pred</span><span class="o">-</span><span class="n">test_Y</span>
+<span class="n">nuts_diff</span> <span class="o">=</span> <span class="n">nuts_pred</span><span class="o">-</span><span class="n">test_Y</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+100%|██████████| 1000/1000 [00:01&lt;00:00, 689.33it/s]
+100%|██████████| 1000/1000 [00:01&lt;00:00, 711.55it/s]
+100%|██████████| 1000/1000 [00:01&lt;00:00, 723.95it/s]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">print</span><span class="p">(</span><span class="s1">&#39;The NUTS Mean Absolute Error is {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">nuts_diff</span><span class="p">))</span><span class="o">/</span><span class="n">test_Y</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;The CSG Mean Absolute Error is {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">csg_diff</span><span class="p">))</span><span class="o">/</span><span class="n">test_Y</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;The SGFS Mean Absolute Error is {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">sgfs_diff</span><span class="p">))</span><span class="o">/</span><span class="n">test_Y</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The NUTS Mean Absolute Error is 0.705957002724
+The CSG Mean Absolute Error is 0.706815746717
+The SGFS Mean Absolute Error is 0.704868369491
+</pre></div></div>
+</div>
+<p>The mean absolute error for all the sampling algorithms is ~ 0.706.
+which is very close to the ols map fit 0.7057. The error is slightly
+better using SGFS.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">tsplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">nuts_diff</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">interpolate</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">tsplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">csg_diff</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;g&quot;</span><span class="p">,</span> <span class="n">interpolate</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">tsplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">sgfs_diff</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">interpolate</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+/Users/shashank/.virtualenvs/pymc3-dev/lib/python2.7/site-packages/seaborn/timeseries.py:183: UserWarning: The tsplot function is deprecated and will be removed or replaced (in a substantially altered version) in a future release.
+  warnings.warn(msg, UserWarning)
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[20]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>&lt;matplotlib.axes._subplots.AxesSubplot at 0x12118fc90&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_constant_stochastic_gradient_32_2.png" src="../_images/notebooks_constant_stochastic_gradient_32_2.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Sample-covariance-projections-on-the-smallest-and-largest-components">
+<h2>Sample covariance projections on the smallest and largest components<a class="headerlink" href="#Sample-covariance-projections-on-the-smallest-and-largest-components" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">def</span> <span class="nf">posterior_covariance</span><span class="p">(</span><span class="n">step_method</span><span class="p">,</span> <span class="n">trace</span><span class="p">):</span>
+    <span class="n">bij</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">DictToArrayBijection</span><span class="p">(</span><span class="n">step_method</span><span class="o">.</span><span class="n">ordering</span><span class="p">,</span> <span class="n">step_method</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">test_point</span><span class="p">)</span>
+    <span class="n">q_size</span> <span class="o">=</span> <span class="n">bij</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">step_method</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">test_point</span><span class="p">)</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">sample_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+    <span class="n">posterior</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">q_size</span><span class="p">,</span> <span class="n">sample_size</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">trace</span><span class="p">):</span>
+        <span class="n">posterior</span><span class="p">[:,</span> <span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">bij</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+    <span class="n">posterior_minus_mean</span> <span class="o">=</span> <span class="n">posterior</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">asmatrix</span><span class="p">(</span><span class="n">posterior</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">normalized_posterior</span> <span class="o">=</span> <span class="n">posterior_minus_mean</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">asmatrix</span><span class="p">(</span><span class="n">posterior</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">cov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">normalized_posterior</span><span class="p">,</span> <span class="n">normalized_posterior</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">posterior_minus_mean</span><span class="p">,</span> <span class="n">cov</span>
+
+<span class="k">def</span> <span class="nf">projection</span><span class="p">(</span><span class="n">posterior</span><span class="p">,</span> <span class="n">cov</span><span class="p">):</span>
+    <span class="n">U</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">V_h</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">cov</span><span class="p">,</span> <span class="n">compute_uv</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">full_matrices</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">first_projection</span> <span class="o">=</span> <span class="n">V_h</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">last_projection</span> <span class="o">=</span> <span class="n">V_h</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">q_size</span><span class="p">,</span> <span class="n">samples</span> <span class="o">=</span> <span class="n">posterior</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">projection_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">samples</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">samples</span><span class="p">):</span>
+        <span class="n">projection_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">first_projection</span><span class="p">,</span> <span class="n">posterior_minus_mean</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+        <span class="n">projection_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">last_projection</span><span class="p">,</span> <span class="n">posterior_minus_mean</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">projection_matrix</span>
+
+<span class="n">burn_in</span> <span class="o">=</span> <span class="mi">500</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Between-CSG-and-NUTS">
+<h2>Between CSG and NUTS<a class="headerlink" href="#Between-CSG-and-NUTS" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+
+<span class="n">posterior_minus_mean</span><span class="p">,</span> <span class="n">cov</span> <span class="o">=</span> <span class="n">posterior_covariance</span><span class="p">(</span><span class="n">csg_step_method</span><span class="p">,</span> <span class="n">nuts_trace</span><span class="p">[</span><span class="n">burn_in</span><span class="p">:])</span>
+<span class="n">projection_matrix</span> <span class="o">=</span> <span class="n">projection</span><span class="p">(</span><span class="n">posterior_minus_mean</span><span class="p">,</span> <span class="n">cov</span><span class="p">)</span>
+<span class="n">df_nuts</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">projection_matrix</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">df_nuts</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">df_nuts</span><span class="p">[</span><span class="s1">&#39;Y&#39;</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+<span class="n">posterior_minus_mean</span><span class="p">,</span> <span class="n">cov</span> <span class="o">=</span> <span class="n">posterior_covariance</span><span class="p">(</span><span class="n">csg_step_method</span><span class="p">,</span> <span class="n">csg_trace</span><span class="p">[</span><span class="n">burn_in</span><span class="p">:])</span>
+<span class="n">projection_matrix</span> <span class="o">=</span> <span class="n">projection</span><span class="p">(</span><span class="n">posterior_minus_mean</span><span class="p">,</span> <span class="n">cov</span><span class="p">)</span>
+<span class="n">df_csg</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">projection_matrix</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">df_csg</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">df_csg</span><span class="p">[</span><span class="s1">&#39;Y&#39;</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">)</span>
+
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Stationary sampling distributions of the iterates of CSG and NUTS&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[22]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Text(0.5,1,u&#39;Stationary sampling distributions of the iterates of CSG and NUTS&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_constant_stochastic_gradient_36_1.png" src="../_images/notebooks_constant_stochastic_gradient_36_1.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Between-SGFS-and-NUTS">
+<h2>Between SGFS and NUTS<a class="headerlink" href="#Between-SGFS-and-NUTS" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+
+<span class="n">posterior_minus_mean</span><span class="p">,</span> <span class="n">cov</span> <span class="o">=</span> <span class="n">posterior_covariance</span><span class="p">(</span><span class="n">csg_step_method</span><span class="p">,</span> <span class="n">nuts_trace</span><span class="p">[</span><span class="n">burn_in</span><span class="p">:])</span>
+<span class="n">projection_matrix</span> <span class="o">=</span> <span class="n">projection</span><span class="p">(</span><span class="n">posterior_minus_mean</span><span class="p">,</span> <span class="n">cov</span><span class="p">)</span>
+<span class="n">df_nuts</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">projection_matrix</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">df_nuts</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">df_nuts</span><span class="p">[</span><span class="s1">&#39;Y&#39;</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+<span class="n">posterior_minus_mean</span><span class="p">,</span> <span class="n">cov</span> <span class="o">=</span> <span class="n">posterior_covariance</span><span class="p">(</span><span class="n">sgfs_step_method</span><span class="p">,</span> <span class="n">sgfs_trace</span><span class="p">[</span><span class="n">burn_in</span><span class="p">:])</span>
+<span class="n">projection_matrix</span> <span class="o">=</span> <span class="n">projection</span><span class="p">(</span><span class="n">posterior_minus_mean</span><span class="p">,</span> <span class="n">cov</span><span class="p">)</span>
+<span class="n">df_sgfs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">projection_matrix</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">df_sgfs</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">df_sgfs</span><span class="p">[</span><span class="s1">&#39;Y&#39;</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;stationary sampling distributions of the iterates of SGFS and NUTS&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[23]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Text(0.5,1,u&#39;stationary sampling distributions of the iterates of SGFS and NUTS&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_constant_stochastic_gradient_38_1.png" src="../_images/notebooks_constant_stochastic_gradient_38_1.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Result">
+<h2>Result<a class="headerlink" href="#Result" title="Permalink to this headline">¶</a></h2>
+<p>Constant Stochastic Gradient is a good approximator of the posterior, as
+can be seen from the trace plots and the projections of its sample
+covariance matrix which largely overlap with NUTS. The paper also
+presents a figure which shows large overlap between the true posterior
+and the constant stochastic gradient iteratre distribution. In
+comparison SGFS has a unique distribution, which shows a different
+relationship between the two components.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/pymc3_logo.jpg" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="../index.html">PyMC3</a></h1>
+
+
+
+<p class="blurb">Probabilistic Programming in Python: Bayesian Modeling and Probabilistic Machine Learning with Theano</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../prob_dists.html">Probability Distributions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../examples.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#howto">Howto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#applied">Applied</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#glm">GLM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#survival-analysis">Survival Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#gaussian-processes">Gaussian Processes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#mixture-models">Mixture Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#variational-inference">Variational Inference</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../examples.html#stochastic-gradient">Stochastic Gradient</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Constant Stochastic Gradient</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sgfs_simple_optimization.html">Stochastic Gradient Fisher Scoring</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesian_neural_network_with_sgfs.html">Bayesian Neural Networks in PyMC3 with Stochastic Gradient Algorithms</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, The PyMC Development Team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="../_sources/notebooks/constant_stochastic_gradient.ipynb.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

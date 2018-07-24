@@ -1,0 +1,1975 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>A Primer on Bayesian Methods for Multilevel Modeling &#8212; PyMC3 3.5 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="shortcut icon" href="../_static/PyMC3.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Stochastic Volatility model" href="stochastic_volatility.html" />
+    <link rel="prev" title="Bayesian Estimation Supersedes the T-Test" href="BEST.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #303F9F;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #D84315;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 8ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #cfcfcf;
+    border-radius: 2px;
+    background: #f7f7f7;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.pngmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+</style>
+<div class="section" id="A-Primer-on-Bayesian-Methods-for-Multilevel-Modeling">
+<h1>A Primer on Bayesian Methods for Multilevel Modeling<a class="headerlink" href="#A-Primer-on-Bayesian-Methods-for-Multilevel-Modeling" title="Permalink to this headline">¶</a></h1>
+<p>Hierarchical or multilevel modeling is a generalization of regression
+modeling.</p>
+<p><em>Multilevel models</em> are regression models in which the constituent model
+parameters are given <strong>probability models</strong>. This implies that model
+parameters are allowed to <strong>vary by group</strong>.</p>
+<p>Observational units are often naturally <strong>clustered</strong>. Clustering
+induces dependence between observations, despite random sampling of
+clusters and random sampling within clusters.</p>
+<p>A <em>hierarchical model</em> is a particular multilevel model where parameters
+are nested within one another.</p>
+<p>Some multilevel structures are not hierarchical.</p>
+<ul class="simple">
+<li>e.g. “country” and “year” are not nested, but may represent separate,
+but overlapping, clusters of parameters</li>
+</ul>
+<p>We will motivate this topic using an environmental epidemiology example.</p>
+<div class="section" id="Example:-Radon-contamination-(Gelman-and-Hill-2006)">
+<h2>Example: Radon contamination (Gelman and Hill 2006)<a class="headerlink" href="#Example:-Radon-contamination-(Gelman-and-Hill-2006)" title="Permalink to this headline">¶</a></h2>
+<p>Radon is a radioactive gas that enters homes through contact points with
+the ground. It is a carcinogen that is the primary cause of lung cancer
+in non-smokers. Radon levels vary greatly from household to household.</p>
+<div class="figure" id="id1">
+<img alt="radon" src="http://www.fix-your-radon.com/images/how_radon_enters.jpg" />
+<p class="caption"><span class="caption-text">radon</span></p>
+</div>
+<p>The EPA did a study of radon levels in 80,000 houses. Two important
+predictors:</p>
+<ul class="simple">
+<li>measurement in basement or first floor (radon higher in basements)</li>
+<li>county uranium level (positive correlation with radon levels)</li>
+</ul>
+<p>We will focus on modeling radon levels in Minnesota.</p>
+<p>The hierarchy in this example is households within county.</p>
+</div>
+<div class="section" id="Data-organization">
+<h2>Data organization<a class="headerlink" href="#Data-organization" title="Permalink to this headline">¶</a></h2>
+<p>First, we import the data from a local file, and extract Minnesota’s
+data.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">pymc3</span> <span class="kn">import</span> <span class="n">__version__</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="kn">as</span> <span class="nn">sns</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;seaborn-darkgrid&#39;</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Running on PyMC3 v{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__version__</span><span class="p">))</span>
+
+<span class="kn">from</span> <span class="nn">pymc3</span> <span class="kn">import</span> <span class="n">get_data</span>
+
+<span class="c1"># Import radon data</span>
+<span class="n">srrs2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">get_data</span><span class="p">(</span><span class="s1">&#39;srrs2.dat&#39;</span><span class="p">))</span>
+<span class="n">srrs2</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">srrs2</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">strip</span><span class="p">)</span>
+<span class="n">srrs_mn</span> <span class="o">=</span> <span class="n">srrs2</span><span class="p">[</span><span class="n">srrs2</span><span class="o">.</span><span class="n">state</span><span class="o">==</span><span class="s1">&#39;MN&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Running on PyMC3 v3.4.1
+</pre></div></div>
+</div>
+<p>Next, obtain the county-level predictor, uranium, by combining two
+variables.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">srrs_mn</span><span class="p">[</span><span class="s1">&#39;fips&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">srrs_mn</span><span class="o">.</span><span class="n">stfips</span><span class="o">*</span><span class="mi">1000</span> <span class="o">+</span> <span class="n">srrs_mn</span><span class="o">.</span><span class="n">cntyfips</span>
+<span class="n">cty</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">get_data</span><span class="p">(</span><span class="s1">&#39;cty.dat&#39;</span><span class="p">))</span>
+<span class="n">cty_mn</span> <span class="o">=</span> <span class="n">cty</span><span class="p">[</span><span class="n">cty</span><span class="o">.</span><span class="n">st</span><span class="o">==</span><span class="s1">&#39;MN&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">cty_mn</span><span class="p">[</span> <span class="s1">&#39;fips&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1000</span><span class="o">*</span><span class="n">cty_mn</span><span class="o">.</span><span class="n">stfips</span> <span class="o">+</span> <span class="n">cty_mn</span><span class="o">.</span><span class="n">ctfips</span>
+</pre></div>
+</div>
+</div>
+<p>Use the <code class="docutils literal notranslate"><span class="pre">merge</span></code> method to combine home- and county-level information
+in a single DataFrame.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">srrs_mn</span> <span class="o">=</span> <span class="n">srrs_mn</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">cty_mn</span><span class="p">[[</span><span class="s1">&#39;fips&#39;</span><span class="p">,</span> <span class="s1">&#39;Uppm&#39;</span><span class="p">]],</span> <span class="n">on</span><span class="o">=</span><span class="s1">&#39;fips&#39;</span><span class="p">)</span>
+<span class="n">srrs_mn</span> <span class="o">=</span> <span class="n">srrs_mn</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;idnum&#39;</span><span class="p">)</span>
+<span class="n">u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">srrs_mn</span><span class="o">.</span><span class="n">Uppm</span><span class="p">)</span>
+
+<span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">srrs_mn</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">srrs_mn</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[4]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>idnum</th>
+      <th>state</th>
+      <th>state2</th>
+      <th>stfips</th>
+      <th>zip</th>
+      <th>region</th>
+      <th>typebldg</th>
+      <th>floor</th>
+      <th>room</th>
+      <th>basement</th>
+      <th>...</th>
+      <th>stopdt</th>
+      <th>activity</th>
+      <th>pcterr</th>
+      <th>adjwt</th>
+      <th>dupflag</th>
+      <th>zipflag</th>
+      <th>cntyfips</th>
+      <th>county</th>
+      <th>fips</th>
+      <th>Uppm</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>5081</td>
+      <td>MN</td>
+      <td>MN</td>
+      <td>27</td>
+      <td>55735</td>
+      <td>5</td>
+      <td>1</td>
+      <td>1</td>
+      <td>3</td>
+      <td>N</td>
+      <td>...</td>
+      <td>12288</td>
+      <td>2.2</td>
+      <td>9.7</td>
+      <td>1146.499190</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>AITKIN</td>
+      <td>27001</td>
+      <td>0.502054</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>5082</td>
+      <td>MN</td>
+      <td>MN</td>
+      <td>27</td>
+      <td>55748</td>
+      <td>5</td>
+      <td>1</td>
+      <td>0</td>
+      <td>4</td>
+      <td>Y</td>
+      <td>...</td>
+      <td>12088</td>
+      <td>2.2</td>
+      <td>14.5</td>
+      <td>471.366223</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>AITKIN</td>
+      <td>27001</td>
+      <td>0.502054</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>5083</td>
+      <td>MN</td>
+      <td>MN</td>
+      <td>27</td>
+      <td>55748</td>
+      <td>5</td>
+      <td>1</td>
+      <td>0</td>
+      <td>4</td>
+      <td>Y</td>
+      <td>...</td>
+      <td>21188</td>
+      <td>2.9</td>
+      <td>9.6</td>
+      <td>433.316718</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>AITKIN</td>
+      <td>27001</td>
+      <td>0.502054</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>5084</td>
+      <td>MN</td>
+      <td>MN</td>
+      <td>27</td>
+      <td>56469</td>
+      <td>5</td>
+      <td>1</td>
+      <td>0</td>
+      <td>4</td>
+      <td>Y</td>
+      <td>...</td>
+      <td>123187</td>
+      <td>1.0</td>
+      <td>24.3</td>
+      <td>461.623670</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>AITKIN</td>
+      <td>27001</td>
+      <td>0.502054</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>5085</td>
+      <td>MN</td>
+      <td>MN</td>
+      <td>27</td>
+      <td>55011</td>
+      <td>3</td>
+      <td>1</td>
+      <td>0</td>
+      <td>4</td>
+      <td>Y</td>
+      <td>...</td>
+      <td>13088</td>
+      <td>3.1</td>
+      <td>13.8</td>
+      <td>433.316718</td>
+      <td>0</td>
+      <td>0</td>
+      <td>3</td>
+      <td>ANOKA</td>
+      <td>27003</td>
+      <td>0.428565</td>
+    </tr>
+  </tbody>
+</table>
+<p>5 rows × 27 columns</p>
+</div></div>
+</div>
+<p>We also need a lookup table (<code class="docutils literal notranslate"><span class="pre">dict</span></code>) for each unique county, for
+indexing.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">srrs_mn</span><span class="o">.</span><span class="n">county</span> <span class="o">=</span> <span class="n">srrs_mn</span><span class="o">.</span><span class="n">county</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">strip</span><span class="p">)</span>
+<span class="n">mn_counties</span> <span class="o">=</span> <span class="n">srrs_mn</span><span class="o">.</span><span class="n">county</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+<span class="n">counties</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">mn_counties</span><span class="p">)</span>
+<span class="n">county_lookup</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">mn_counties</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mn_counties</span><span class="p">))))</span>
+</pre></div>
+</div>
+</div>
+<p>Finally, create local copies of variables.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">county</span> <span class="o">=</span> <span class="n">srrs_mn</span><span class="p">[</span><span class="s1">&#39;county_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">srrs_mn</span><span class="o">.</span><span class="n">county</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">county_lookup</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+<span class="n">radon</span> <span class="o">=</span> <span class="n">srrs_mn</span><span class="o">.</span><span class="n">activity</span>
+<span class="n">srrs_mn</span><span class="p">[</span><span class="s1">&#39;log_radon&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">log_radon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">radon</span> <span class="o">+</span> <span class="mf">0.1</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+<span class="n">floor_measure</span> <span class="o">=</span> <span class="n">srrs_mn</span><span class="o">.</span><span class="n">floor</span><span class="o">.</span><span class="n">values</span>
+</pre></div>
+</div>
+</div>
+<p>Distribution of radon levels in MN (log scale):</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">srrs_mn</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="mf">0.1</span><span class="p">))</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">bins</span><span class="o">=</span><span class="mi">25</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_multilevel_modeling_16_0.png" src="../_images/notebooks_multilevel_modeling_16_0.png" />
+</div>
+</div>
+<div class="section" id="Conventional-approaches">
+<h3>Conventional approaches<a class="headerlink" href="#Conventional-approaches" title="Permalink to this headline">¶</a></h3>
+<p>The two conventional alternatives to modeling radon exposure represent
+the two extremes of the bias-variance tradeoff:</p>
+<p><strong>*Complete pooling*</strong>:</p>
+<p>Treat all counties the same, and estimate a single radon level.</p>
+<div class="math notranslate nohighlight">
+\[y_i = \alpha + \beta x_i + \epsilon_i\]</div>
+<p><strong>*No pooling*</strong>:</p>
+<p>Model radon in each county independently.</p>
+<div class="math notranslate nohighlight">
+\[y_i = \alpha_{j[i]} + \beta x_i + \epsilon_i\]</div>
+<p>where <span class="math notranslate nohighlight">\(j = 1,\ldots,85\)</span></p>
+<p>The errors <span class="math notranslate nohighlight">\(\epsilon_i\)</span> may represent measurement error, temporal
+within-house variation, or variation among houses.</p>
+<p>Here are the point estimates of the slope and intercept for the complete
+pooling model:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pymc3</span> <span class="kn">import</span> <span class="n">Model</span><span class="p">,</span> <span class="n">sample</span><span class="p">,</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">HalfCauchy</span><span class="p">,</span> <span class="n">Uniform</span><span class="p">,</span> <span class="n">model_to_graphviz</span>
+
+<span class="n">floor</span> <span class="o">=</span> <span class="n">srrs_mn</span><span class="o">.</span><span class="n">floor</span><span class="o">.</span><span class="n">values</span>
+<span class="n">log_radon</span> <span class="o">=</span> <span class="n">srrs_mn</span><span class="o">.</span><span class="n">log_radon</span><span class="o">.</span><span class="n">values</span>
+
+<span class="k">with</span> <span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">pooled_model</span><span class="p">:</span>
+
+    <span class="n">beta</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;beta&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">1e5</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">HalfCauchy</span><span class="p">(</span><span class="s1">&#39;sigma&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">beta</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">beta</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">floor</span>
+
+    <span class="n">y</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">log_radon</span><span class="p">)</span>
+<span class="n">model_to_graphviz</span><span class="p">(</span><span class="n">pooled_model</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[8]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_multilevel_modeling_19_0.svg" src="../_images/notebooks_multilevel_modeling_19_0.svg" /></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">pooled_model</span><span class="p">:</span>
+    <span class="n">pooled_trace</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">tune</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [sigma, beta]
+Sampling 4 chains: 100%|██████████| 8000/8000 [00:02&lt;00:00, 3192.66draws/s]
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">b0</span><span class="p">,</span> <span class="n">m0</span> <span class="o">=</span> <span class="n">pooled_trace</span><span class="p">[</span><span class="s1">&#39;beta&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">srrs_mn</span><span class="o">.</span><span class="n">floor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">srrs_mn</span><span class="o">.</span><span class="n">activity</span><span class="o">+</span><span class="mf">0.1</span><span class="p">))</span>
+<span class="n">xvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xvals</span><span class="p">,</span> <span class="n">m0</span><span class="o">*</span><span class="n">xvals</span><span class="o">+</span><span class="n">b0</span><span class="p">,</span> <span class="s1">&#39;r--&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_multilevel_modeling_22_0.png" src="../_images/notebooks_multilevel_modeling_22_0.png" />
+</div>
+</div>
+<p>Estimates of county radon levels for the unpooled model:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">unpooled_model</span><span class="p">:</span>
+
+    <span class="n">beta0</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;beta0&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">1e5</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">counties</span><span class="p">)</span>
+    <span class="n">beta1</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;beta1&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">1e5</span><span class="p">)</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">HalfCauchy</span><span class="p">(</span><span class="s1">&#39;sigma&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">beta0</span><span class="p">[</span><span class="n">county</span><span class="p">]</span> <span class="o">+</span> <span class="n">beta1</span><span class="o">*</span><span class="n">floor</span>
+
+    <span class="n">y</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">log_radon</span><span class="p">)</span>
+<span class="n">model_to_graphviz</span><span class="p">(</span><span class="n">unpooled_model</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[12]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_multilevel_modeling_24_0.svg" src="../_images/notebooks_multilevel_modeling_24_0.svg" /></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">unpooled_model</span><span class="p">:</span>
+    <span class="n">unpooled_trace</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">tune</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [sigma, beta1, beta0]
+Sampling 4 chains: 100%|██████████| 8000/8000 [00:06&lt;00:00, 1164.07draws/s]
+</pre></div></div>
+</div>
+<p>Here are the unpooled county expected values</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pymc3</span> <span class="kn">import</span> <span class="n">forestplot</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">14</span><span class="p">))</span>
+<span class="n">forestplot</span><span class="p">(</span><span class="n">unpooled_trace</span><span class="p">,</span> <span class="n">varnames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;beta0&#39;</span><span class="p">]);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_multilevel_modeling_27_0.png" src="../_images/notebooks_multilevel_modeling_27_0.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">unpooled_estimates</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">unpooled_trace</span><span class="p">[</span><span class="s1">&#39;beta0&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">mn_counties</span><span class="p">)</span>
+<span class="n">unpooled_se</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">unpooled_trace</span><span class="p">[</span><span class="s1">&#39;beta0&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">mn_counties</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>We can plot the ordered estimates to identify counties with high radon
+levels:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">order</span> <span class="o">=</span> <span class="n">unpooled_estimates</span><span class="o">.</span><span class="n">sort_values</span><span class="p">()</span><span class="o">.</span><span class="n">index</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unpooled_estimates</span><span class="p">)),</span> <span class="n">unpooled_estimates</span><span class="p">[</span><span class="n">order</span><span class="p">])</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">se</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unpooled_estimates</span><span class="p">)),</span> <span class="n">unpooled_estimates</span><span class="p">[</span><span class="n">order</span><span class="p">],</span> <span class="n">unpooled_se</span><span class="p">[</span><span class="n">order</span><span class="p">]):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">],</span> <span class="p">[</span><span class="n">m</span><span class="o">-</span><span class="n">se</span><span class="p">,</span> <span class="n">m</span><span class="o">+</span><span class="n">se</span><span class="p">],</span> <span class="s1">&#39;b-&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">86</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Radon estimate&#39;</span><span class="p">);</span><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Ordered county&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_multilevel_modeling_30_0.png" src="../_images/notebooks_multilevel_modeling_30_0.png" />
+</div>
+</div>
+<p>Here are visual comparisons between the pooled and unpooled estimates
+for a subset of counties representing a range of sample sizes.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">sample_counties</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;LAC QUI PARLE&#39;</span><span class="p">,</span> <span class="s1">&#39;AITKIN&#39;</span><span class="p">,</span> <span class="s1">&#39;KOOCHICHING&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;DOUGLAS&#39;</span><span class="p">,</span> <span class="s1">&#39;CLAY&#39;</span><span class="p">,</span> <span class="s1">&#39;STEARNS&#39;</span><span class="p">,</span> <span class="s1">&#39;RAMSEY&#39;</span><span class="p">,</span> <span class="s1">&#39;ST LOUIS&#39;</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">sharey</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">axes</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">unpooled_trace</span><span class="p">[</span><span class="s1">&#39;beta1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sample_counties</span><span class="p">):</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">srrs_mn</span><span class="o">.</span><span class="n">log_radon</span><span class="p">[</span><span class="n">srrs_mn</span><span class="o">.</span><span class="n">county</span><span class="o">==</span><span class="n">c</span><span class="p">]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">srrs_mn</span><span class="o">.</span><span class="n">floor</span><span class="p">[</span><span class="n">srrs_mn</span><span class="o">.</span><span class="n">county</span><span class="o">==</span><span class="n">c</span><span class="p">]</span>
+    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span><span class="o">*</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+
+    <span class="c1"># No pooling model</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">unpooled_estimates</span><span class="p">[</span><span class="n">c</span><span class="p">]</span>
+
+    <span class="c1"># Plot both models and data</span>
+    <span class="n">xvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xvals</span><span class="p">,</span> <span class="n">m</span><span class="o">*</span><span class="n">xvals</span><span class="o">+</span><span class="n">b</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xvals</span><span class="p">,</span> <span class="n">m0</span><span class="o">*</span><span class="n">xvals</span><span class="o">+</span><span class="n">b0</span><span class="p">,</span> <span class="s1">&#39;r--&#39;</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s1">&#39;basement&#39;</span><span class="p">,</span> <span class="s1">&#39;floor&#39;</span><span class="p">])</span>
+    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">i</span><span class="o">%</span><span class="k">2</span>:
+        <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;log radon level&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_multilevel_modeling_32_0.png" src="../_images/notebooks_multilevel_modeling_32_0.png" />
+</div>
+</div>
+<p>Neither of these models are satisfactory:</p>
+<ul class="simple">
+<li>if we are trying to identify high-radon counties, pooling is useless</li>
+<li>we do not trust extreme unpooled estimates produced by models using
+few observations</li>
+</ul>
+</div>
+<div class="section" id="Multilevel-and-hierarchical-models">
+<h3>Multilevel and hierarchical models<a class="headerlink" href="#Multilevel-and-hierarchical-models" title="Permalink to this headline">¶</a></h3>
+<p>When we pool our data, we imply that they are sampled from the same
+model. This ignores any variation among sampling units (other than
+sampling variance):</p>
+<div class="figure" id="id2">
+<img alt="pooled" src="http://f.cl.ly/items/0R1W063h1h0W2M2C0S3M/Screen%20Shot%202013-10-10%20at%208.22.21%20AM.png" />
+<p class="caption"><span class="caption-text">pooled</span></p>
+</div>
+<p>When we analyze data unpooled, we imply that they are sampled
+independently from separate models. At the opposite extreme from the
+pooled case, this approach claims that differences between sampling
+units are to large to combine them:</p>
+<div class="figure" id="id3">
+<img alt="unpooled" src="http://f.cl.ly/items/38020n2t2Y2b1p3t0B0e/Screen%20Shot%202013-10-10%20at%208.23.36%20AM.png" />
+<p class="caption"><span class="caption-text">unpooled</span></p>
+</div>
+<p>In a hierarchical model, parameters are viewed as a sample from a
+population distribution of parameters. Thus, we view them as being
+neither entirely different or exactly the same. This is <strong>*parital
+pooling*</strong>.</p>
+<div class="figure" id="id4">
+<img alt="hierarchical" src="http://f.cl.ly/items/1B3U223i002y3V2W3r0W/Screen%20Shot%202013-10-10%20at%208.25.05%20AM.png" />
+<p class="caption"><span class="caption-text">hierarchical</span></p>
+</div>
+<p>We can use PyMC to easily specify multilevel models, and fit them using
+Markov chain Monte Carlo.</p>
+</div>
+<div class="section" id="Partial-pooling-model">
+<h3>Partial pooling model<a class="headerlink" href="#Partial-pooling-model" title="Permalink to this headline">¶</a></h3>
+<p>The simplest partial pooling model for the household radon dataset is
+one which simply estimates radon levels, without any predictors at any
+level. A partial pooling model represents a compromise between the
+pooled and unpooled extremes, approximately a weighted average (based on
+sample size) of the unpooled county estimates and the pooled estimates.</p>
+<div class="math notranslate nohighlight">
+\[\hat{\alpha} \approx \frac{(n_j/\sigma_y^2)\bar{y}_j + (1/\sigma_{\alpha}^2)\bar{y}}{(n_j/\sigma_y^2) + (1/\sigma_{\alpha}^2)}\]</div>
+<p>Estimates for counties with smaller sample sizes will shrink towards the
+state-wide average.</p>
+<p>Estimates for counties with larger sample sizes will be closer to the
+unpooled county estimates.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">partial_pooling</span><span class="p">:</span>
+
+    <span class="c1"># Priors</span>
+    <span class="n">mu_a</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;mu_a&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">1e5</span><span class="p">)</span>
+    <span class="n">sigma_a</span> <span class="o">=</span> <span class="n">HalfCauchy</span><span class="p">(</span><span class="s1">&#39;sigma_a&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+    <span class="c1"># Random intercepts</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu_a</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">sigma_a</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">counties</span><span class="p">)</span>
+
+    <span class="c1"># Model error</span>
+    <span class="n">sigma_y</span> <span class="o">=</span> <span class="n">HalfCauchy</span><span class="p">(</span><span class="s1">&#39;sigma_y&#39;</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+
+    <span class="c1"># Expected value</span>
+    <span class="n">y_hat</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="n">county</span><span class="p">]</span>
+
+    <span class="c1"># Data likelihood</span>
+    <span class="n">y_like</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;y_like&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">y_hat</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">sigma_y</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">log_radon</span><span class="p">)</span>
+
+<span class="n">model_to_graphviz</span><span class="p">(</span><span class="n">partial_pooling</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[18]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_multilevel_modeling_37_0.svg" src="../_images/notebooks_multilevel_modeling_37_0.svg" /></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">partial_pooling</span><span class="p">:</span>
+    <span class="n">partial_pooling_trace</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">tune</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [sigma_y, a, sigma_a, mu_a]
+Sampling 4 chains: 100%|██████████| 8000/8000 [00:10&lt;00:00, 732.78draws/s]
+The number of effective samples is smaller than 25% for some parameters.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">sample_trace</span> <span class="o">=</span> <span class="n">partial_pooling_trace</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">]</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span> <span class="n">sharex</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">samples</span><span class="p">,</span> <span class="n">counties</span> <span class="o">=</span> <span class="n">sample_trace</span><span class="o">.</span><span class="n">shape</span>
+<span class="n">jitter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">counties</span><span class="p">)</span>
+
+<span class="n">n_county</span> <span class="o">=</span> <span class="n">srrs_mn</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;county&#39;</span><span class="p">)[</span><span class="s1">&#39;idnum&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="n">unpooled_means</span> <span class="o">=</span> <span class="n">srrs_mn</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;county&#39;</span><span class="p">)[</span><span class="s1">&#39;log_radon&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="n">unpooled_sd</span> <span class="o">=</span> <span class="n">srrs_mn</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;county&#39;</span><span class="p">)[</span><span class="s1">&#39;log_radon&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+<span class="n">unpooled</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;n&#39;</span><span class="p">:</span><span class="n">n_county</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">:</span><span class="n">unpooled_means</span><span class="p">,</span> <span class="s1">&#39;sd&#39;</span><span class="p">:</span><span class="n">unpooled_sd</span><span class="p">})</span>
+<span class="n">unpooled</span><span class="p">[</span><span class="s1">&#39;se&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unpooled</span><span class="o">.</span><span class="n">sd</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">unpooled</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">unpooled</span><span class="o">.</span><span class="n">n</span> <span class="o">+</span> <span class="n">jitter</span><span class="p">,</span> <span class="n">unpooled</span><span class="o">.</span><span class="n">m</span><span class="p">,</span> <span class="s1">&#39;b.&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">jitter</span><span class="p">,</span> <span class="n">unpooled</span><span class="o">.</span><span class="n">iterrows</span><span class="p">()):</span>
+    <span class="n">name</span><span class="p">,</span> <span class="n">dat</span> <span class="o">=</span> <span class="n">row</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">dat</span><span class="o">.</span><span class="n">n</span><span class="o">+</span><span class="n">j</span><span class="p">,</span><span class="n">dat</span><span class="o">.</span><span class="n">n</span><span class="o">+</span><span class="n">j</span><span class="p">],</span> <span class="p">[</span><span class="n">dat</span><span class="o">.</span><span class="n">m</span><span class="o">-</span><span class="n">dat</span><span class="o">.</span><span class="n">se</span><span class="p">,</span> <span class="n">dat</span><span class="o">.</span><span class="n">m</span><span class="o">+</span><span class="n">dat</span><span class="o">.</span><span class="n">se</span><span class="p">],</span> <span class="s1">&#39;b-&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="n">sample_trace</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="n">linestyles</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">)</span>
+
+
+<span class="n">samples</span><span class="p">,</span> <span class="n">counties</span> <span class="o">=</span> <span class="n">sample_trace</span><span class="o">.</span><span class="n">shape</span>
+<span class="n">means</span> <span class="o">=</span> <span class="n">sample_trace</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">sd</span> <span class="o">=</span> <span class="n">sample_trace</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">n_county</span><span class="o">.</span><span class="n">values</span> <span class="o">+</span> <span class="n">jitter</span><span class="p">,</span> <span class="n">means</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="n">sample_trace</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="n">linestyles</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">j</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">,</span><span class="n">s</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">jitter</span><span class="p">,</span> <span class="n">n_county</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">means</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">n</span><span class="o">+</span><span class="n">j</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="n">m</span><span class="o">-</span><span class="n">s</span><span class="p">,</span> <span class="n">m</span><span class="o">+</span><span class="n">s</span><span class="p">],</span> <span class="s1">&#39;b-&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_multilevel_modeling_39_0.png" src="../_images/notebooks_multilevel_modeling_39_0.png" />
+</div>
+</div>
+<p>Notice the difference between the unpooled and partially-pooled
+estimates, particularly at smaller sample sizes. The former are both
+more extreme and more imprecise.</p>
+</div>
+<div class="section" id="Varying-intercept-model">
+<h3>Varying intercept model<a class="headerlink" href="#Varying-intercept-model" title="Permalink to this headline">¶</a></h3>
+<p>This model allows intercepts to vary across county, according to a
+random effect.</p>
+<div class="math notranslate nohighlight">
+\[y_i = \alpha_{j[i]} + \beta x_{i} + \epsilon_i\]</div>
+<p>where</p>
+<div class="math notranslate nohighlight">
+\[\epsilon_i \sim N(0, \sigma_y^2)\]</div>
+<p>and the intercept random effect:</p>
+<div class="math notranslate nohighlight">
+\[\alpha_{j[i]} \sim N(\mu_{\alpha}, \sigma_{\alpha}^2)\]</div>
+<p>As with the the “no-pooling” model, we set a separate intercept for each
+county, but rather than fitting separate least squares regression models
+for each county, multilevel modeling <strong>shares strength</strong> among counties,
+allowing for more reasonable inference in counties with little data.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">varying_intercept</span><span class="p">:</span>
+
+    <span class="c1"># Priors</span>
+    <span class="n">mu_a</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;mu_a&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">)</span>
+    <span class="n">sigma_a</span> <span class="o">=</span> <span class="n">HalfCauchy</span><span class="p">(</span><span class="s1">&#39;sigma_a&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+
+    <span class="c1"># Random intercepts</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu_a</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">sigma_a</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">counties</span><span class="p">)</span>
+    <span class="c1"># Common slope</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">1e5</span><span class="p">)</span>
+
+    <span class="c1"># Model error</span>
+    <span class="n">sd_y</span> <span class="o">=</span> <span class="n">HalfCauchy</span><span class="p">(</span><span class="s1">&#39;sd_y&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+    <span class="c1"># Expected value</span>
+    <span class="n">y_hat</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="n">county</span><span class="p">]</span> <span class="o">+</span> <span class="n">b</span> <span class="o">*</span> <span class="n">floor_measure</span>
+
+    <span class="c1"># Data likelihood</span>
+    <span class="n">y_like</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;y_like&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">y_hat</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">sd_y</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">log_radon</span><span class="p">)</span>
+
+<span class="n">model_to_graphviz</span><span class="p">(</span><span class="n">varying_intercept</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[21]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_multilevel_modeling_42_0.svg" src="../_images/notebooks_multilevel_modeling_42_0.svg" /></div>
+</div>
+<p>We can fit the above model using MCMC.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">varying_intercept</span><span class="p">:</span>
+    <span class="n">varying_intercept_trace</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">tune</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [sd_y, b, a, sigma_a, mu_a]
+Sampling 4 chains: 100%|██████████| 8000/8000 [00:10&lt;00:00, 771.10draws/s]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pymc3</span> <span class="kn">import</span> <span class="n">forestplot</span><span class="p">,</span> <span class="n">traceplot</span><span class="p">,</span> <span class="n">plot_posterior</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">14</span><span class="p">))</span>
+<span class="n">forestplot</span><span class="p">(</span><span class="n">varying_intercept_trace</span><span class="p">,</span> <span class="n">varnames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">]);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_multilevel_modeling_45_0.png" src="../_images/notebooks_multilevel_modeling_45_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">plot_posterior</span><span class="p">(</span><span class="n">varying_intercept_trace</span><span class="p">,</span> <span class="n">varnames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;sigma_a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">]);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_multilevel_modeling_46_0.png" src="../_images/notebooks_multilevel_modeling_46_0.png" />
+</div>
+</div>
+<p>The estimate for the <code class="docutils literal notranslate"><span class="pre">floor</span></code> coefficient is approximately -0.66, which
+can be interpreted as houses without basements having about half
+(<span class="math notranslate nohighlight">\(\exp(-0.66) = 0.52\)</span>) the radon levels of those with basements,
+after accounting for county.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pymc3</span> <span class="kn">import</span> <span class="n">summary</span>
+
+<span class="n">summary</span><span class="p">(</span><span class="n">varying_intercept_trace</span><span class="p">,</span> <span class="n">varnames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;b&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[25]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>mc_error</th>
+      <th>hpd_2.5</th>
+      <th>hpd_97.5</th>
+      <th>n_eff</th>
+      <th>Rhat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>b</th>
+      <td>-0.663514</td>
+      <td>0.068519</td>
+      <td>0.001185</td>
+      <td>-0.799726</td>
+      <td>-0.533691</td>
+      <td>3035.212365</td>
+      <td>0.999866</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">xvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">bp</span> <span class="o">=</span> <span class="n">varying_intercept_trace</span><span class="p">[</span><span class="n">a</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">mp</span> <span class="o">=</span> <span class="n">varying_intercept_trace</span><span class="p">[</span><span class="n">b</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">bi</span> <span class="ow">in</span> <span class="n">bp</span><span class="p">:</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xvals</span><span class="p">,</span> <span class="n">mp</span><span class="o">*</span><span class="n">xvals</span> <span class="o">+</span> <span class="n">bi</span><span class="p">,</span> <span class="s1">&#39;bo-&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">1.1</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_multilevel_modeling_49_0.png" src="../_images/notebooks_multilevel_modeling_49_0.png" />
+</div>
+</div>
+<p>It is easy to show that the partial pooling model provides more
+objectively reasonable estimates than either the pooled or unpooled
+models, at least for counties with small sample sizes.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">sharey</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">axes</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sample_counties</span><span class="p">):</span>
+
+    <span class="c1"># Plot county data</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">srrs_mn</span><span class="o">.</span><span class="n">log_radon</span><span class="p">[</span><span class="n">srrs_mn</span><span class="o">.</span><span class="n">county</span><span class="o">==</span><span class="n">c</span><span class="p">]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">srrs_mn</span><span class="o">.</span><span class="n">floor</span><span class="p">[</span><span class="n">srrs_mn</span><span class="o">.</span><span class="n">county</span><span class="o">==</span><span class="n">c</span><span class="p">]</span>
+    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span><span class="o">*</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+
+    <span class="c1"># No pooling model</span>
+    <span class="n">m</span><span class="p">,</span><span class="n">b</span> <span class="o">=</span> <span class="n">unpooled_estimates</span><span class="p">[[</span><span class="s1">&#39;floor&#39;</span><span class="p">,</span> <span class="n">c</span><span class="p">]]</span>
+
+    <span class="n">xvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">)</span>
+    <span class="c1"># Unpooled estimate</span>
+    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xvals</span><span class="p">,</span> <span class="n">m</span><span class="o">*</span><span class="n">xvals</span><span class="o">+</span><span class="n">b</span><span class="p">)</span>
+    <span class="c1"># Pooled estimate</span>
+    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xvals</span><span class="p">,</span> <span class="n">m0</span><span class="o">*</span><span class="n">xvals</span><span class="o">+</span><span class="n">b0</span><span class="p">,</span> <span class="s1">&#39;r--&#39;</span><span class="p">)</span>
+    <span class="c1"># Partial pooling esimate</span>
+    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xvals</span><span class="p">,</span> <span class="n">mp</span><span class="o">*</span><span class="n">xvals</span><span class="o">+</span><span class="n">bp</span><span class="p">[</span><span class="n">county_lookup</span><span class="p">[</span><span class="n">c</span><span class="p">]],</span> <span class="s1">&#39;k:&#39;</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s1">&#39;basement&#39;</span><span class="p">,</span> <span class="s1">&#39;floor&#39;</span><span class="p">])</span>
+    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">i</span><span class="o">%</span><span class="k">2</span>:
+        <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;log radon level&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+/home/colin/miniconda3/envs/pymc33.6/lib/python3.6/site-packages/pandas/core/series.py:850: FutureWarning:
+Passing list-likes to .loc or [] with any missing label will raise
+KeyError in the future, you can use .reindex() as an alternative.
+
+See the documentation here:
+https://pandas.pydata.org/pandas-docs/stable/indexing.html#deprecate-loc-reindex-listlike
+  return self.loc[key]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_multilevel_modeling_51_1.png" src="../_images/notebooks_multilevel_modeling_51_1.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Varying-slope-model">
+<h3>Varying slope model<a class="headerlink" href="#Varying-slope-model" title="Permalink to this headline">¶</a></h3>
+<p>Alternatively, we can posit a model that allows the counties to vary
+according to how the location of measurement (basement or floor)
+influences the radon reading.</p>
+<div class="math notranslate nohighlight">
+\[y_i = \alpha + \beta_{j[i]} x_{i} + \epsilon_i\]</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">varying_slope</span><span class="p">:</span>
+
+    <span class="c1"># Priors</span>
+    <span class="n">mu_b</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;mu_b&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">1e5</span><span class="p">)</span>
+    <span class="n">sigma_b</span> <span class="o">=</span> <span class="n">HalfCauchy</span><span class="p">(</span><span class="s1">&#39;sigma_b&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+    <span class="c1"># Common intercepts</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">1e5</span><span class="p">)</span>
+    <span class="c1"># Random slopes</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu_b</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">sigma_b</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">counties</span><span class="p">)</span>
+
+    <span class="c1"># Model error</span>
+    <span class="n">sigma_y</span> <span class="o">=</span> <span class="n">HalfCauchy</span><span class="p">(</span><span class="s1">&#39;sigma_y&#39;</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+
+    <span class="c1"># Expected value</span>
+    <span class="n">y_hat</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">[</span><span class="n">county</span><span class="p">]</span> <span class="o">*</span> <span class="n">floor_measure</span>
+
+    <span class="c1"># Data likelihood</span>
+    <span class="n">y_like</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;y_like&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">y_hat</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">sigma_y</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">log_radon</span><span class="p">)</span>
+
+<span class="n">model_to_graphviz</span><span class="p">(</span><span class="n">varying_slope</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[28]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_multilevel_modeling_53_0.svg" src="../_images/notebooks_multilevel_modeling_53_0.svg" /></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">varying_slope</span><span class="p">:</span>
+    <span class="n">varying_slope_trace</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">tune</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [sigma_y, b, a, sigma_b, mu_b]
+Sampling 4 chains: 100%|██████████| 8000/8000 [00:22&lt;00:00, 363.62draws/s]
+There were 1 divergences after tuning. Increase `target_accept` or reparameterize.
+There were 71 divergences after tuning. Increase `target_accept` or reparameterize.
+There were 1 divergences after tuning. Increase `target_accept` or reparameterize.
+There were 32 divergences after tuning. Increase `target_accept` or reparameterize.
+The acceptance probability does not match the target. It is 0.5938732117578109, but should be close to 0.8. Try to increase the number of tuning steps.
+The estimated number of effective samples is smaller than 200 for some parameters.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">14</span><span class="p">))</span>
+<span class="n">forestplot</span><span class="p">(</span><span class="n">varying_slope_trace</span><span class="p">,</span> <span class="n">varnames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;b&#39;</span><span class="p">]);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_multilevel_modeling_55_0.png" src="../_images/notebooks_multilevel_modeling_55_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">xvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">varying_slope_trace</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">varying_slope_trace</span><span class="p">[</span><span class="s1">&#39;b&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">mi</span> <span class="ow">in</span> <span class="n">m</span><span class="p">:</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xvals</span><span class="p">,</span> <span class="n">mi</span><span class="o">*</span><span class="n">xvals</span> <span class="o">+</span> <span class="n">b</span><span class="p">,</span> <span class="s1">&#39;bo-&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_multilevel_modeling_56_0.png" src="../_images/notebooks_multilevel_modeling_56_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Varying-intercept-and-slope-model">
+<h3>Varying intercept and slope model<a class="headerlink" href="#Varying-intercept-and-slope-model" title="Permalink to this headline">¶</a></h3>
+<p>The most general model allows both the intercept and slope to vary by
+county:</p>
+<div class="math notranslate nohighlight">
+\[y_i = \alpha_{j[i]} + \beta_{j[i]} x_{i} + \epsilon_i\]</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">varying_intercept_slope</span><span class="p">:</span>
+
+    <span class="c1"># Priors</span>
+    <span class="n">mu_a</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;mu_a&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">1e5</span><span class="p">)</span>
+    <span class="n">sigma_a</span> <span class="o">=</span> <span class="n">HalfCauchy</span><span class="p">(</span><span class="s1">&#39;sigma_a&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="n">mu_b</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;mu_b&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">1e5</span><span class="p">)</span>
+    <span class="n">sigma_b</span> <span class="o">=</span> <span class="n">HalfCauchy</span><span class="p">(</span><span class="s1">&#39;sigma_b&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+    <span class="c1"># Random intercepts</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu_a</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">sigma_a</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">counties</span><span class="p">)</span>
+    <span class="c1"># Random slopes</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu_b</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">sigma_b</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">counties</span><span class="p">)</span>
+
+    <span class="c1"># Model error</span>
+    <span class="n">sigma_y</span> <span class="o">=</span> <span class="n">Uniform</span><span class="p">(</span><span class="s1">&#39;sigma_y&#39;</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+    <span class="c1"># Expected value</span>
+    <span class="n">y_hat</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="n">county</span><span class="p">]</span> <span class="o">+</span> <span class="n">b</span><span class="p">[</span><span class="n">county</span><span class="p">]</span> <span class="o">*</span> <span class="n">floor_measure</span>
+
+    <span class="c1"># Data likelihood</span>
+    <span class="n">y_like</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;y_like&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">y_hat</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">sigma_y</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">log_radon</span><span class="p">)</span>
+
+<span class="n">model_to_graphviz</span><span class="p">(</span><span class="n">varying_intercept_slope</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[32]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_multilevel_modeling_58_0.svg" src="../_images/notebooks_multilevel_modeling_58_0.svg" /></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [33]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">varying_intercept_slope</span><span class="p">:</span>
+    <span class="n">varying_intercept_slope_trace</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">tune</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [sigma_y, b, a, sigma_b, mu_b, sigma_a, mu_a]
+Sampling 4 chains: 100%|██████████| 8000/8000 [00:26&lt;00:00, 305.07draws/s]
+There were 35 divergences after tuning. Increase `target_accept` or reparameterize.
+The acceptance probability does not match the target. It is 0.7018759674375128, but should be close to 0.8. Try to increase the number of tuning steps.
+There were 4 divergences after tuning. Increase `target_accept` or reparameterize.
+The acceptance probability does not match the target. It is 0.6832205781644568, but should be close to 0.8. Try to increase the number of tuning steps.
+The estimated number of effective samples is smaller than 200 for some parameters.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [34]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">16</span><span class="p">))</span>
+<span class="n">forestplot</span><span class="p">(</span><span class="n">varying_intercept_slope_trace</span><span class="p">,</span> <span class="n">varnames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">]);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_multilevel_modeling_60_0.png" src="../_images/notebooks_multilevel_modeling_60_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [35]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">xvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">varying_intercept_slope_trace</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">varying_intercept_slope_trace</span><span class="p">[</span><span class="s1">&#39;b&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">bi</span><span class="p">,</span><span class="n">mi</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">m</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xvals</span><span class="p">,</span> <span class="n">mi</span><span class="o">*</span><span class="n">xvals</span> <span class="o">+</span> <span class="n">bi</span><span class="p">,</span> <span class="s1">&#39;bo-&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_multilevel_modeling_61_0.png" src="../_images/notebooks_multilevel_modeling_61_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Adding-group-level-predictors">
+<h3>Adding group-level predictors<a class="headerlink" href="#Adding-group-level-predictors" title="Permalink to this headline">¶</a></h3>
+<p>A primary strength of multilevel models is the ability to handle
+predictors on multiple levels simultaneously. If we consider the
+varying-intercepts model above:</p>
+<div class="math notranslate nohighlight">
+\[y_i = \alpha_{j[i]} + \beta x_{i} + \epsilon_i\]</div>
+<p>we may, instead of a simple random effect to describe variation in the
+expected radon value, specify another regression model with a
+county-level covariate. Here, we use the county uranium reading
+<span class="math notranslate nohighlight">\(u_j\)</span>, which is thought to be related to radon levels:</p>
+<div class="math notranslate nohighlight">
+\[\alpha_j = \gamma_0 + \gamma_1 u_j + \zeta_j\]</div>
+<div class="math notranslate nohighlight">
+\[\zeta_j \sim N(0, \sigma_{\alpha}^2)\]</div>
+<p>Thus, we are now incorporating a house-level predictor (floor or
+basement) as well as a county-level predictor (uranium).</p>
+<p>Note that the model has both indicator variables for each county, plus a
+county-level covariate. In classical regression, this would result in
+collinearity. In a multilevel model, the partial pooling of the
+intercepts towards the expected value of the group-level linear model
+avoids this.</p>
+<p>Group-level predictors also serve to reduce group-level variation
+<span class="math notranslate nohighlight">\(\sigma_{\alpha}\)</span>. An important implication of this is that the
+group-level estimate induces stronger pooling.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [36]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pymc3</span> <span class="kn">import</span> <span class="n">Deterministic</span>
+
+<span class="k">with</span> <span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">hierarchical_intercept</span><span class="p">:</span>
+
+    <span class="c1"># Priors</span>
+    <span class="n">sigma_a</span> <span class="o">=</span> <span class="n">HalfCauchy</span><span class="p">(</span><span class="s1">&#39;sigma_a&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+    <span class="c1"># County uranium model for slope</span>
+    <span class="n">gamma_0</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;gamma_0&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">1e5</span><span class="p">)</span>
+    <span class="n">gamma_1</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;gamma_1&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">1e5</span><span class="p">)</span>
+
+
+    <span class="c1"># Uranium model for intercept</span>
+    <span class="n">mu_a</span> <span class="o">=</span> <span class="n">gamma_0</span> <span class="o">+</span> <span class="n">gamma_1</span><span class="o">*</span><span class="n">u</span>
+    <span class="c1"># County variation not explained by uranium</span>
+    <span class="n">eps_a</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;eps_a&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">sigma_a</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">counties</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">Deterministic</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">mu_a</span> <span class="o">+</span> <span class="n">eps_a</span><span class="p">[</span><span class="n">county</span><span class="p">])</span>
+
+    <span class="c1"># Common slope</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">1e5</span><span class="p">)</span>
+
+    <span class="c1"># Model error</span>
+    <span class="n">sigma_y</span> <span class="o">=</span> <span class="n">Uniform</span><span class="p">(</span><span class="s1">&#39;sigma_y&#39;</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+    <span class="c1"># Expected value</span>
+    <span class="n">y_hat</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">*</span> <span class="n">floor_measure</span>
+
+    <span class="c1"># Data likelihood</span>
+    <span class="n">y_like</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;y_like&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">y_hat</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">sigma_y</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">log_radon</span><span class="p">)</span>
+
+<span class="n">model_to_graphviz</span><span class="p">(</span><span class="n">hierarchical_intercept</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[36]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_multilevel_modeling_63_0.svg" src="../_images/notebooks_multilevel_modeling_63_0.svg" /></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [37]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">hierarchical_intercept</span><span class="p">:</span>
+    <span class="n">hierarchical_intercept_trace</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">tune</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [sigma_y, b, eps_a, gamma_1, gamma_0, sigma_a]
+Sampling 4 chains: 100%|██████████| 8000/8000 [00:18&lt;00:00, 436.44draws/s]
+There were 2 divergences after tuning. Increase `target_accept` or reparameterize.
+The acceptance probability does not match the target. It is 0.6586914850689609, but should be close to 0.8. Try to increase the number of tuning steps.
+The estimated number of effective samples is smaller than 200 for some parameters.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [38]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">a_means</span> <span class="o">=</span> <span class="n">hierarchical_intercept_trace</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">a_means</span><span class="p">)</span>
+<span class="n">g0</span> <span class="o">=</span> <span class="n">hierarchical_intercept_trace</span><span class="p">[</span><span class="s1">&#39;gamma_0&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="n">g1</span> <span class="o">=</span> <span class="n">hierarchical_intercept_trace</span><span class="p">[</span><span class="s1">&#39;gamma_1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="n">xvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xvals</span><span class="p">,</span> <span class="n">g0</span><span class="o">+</span><span class="n">g1</span><span class="o">*</span><span class="n">xvals</span><span class="p">,</span> <span class="s1">&#39;k--&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">)</span>
+
+<span class="n">a_se</span> <span class="o">=</span> <span class="n">hierarchical_intercept_trace</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">ui</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">se</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">a_means</span><span class="p">,</span> <span class="n">a_se</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">ui</span><span class="p">,</span><span class="n">ui</span><span class="p">],</span> <span class="p">[</span><span class="n">m</span><span class="o">-</span><span class="n">se</span><span class="p">,</span> <span class="n">m</span><span class="o">+</span><span class="n">se</span><span class="p">],</span> <span class="s1">&#39;b-&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;County-level uranium&#39;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Intercept estimate&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_multilevel_modeling_65_0.png" src="../_images/notebooks_multilevel_modeling_65_0.png" />
+</div>
+</div>
+<p>The standard errors on the intercepts are narrower than for the
+partial-pooling model without a county-level covariate.</p>
+</div>
+</div>
+<div class="section" id="Correlations-among-levels">
+<h2>Correlations among levels<a class="headerlink" href="#Correlations-among-levels" title="Permalink to this headline">¶</a></h2>
+<p>In some instances, having predictors at multiple levels can reveal
+correlation between individual-level variables and group residuals. We
+can account for this by including the average of the individual
+predictors as a covariate in the model for the group intercept.</p>
+<div class="math notranslate nohighlight">
+\[\alpha_j = \gamma_0 + \gamma_1 u_j + \gamma_2 \bar{x} + \zeta_j\]</div>
+<p>These are broadly referred to as <strong>*contextual effects*</strong>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [39]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Create new variable for mean of floor across counties</span>
+<span class="n">xbar</span> <span class="o">=</span> <span class="n">srrs_mn</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;county&#39;</span><span class="p">)[</span><span class="s1">&#39;floor&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">county_lookup</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [40]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">contextual_effect</span><span class="p">:</span>
+
+    <span class="c1"># Priors</span>
+    <span class="n">sigma_a</span> <span class="o">=</span> <span class="n">HalfCauchy</span><span class="p">(</span><span class="s1">&#39;sigma_a&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+    <span class="c1"># County uranium model for slope</span>
+    <span class="n">gamma</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;gamma&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">1e5</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="c1"># Uranium model for intercept</span>
+    <span class="n">mu_a</span> <span class="o">=</span> <span class="n">Deterministic</span><span class="p">(</span><span class="s1">&#39;mu_a&#39;</span><span class="p">,</span> <span class="n">gamma</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">gamma</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">values</span> <span class="o">+</span> <span class="n">gamma</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">xbar</span><span class="p">[</span><span class="n">county</span><span class="p">])</span>
+
+    <span class="c1"># County variation not explained by uranium</span>
+    <span class="n">eps_a</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;eps_a&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">sigma_a</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">counties</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">Deterministic</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">mu_a</span> <span class="o">+</span> <span class="n">eps_a</span><span class="p">[</span><span class="n">county</span><span class="p">])</span>
+
+    <span class="c1"># Common slope</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">1e15</span><span class="p">)</span>
+
+    <span class="c1"># Model error</span>
+    <span class="n">sigma_y</span> <span class="o">=</span> <span class="n">Uniform</span><span class="p">(</span><span class="s1">&#39;sigma_y&#39;</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+    <span class="c1"># Expected value</span>
+    <span class="n">y_hat</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">*</span> <span class="n">floor_measure</span>
+
+    <span class="c1"># Data likelihood</span>
+    <span class="n">y_like</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;y_like&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">y_hat</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">sigma_y</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">log_radon</span><span class="p">)</span>
+
+<span class="n">model_to_graphviz</span><span class="p">(</span><span class="n">contextual_effect</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[40]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_multilevel_modeling_69_0.svg" src="../_images/notebooks_multilevel_modeling_69_0.svg" /></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [41]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">contextual_effect</span><span class="p">:</span>
+    <span class="n">contextual_effect_trace</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">tune</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [sigma_y, b, eps_a, gamma, sigma_a]
+Sampling 4 chains: 100%|██████████| 8000/8000 [00:19&lt;00:00, 407.55draws/s]
+There were 2 divergences after tuning. Increase `target_accept` or reparameterize.
+There were 1 divergences after tuning. Increase `target_accept` or reparameterize.
+The acceptance probability does not match the target. It is 0.6922214272506528, but should be close to 0.8. Try to increase the number of tuning steps.
+The estimated number of effective samples is smaller than 200 for some parameters.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [42]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">summary</span><span class="p">(</span><span class="n">contextual_effect_trace</span><span class="p">,</span> <span class="n">varnames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;gamma&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[42]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>mc_error</th>
+      <th>hpd_2.5</th>
+      <th>hpd_97.5</th>
+      <th>n_eff</th>
+      <th>Rhat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>gamma__0</th>
+      <td>1.427291</td>
+      <td>0.048235</td>
+      <td>0.001048</td>
+      <td>1.330803</td>
+      <td>1.516513</td>
+      <td>2024.872123</td>
+      <td>1.001484</td>
+    </tr>
+    <tr>
+      <th>gamma__1</th>
+      <td>0.698287</td>
+      <td>0.087482</td>
+      <td>0.001630</td>
+      <td>0.527938</td>
+      <td>0.869216</td>
+      <td>3172.220320</td>
+      <td>1.000012</td>
+    </tr>
+    <tr>
+      <th>gamma__2</th>
+      <td>0.390631</td>
+      <td>0.196336</td>
+      <td>0.004177</td>
+      <td>-0.004603</td>
+      <td>0.771079</td>
+      <td>2233.710720</td>
+      <td>0.999814</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>So, we might infer from this that counties with higher proportions of
+houses without basements tend to have higher baseline levels of radon.
+Perhaps this is related to the soil type, which in turn might influence
+what type of structures are built.</p>
+</div>
+<div class="section" id="Prediction">
+<h2>Prediction<a class="headerlink" href="#Prediction" title="Permalink to this headline">¶</a></h2>
+<p>Gelman (2006) used cross-validation tests to check the prediction error
+of the unpooled, pooled, and partially-pooled models</p>
+<p><strong>root mean squared cross-validation prediction errors</strong>:</p>
+<ul class="simple">
+<li>unpooled = 0.86</li>
+<li>pooled = 0.84</li>
+<li>multilevel = 0.79</li>
+</ul>
+<p>There are two types of prediction that can be made in a multilevel
+model:</p>
+<ol class="arabic simple">
+<li>a new individual within an existing group</li>
+<li>a new individual within a new group</li>
+</ol>
+<p>For example, if we wanted to make a prediction for a new house with no
+basement in St. Louis county, we just need to sample from the radon
+model with the appropriate intercept.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [43]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">county_lookup</span><span class="p">[</span><span class="s1">&#39;ST LOUIS&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[43]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>69
+</pre></div>
+</div>
+</div>
+<p>That is,</p>
+<div class="math notranslate nohighlight">
+\[\tilde{y}_i \sim N(\alpha_{69} + \beta (x_i=1), \sigma_y^2)\]</div>
+<p>This is simply a matter of adding a single additional line in PyMC:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [44]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">contextual_pred</span><span class="p">:</span>
+
+    <span class="c1"># Priors</span>
+    <span class="n">sigma_a</span> <span class="o">=</span> <span class="n">HalfCauchy</span><span class="p">(</span><span class="s1">&#39;sigma_a&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+    <span class="c1"># County uranium model for slope</span>
+    <span class="n">gamma</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;gamma&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">1e5</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="c1"># Uranium model for intercept</span>
+    <span class="n">mu_a</span> <span class="o">=</span> <span class="n">Deterministic</span><span class="p">(</span><span class="s1">&#39;mu_a&#39;</span><span class="p">,</span> <span class="n">gamma</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">gamma</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">values</span> <span class="o">+</span> <span class="n">gamma</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">xbar</span><span class="p">[</span><span class="n">county</span><span class="p">])</span>
+
+    <span class="c1"># County variation not explained by uranium</span>
+    <span class="n">eps_a</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;eps_a&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">sigma_a</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">counties</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">Deterministic</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">mu_a</span> <span class="o">+</span> <span class="n">eps_a</span><span class="p">[</span><span class="n">county</span><span class="p">])</span>
+
+    <span class="c1"># Common slope</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">1e15</span><span class="p">)</span>
+
+    <span class="c1"># Model error</span>
+    <span class="n">sigma_y</span> <span class="o">=</span> <span class="n">Uniform</span><span class="p">(</span><span class="s1">&#39;sigma_y&#39;</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+    <span class="c1"># Expected value</span>
+    <span class="n">y_hat</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">*</span> <span class="n">floor_measure</span>
+
+    <span class="c1"># Data likelihood</span>
+    <span class="n">y_like</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;y_like&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">y_hat</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">sigma_y</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">log_radon</span><span class="p">)</span>
+
+    <span class="c1"># St Louis county prediction</span>
+    <span class="n">stl_pred</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;stl_pred&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">a</span><span class="p">[</span><span class="mi">69</span><span class="p">]</span> <span class="o">+</span> <span class="n">b</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">sigma_y</span><span class="p">)</span>
+
+<span class="n">model_to_graphviz</span><span class="p">(</span><span class="n">contextual_pred</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[44]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_multilevel_modeling_76_0.svg" src="../_images/notebooks_multilevel_modeling_76_0.svg" /></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [45]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">contextual_pred</span><span class="p">:</span>
+    <span class="n">contextual_pred_trace</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">tune</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [stl_pred, sigma_y, b, eps_a, gamma, sigma_a]
+Sampling 4 chains: 100%|██████████| 8000/8000 [00:20&lt;00:00, 395.41draws/s]
+There were 176 divergences after tuning. Increase `target_accept` or reparameterize.
+The acceptance probability does not match the target. It is 0.48972929484728844, but should be close to 0.8. Try to increase the number of tuning steps.
+The estimated number of effective samples is smaller than 200 for some parameters.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [46]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">plot_posterior</span><span class="p">(</span><span class="n">contextual_pred_trace</span><span class="p">,</span> <span class="n">varnames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;stl_pred&#39;</span><span class="p">]);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_multilevel_modeling_78_0.png" src="../_images/notebooks_multilevel_modeling_78_0.png" />
+</div>
+</div>
+<div class="section" id="Benefits-of-Multilevel-Models">
+<h3>Benefits of Multilevel Models<a class="headerlink" href="#Benefits-of-Multilevel-Models" title="Permalink to this headline">¶</a></h3>
+<p>Accounting for natural hierarchical structure of observational data</p>
+<p>Estimation of coefficients for (under-represented) groups</p>
+<p>Incorporating individual- and group-level information when estimating
+group-level coefficients</p>
+<p>Allowing for variation among individual-level coefficients across groups</p>
+</div>
+<div class="section" id="References">
+<h3>References<a class="headerlink" href="#References" title="Permalink to this headline">¶</a></h3>
+<p>Gelman, A., &amp; Hill, J. (2006). Data Analysis Using Regression and
+Multilevel/Hierarchical Models (1st ed.). Cambridge University Press.</p>
+<p>Gelman, A. (2006). Multilevel (Hierarchical) modeling: what it can and
+cannot do. Technometrics, 48(3), 432–435.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/pymc3_logo.jpg" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="../index.html">PyMC3</a></h1>
+
+
+
+<p class="blurb">Probabilistic Programming in Python: Bayesian Modeling and Probabilistic Machine Learning with Theano</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../prob_dists.html">Probability Distributions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../examples.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#howto">Howto</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../examples.html#applied">Applied</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="BEST.html">Bayesian Estimation Supersedes the T-Test</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">A Primer on Bayesian Methods for Multilevel Modeling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stochastic_volatility.html">Stochastic Volatility model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="probabilistic_matrix_factorization.html">Probabilistic Matrix Factorization for Making Personalized Recommendations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rugby_analytics.html">A Hierarchical model for Rugby prediction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dawid-skene.html">The Dawid-Skene model with priors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#glm">GLM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#survival-analysis">Survival Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#gaussian-processes">Gaussian Processes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#mixture-models">Mixture Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#variational-inference">Variational Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#stochastic-gradient">Stochastic Gradient</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, The PyMC Development Team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="../_sources/notebooks/multilevel_modeling.ipynb.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

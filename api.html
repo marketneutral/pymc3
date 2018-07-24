@@ -1,0 +1,167 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>API Reference &#8212; PyMC3 3.5 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="shortcut icon" href="_static/PyMC3.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Distributions" href="api/distributions.html" />
+    <link rel="prev" title="Bayesian Neural Networks in PyMC3 with Stochastic Gradient Algorithms" href="notebooks/bayesian_neural_network_with_sgfs.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="api-reference">
+<span id="api"></span><h1>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/distributions.html">Distributions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/distributions/continuous.html">Continuous</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/distributions/discrete.html">Discrete</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/distributions/multivariate.html">Multivariate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/distributions/mixture.html">Mixture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/distributions/timeseries.html">Timeseries</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/bounds.html">Bounded Variables</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/bounds.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/bounds.html#caveats">Caveats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/bounds.html#module-pymc3.distributions.bound">API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/inference.html">Inference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/inference.html#module-pymc3.sampling">Sampling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/inference.html#step-methods">Step-methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/inference.html#variational">Variational</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/glm.html">Generalized Linear Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/gp.html">GP Implementations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/gp.html#mean-functions">Mean Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/gp.html#covariance-functions">Covariance Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/plots.html">Plots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/stats.html">Stats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/diagnostics.html">Diagnostics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/backends.html">Backends</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/backends.html#available-backends">Available backends</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/backends.html#selecting-a-backend">Selecting a backend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/backends.html#selecting-values-from-a-backend">Selecting values from a backend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/backends.html#loading-a-saved-backend">Loading a saved backend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/backends.html#writing-custom-backends">Writing custom backends</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/backends.html#module-pymc3.backends.ndarray">ndarray</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/backends.html#module-pymc3.backends.sqlite">sqlite</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/backends.html#module-pymc3.backends.text">text</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/backends.html#module-pymc3.backends.tracetab">tracetab</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/math.html">Math</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/model.html">Model</a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/pymc3_logo.jpg" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="index.html">PyMC3</a></h1>
+
+
+
+<p class="blurb">Probabilistic Programming in Python: Bayesian Modeling and Probabilistic Machine Learning with Theano</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prob_dists.html">Probability Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/distributions.html">Distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/bounds.html">Bounded Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/inference.html">Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/glm.html">Generalized Linear Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gp.html">GP Implementations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gp.html#mean-functions">Mean Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/gp.html#covariance-functions">Covariance Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/plots.html">Plots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/stats.html">Stats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/diagnostics.html">Diagnostics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/backends.html">Backends</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/math.html">Math</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/data.html">Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/model.html">Model</a></li>
+</ul>
+</li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, The PyMC Development Team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="_sources/api.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

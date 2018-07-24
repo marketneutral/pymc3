@@ -1,0 +1,1197 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Normalizing Flows Overview &#8212; PyMC3 3.5 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="shortcut icon" href="../_static/PyMC3.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Constant Stochastic Gradient" href="constant_stochastic_gradient.html" />
+    <link rel="prev" title="Empirical Approximation overview" href="empirical-approx-overview.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #303F9F;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #D84315;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 8ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #cfcfcf;
+    border-radius: 2px;
+    background: #f7f7f7;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.pngmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+</style>
+<div class="section" id="Normalizing-Flows-Overview">
+<h1>Normalizing Flows Overview<a class="headerlink" href="#Normalizing-Flows-Overview" title="Permalink to this headline">¶</a></h1>
+<p>Normalizing Flows is a rich family of distributions. They were described
+by <a class="reference external" href="https://arxiv.org/abs/1505.05770">Rezende and Mohamed</a>, and their
+experiments proved the importance of studying them further. Some
+extensions like that of <a class="reference external" href="https://arxiv.org/abs/1611.09630">Tomczak and
+Welling</a> made partially/full rank
+Gaussian approximations for high dimensional spaces computationally
+tractable.</p>
+<p>This notebook reveals some tips and tricks for using normalizing flows
+effectively in PyMC3.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="kn">as</span> <span class="nn">sns</span>
+<span class="kn">import</span> <span class="nn">pymc3</span> <span class="kn">as</span> <span class="nn">pm</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">theano</span> <span class="kn">import</span> <span class="n">theano</span><span class="p">,</span> <span class="n">tensor</span> <span class="k">as</span> <span class="n">tt</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
+
+<span class="n">pm</span><span class="o">.</span><span class="n">set_tt_rng</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="Theory">
+<h2>Theory<a class="headerlink" href="#Theory" title="Permalink to this headline">¶</a></h2>
+<p>Normalizing flows is a series of invertible transformations on an
+initial distribution.</p>
+<div class="math notranslate nohighlight">
+\[z_K = f_K \circ \dots \circ f_2 \circ f_1(z_0)\]</div>
+<p>In this case, we can compute a tractable density for the flow.</p>
+<div class="math notranslate nohighlight">
+\[\ln q_K(z_K) = \ln q_0(z_0) - \sum_{k=1}^{K}\ln \left|\frac{\partial f_k}{\partial z_{k-1}}\right|\]</div>
+<p>Here, every <span class="math notranslate nohighlight">\(f_k\)</span> is a parametric function with a well-defined
+determinant. The transformation used is up to the user; for example, the
+simplest flow is an affine transform:</p>
+<div class="math notranslate nohighlight">
+\[z = loc(scale(z_0)) = \mu + \sigma * z_0\]</div>
+<p>In this case, we get a mean field approximation if
+<span class="math notranslate nohighlight">\(z_0 \sim \mathcal{N}(0, 1)\)</span></p>
+</div>
+<div class="section" id="Flow-Formulas">
+<h2>Flow Formulas<a class="headerlink" href="#Flow-Formulas" title="Permalink to this headline">¶</a></h2>
+<p>In PyMC3 there are flexible ways to define flows with formulas. There
+are currently 5 types defined:</p>
+<ul class="simple">
+<li>Loc (<code class="docutils literal notranslate"><span class="pre">loc</span></code>): <span class="math notranslate nohighlight">\(z' = z + \mu\)</span></li>
+<li>Scale (<code class="docutils literal notranslate"><span class="pre">scale</span></code>): <span class="math notranslate nohighlight">\(z' = \sigma * z\)</span></li>
+<li>Planar (<code class="docutils literal notranslate"><span class="pre">planar</span></code>): <span class="math notranslate nohighlight">\(z' = z + u * \tanh(w^T z + b)\)</span></li>
+<li>Radial (<code class="docutils literal notranslate"><span class="pre">radial</span></code>):
+<span class="math notranslate nohighlight">\(z' = z + \beta (\alpha + ||z-z_r||)^{-1}(z-z_r)\)</span></li>
+<li>Householder (<code class="docutils literal notranslate"><span class="pre">hh</span></code>): <span class="math notranslate nohighlight">\(z' = H z\)</span></li>
+</ul>
+<p>Formulae can be composed as a string, e.g. <code class="docutils literal notranslate"><span class="pre">'scale-loc'</span></code>,
+<code class="docutils literal notranslate"><span class="pre">'scale-hh*4-loc'</span></code>, <code class="docutils literal notranslate"><span class="pre">'panar*10'</span></code>. Each step is separated with
+<code class="docutils literal notranslate"><span class="pre">'-'</span></code>, and repeated flows are defined with <code class="docutils literal notranslate"><span class="pre">'*'</span></code> in the form of
+<code class="docutils literal notranslate"><span class="pre">'&lt;flow&gt;*&lt;#repeats&gt;'</span></code>.</p>
+<p>Flow-based approximations in PyMC3 are based on the <code class="docutils literal notranslate"><span class="pre">NormalizingFlow</span></code>
+class, with corresponding inference classes named using the <code class="docutils literal notranslate"><span class="pre">NF</span></code>
+abbreviation (analogous to how <code class="docutils literal notranslate"><span class="pre">ADVI</span></code> and <code class="docutils literal notranslate"><span class="pre">SVGD</span></code> are treated in
+PyMC3).</p>
+<p>Concretely, an approximation is represented by:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pm</span><span class="o">.</span><span class="n">NormalizingFlow</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[2]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>pymc3.variational.approximations.NormalizingFlow
+</pre></div>
+</div>
+</div>
+<p>While an inference class is:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pm</span><span class="o">.</span><span class="n">NFVI</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[3]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>pymc3.variational.inference.NFVI
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Flow-patterns">
+<h2>Flow patterns<a class="headerlink" href="#Flow-patterns" title="Permalink to this headline">¶</a></h2>
+<p>Composing flows requires some understanding of the target output. Flows
+that are too complex might not converge, whereas if they are too simple,
+they may not accurately estimate the posterior.</p>
+<p>Let’s start simply:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">dummy</span><span class="p">:</span>
+
+    <span class="n">N</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">100</span><span class="p">,))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="Mean-Field-connectivity">
+<h3>Mean Field connectivity<a class="headerlink" href="#Mean-Field-connectivity" title="Permalink to this headline">¶</a></h3>
+<p>Let’s apply the transformation corresponding to the mean-field family to
+begin with:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pm</span><span class="o">.</span><span class="n">NormalizingFlow</span><span class="p">(</span><span class="s1">&#39;scale-loc&#39;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">dummy</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[5]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>&lt;pymc3.variational.approximations.NormalizingFlow at 0x109b841d0&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Full-Rank-Normal-connectivity">
+<h3>Full Rank Normal connectivity<a class="headerlink" href="#Full-Rank-Normal-connectivity" title="Permalink to this headline">¶</a></h3>
+<p>We can get a full rank model with dense covariance matrix using
+<strong>householder flows</strong> (hh). One <code class="docutils literal notranslate"><span class="pre">hh</span></code> flow adds exactly one rank to the
+covariance matrix, so for a full rank matrix we need <code class="docutils literal notranslate"><span class="pre">K=ndim</span></code>
+householder flows. hh flows are volume-preserving, so we need to change
+the scaling if we want our posterior to have unit variance for the
+latent variables.</p>
+<p>After we specify the covariance with a combination of <code class="docutils literal notranslate"><span class="pre">'scale-hh*K'</span></code>,
+we then add location shift with the <code class="docutils literal notranslate"><span class="pre">loc</span></code> flow. We now have a
+full-rank analog:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pm</span><span class="o">.</span><span class="n">NormalizingFlow</span><span class="p">(</span><span class="s1">&#39;scale-hh*100-loc&#39;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">dummy</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[6]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>&lt;pymc3.variational.approximations.NormalizingFlow at 0x1156df0b8&gt;
+</pre></div>
+</div>
+</div>
+<p>A more interesting case is when we do not expect a lot of interactions
+within the posterior. In this case, where our covariance is expected to
+be sparse, we can constrain it by defining a <em>low rank</em> approximation
+family.</p>
+<p>This has the additional benefit of reducing the computational cost of
+approximating the model.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pm</span><span class="o">.</span><span class="n">NormalizingFlow</span><span class="p">(</span><span class="s1">&#39;scale-hh*10-loc&#39;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">dummy</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[7]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>&lt;pymc3.variational.approximations.NormalizingFlow at 0x1156dfeb8&gt;
+</pre></div>
+</div>
+</div>
+<p>Parameters can be initialized randomly, using the <code class="docutils literal notranslate"><span class="pre">jitter</span></code> argument to
+specify the scale of the randomness.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pm</span><span class="o">.</span><span class="n">NormalizingFlow</span><span class="p">(</span><span class="s1">&#39;scale-hh*10-loc&#39;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">dummy</span><span class="p">,</span> <span class="n">jitter</span><span class="o">=.</span><span class="mo">001</span><span class="p">)</span> <span class="c1"># LowRank</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[8]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>&lt;pymc3.variational.approximations.NormalizingFlow at 0x115fea7f0&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Planar-and-Radial-Flows">
+<h3>Planar and Radial Flows<a class="headerlink" href="#Planar-and-Radial-Flows" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Planar (<code class="docutils literal notranslate"><span class="pre">planar</span></code>): <span class="math notranslate nohighlight">\(z' = z + u * \tanh(w^T z + b)\)</span></li>
+<li>Radial (<code class="docutils literal notranslate"><span class="pre">radial</span></code>):
+<span class="math notranslate nohighlight">\(z' = z + \beta (\alpha + ||z-z_r||)^{-1}(z-z_r)\)</span></li>
+</ul>
+<p>Planar flows are useful for splitting the incoming distribution into two
+parts, which allows multimodal distributions to be modeled.</p>
+<p>Similarly, a radial flow changes density around a specific reference
+point.</p>
+</div>
+</div>
+<div class="section" id="Simulated-data-example">
+<h2>Simulated data example<a class="headerlink" href="#Simulated-data-example" title="Permalink to this headline">¶</a></h2>
+<p>There were 4 potential functions illustrated in the <a class="reference external" href="https://arxiv.org/abs/1505.05770">original
+paper</a>, which we can replicate
+here. Inference can be unstable in multimodal cases, but there are
+strategies for dealing with them.</p>
+<p>First, let’s specify the potential functions:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">def</span> <span class="nf">w1</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">tt</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mf">4.</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">w2</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mf">3.</span><span class="o">*</span><span class="n">tt</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-.</span><span class="mi">5</span><span class="o">*</span><span class="p">(((</span><span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mf">1.</span><span class="p">)</span><span class="o">/.</span><span class="mi">6</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">w3</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mf">3.</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">tt</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mf">1.</span><span class="p">)</span><span class="o">/.</span><span class="mi">3</span><span class="p">))</span><span class="o">**-</span><span class="mi">1</span>
+
+<span class="k">def</span> <span class="nf">pot1</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">z</span><span class="o">.</span><span class="n">T</span>
+    <span class="k">return</span> <span class="o">.</span><span class="mi">5</span><span class="o">*</span><span class="p">((</span><span class="n">z</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">-</span><span class="mf">2.</span><span class="p">)</span><span class="o">/.</span><span class="mi">4</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">tt</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">tt</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-.</span><span class="mi">5</span><span class="o">*</span><span class="p">((</span><span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mf">2.</span><span class="p">)</span><span class="o">/.</span><span class="mi">6</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span>
+                                                      <span class="n">tt</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-.</span><span class="mi">5</span><span class="o">*</span><span class="p">((</span><span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mf">2.</span><span class="p">)</span><span class="o">/.</span><span class="mi">6</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">pot2</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">z</span><span class="o">.</span><span class="n">T</span>
+    <span class="k">return</span> <span class="o">.</span><span class="mi">5</span><span class="o">*</span><span class="p">((</span><span class="n">z</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">w1</span><span class="p">(</span><span class="n">z</span><span class="p">))</span><span class="o">/.</span><span class="mi">4</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">tt</span><span class="o">.</span><span class="n">abs_</span><span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="k">def</span> <span class="nf">pot3</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">z</span><span class="o">.</span><span class="n">T</span>
+    <span class="k">return</span> <span class="o">-</span><span class="n">tt</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">tt</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-.</span><span class="mi">5</span><span class="o">*</span><span class="p">((</span><span class="n">z</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">w1</span><span class="p">(</span><span class="n">z</span><span class="p">))</span><span class="o">/.</span><span class="mi">35</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span>
+                   <span class="n">tt</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-.</span><span class="mi">5</span><span class="o">*</span><span class="p">((</span><span class="n">z</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">w1</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="o">+</span><span class="n">w2</span><span class="p">(</span><span class="n">z</span><span class="p">))</span><span class="o">/.</span><span class="mi">35</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">+</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">tt</span><span class="o">.</span><span class="n">abs_</span><span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="k">def</span> <span class="nf">pot4</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">z</span><span class="o">.</span><span class="n">T</span>
+    <span class="k">return</span> <span class="o">-</span><span class="n">tt</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">tt</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-.</span><span class="mi">5</span><span class="o">*</span><span class="p">((</span><span class="n">z</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">w1</span><span class="p">(</span><span class="n">z</span><span class="p">))</span><span class="o">/.</span><span class="mi">4</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span>
+                   <span class="n">tt</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-.</span><span class="mi">5</span><span class="o">*</span><span class="p">((</span><span class="n">z</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">w1</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="o">+</span><span class="n">w3</span><span class="p">(</span><span class="n">z</span><span class="p">))</span><span class="o">/.</span><span class="mi">35</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">+</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">tt</span><span class="o">.</span><span class="n">abs_</span><span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="n">z</span> <span class="o">=</span> <span class="n">tt</span><span class="o">.</span><span class="n">matrix</span><span class="p">(</span><span class="s1">&#39;z&#39;</span><span class="p">)</span>
+<span class="n">z</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">test_value</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">floatX</span><span class="p">([[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]])</span>
+<span class="n">pot1f</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">function</span><span class="p">([</span><span class="n">z</span><span class="p">],</span> <span class="n">pot1</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
+<span class="n">pot2f</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">function</span><span class="p">([</span><span class="n">z</span><span class="p">],</span> <span class="n">pot2</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
+<span class="n">pot3f</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">function</span><span class="p">([</span><span class="n">z</span><span class="p">],</span> <span class="n">pot3</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
+<span class="n">pot4f</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">function</span><span class="p">([</span><span class="n">z</span><span class="p">],</span> <span class="n">pot4</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">def</span> <span class="nf">contour_pot</span><span class="p">(</span><span class="n">potf</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">xlim</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">floatX</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mgrid</span><span class="p">[</span><span class="o">-</span><span class="n">xlim</span><span class="p">:</span><span class="n">xlim</span><span class="p">:</span><span class="mi">100j</span><span class="p">,</span><span class="o">-</span><span class="n">ylim</span><span class="p">:</span><span class="n">ylim</span><span class="p">:</span><span class="mi">100j</span><span class="p">])</span>
+    <span class="n">grid_2d</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;inferno&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">9</span><span class="p">))</span>
+    <span class="n">pdf1e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">potf</span><span class="p">(</span><span class="n">grid_2d</span><span class="p">))</span>
+    <span class="n">contour</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">grid</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">pdf1e</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ax</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+<span class="n">contour_pot</span><span class="p">(</span><span class="n">pot1f</span><span class="p">,</span> <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;pot1&#39;</span><span class="p">,</span> <span class="p">);</span>
+<span class="n">contour_pot</span><span class="p">(</span><span class="n">pot2f</span><span class="p">,</span> <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;pot2&#39;</span><span class="p">);</span>
+<span class="n">contour_pot</span><span class="p">(</span><span class="n">pot3f</span><span class="p">,</span> <span class="n">ax</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="s1">&#39;pot3&#39;</span><span class="p">);</span>
+<span class="n">contour_pot</span><span class="p">(</span><span class="n">pot4f</span><span class="p">,</span> <span class="n">ax</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="s1">&#39;pot4&#39;</span><span class="p">);</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_normalizing_flows_overview_23_0.png" src="../_images/notebooks_normalizing_flows_overview_23_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Reproducing-first-potential-function">
+<h2>Reproducing first potential function<a class="headerlink" href="#Reproducing-first-potential-function" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pymc3.distributions.dist_math</span> <span class="kn">import</span> <span class="n">bound</span>
+<span class="k">def</span> <span class="nf">cust_logp</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+    <span class="c1">#return bound(-pot1(z), z&gt;-5, z&lt;5)</span>
+    <span class="k">return</span> <span class="o">-</span><span class="n">pot1</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">pot1m</span><span class="p">:</span>
+    <span class="n">pm</span><span class="o">.</span><span class="n">DensityDist</span><span class="p">(</span><span class="s1">&#39;pot1&#39;</span><span class="p">,</span> <span class="n">logp</span><span class="o">=</span><span class="n">cust_logp</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="NUTS">
+<h3>NUTS<a class="headerlink" href="#NUTS" title="Permalink to this headline">¶</a></h3>
+<p>Let’s use NUTS first. Just to have a look how good is it’s
+approximation.</p>
+<blockquote>
+<div>Note you may need to rerun the model a couple of times, as the
+sampler/estimator might not fully explore function due to
+multimodality.</div></blockquote>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pm</span><span class="o">.</span><span class="n">set_tt_rng</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">pot1m</span><span class="p">:</span>
+    <span class="n">trace</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">cores</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">pot1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])),</span>
+                                                         <span class="nb">dict</span><span class="p">(</span><span class="n">pot1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+ 99%|█████████▊| 1481/1500 [00:03&lt;00:00, 473.27it/s]/Users/ferres/dev/pymc3/pymc3/step_methods/hmc/nuts.py:451: UserWarning: The acceptance probability in chain 0 does not match the target. It is 0.889185534675, but should be close to 0.8. Try to increase the number of tuning steps.
+  % (self._chain_id, mean_accept, target_accept))
+100%|██████████| 1500/1500 [00:03&lt;00:00, 467.67it/s]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">dftrace</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">trace_to_dataframe</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">jointplot</span><span class="p">(</span><span class="n">dftrace</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dftrace</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;kde&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[14]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>&lt;seaborn.axisgrid.JointGrid at 0x116b9a208&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_normalizing_flows_overview_28_1.png" src="../_images/notebooks_normalizing_flows_overview_28_1.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Normalizing-flows">
+<h3>Normalizing flows<a class="headerlink" href="#Normalizing-flows" title="Permalink to this headline">¶</a></h3>
+<p>As a first (naive) try with flows, we will keep things simple: Let’s use
+just 2 planar flows and see what we get:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">pot1m</span><span class="p">:</span>
+    <span class="n">inference</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">NFVI</span><span class="p">(</span><span class="s1">&#39;planar*2&#39;</span><span class="p">,</span> <span class="n">jitter</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1">## Plotting starting distribution</span>
+<span class="n">dftrace</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">trace_to_dataframe</span><span class="p">(</span><span class="n">inference</span><span class="o">.</span><span class="n">approx</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">jointplot</span><span class="p">(</span><span class="n">dftrace</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dftrace</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;kde&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_normalizing_flows_overview_30_0.png" src="../_images/notebooks_normalizing_flows_overview_30_0.png" />
+</div>
+</div>
+<div class="section" id="Tracking-gradients">
+<h4>Tracking gradients<a class="headerlink" href="#Tracking-gradients" title="Permalink to this headline">¶</a></h4>
+<p>It is illustrative to track gradients as well as parameters. In this
+setup, different sampling points can give different gradients because a
+single sampled point tends to collapse to a mode.</p>
+<p>Here are the parameters of the model:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">inference</span><span class="o">.</span><span class="n">approx</span><span class="o">.</span><span class="n">params</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[16]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>[b, u, w, b, u, w]
+</pre></div>
+</div>
+</div>
+<p>We also require an objective:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">inference</span><span class="o">.</span><span class="n">objective</span><span class="p">(</span><span class="n">nmc</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[17]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Elemwise{mul,no_inplace}.0
+</pre></div>
+</div>
+</div>
+<p>Theano can be used to calcuate the gradient of the objective with
+respect to the parameters:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">theano</span><span class="o">.</span><span class="n">configparser</span><span class="o">.</span><span class="n">change_flags</span><span class="p">(</span><span class="n">compute_test_value</span><span class="o">=</span><span class="s1">&#39;off&#39;</span><span class="p">):</span>
+    <span class="n">grads</span> <span class="o">=</span> <span class="n">tt</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">inference</span><span class="o">.</span><span class="n">objective</span><span class="p">(</span><span class="bp">None</span><span class="p">),</span> <span class="n">inference</span><span class="o">.</span><span class="n">approx</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
+<span class="n">grads</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[18]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>[Elemwise{add,no_inplace}.0,
+ Elemwise{add,no_inplace}.0,
+ Elemwise{add,no_inplace}.0,
+ Elemwise{add,no_inplace}.0,
+ Elemwise{add,no_inplace}.0,
+ Elemwise{add,no_inplace}.0]
+</pre></div>
+</div>
+</div>
+<p>If we want to keep track of the gradient changes during the inference,
+we warp them in a pymc3 callback:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span><span class="p">,</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">count</span>
+
+<span class="nd">@theano.configparser.change_flags</span><span class="p">(</span><span class="n">compute_test_value</span><span class="o">=</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">get_tracker</span><span class="p">(</span><span class="n">inference</span><span class="p">):</span>
+    <span class="n">numbers</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">inference</span><span class="o">.</span><span class="n">approx</span><span class="o">.</span><span class="n">params</span>
+    <span class="n">grads</span> <span class="o">=</span> <span class="n">tt</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">inference</span><span class="o">.</span><span class="n">objective</span><span class="p">(</span><span class="bp">None</span><span class="p">),</span> <span class="n">params</span><span class="p">)</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">next</span><span class="p">(</span><span class="n">numbers</span><span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="p">]))</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">inference</span><span class="o">.</span><span class="n">approx</span><span class="o">.</span><span class="n">params</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">pm</span><span class="o">.</span><span class="n">callbacks</span><span class="o">.</span><span class="n">Tracker</span><span class="p">(</span><span class="o">**</span><span class="n">OrderedDict</span><span class="p">(</span>
+      <span class="p">[(</span><span class="n">name</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">eval</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">params</span><span class="p">)]</span> <span class="o">+</span> <span class="p">[(</span><span class="s1">&#39;grad_&#39;</span> <span class="o">+</span> <span class="n">name</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">eval</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">grads</span><span class="p">)]</span>
+    <span class="p">))</span>
+
+<span class="n">tracker</span> <span class="o">=</span> <span class="n">get_tracker</span><span class="p">(</span><span class="n">inference</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">tracker</span><span class="o">.</span><span class="n">whatchdict</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[20]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>{&#39;b_0&#39;: &lt;bound method Variable.eval of b&gt;,
+ &#39;b_1&#39;: &lt;bound method Variable.eval of b&gt;,
+ &#39;grad_b_0&#39;: &lt;bound method Variable.eval of Elemwise{add,no_inplace}.0&gt;,
+ &#39;grad_b_1&#39;: &lt;bound method Variable.eval of Elemwise{add,no_inplace}.0&gt;,
+ &#39;grad_u_0&#39;: &lt;bound method Variable.eval of Elemwise{add,no_inplace}.0&gt;,
+ &#39;grad_u_1&#39;: &lt;bound method Variable.eval of Elemwise{add,no_inplace}.0&gt;,
+ &#39;grad_w_0&#39;: &lt;bound method Variable.eval of Elemwise{add,no_inplace}.0&gt;,
+ &#39;grad_w_1&#39;: &lt;bound method Variable.eval of Elemwise{add,no_inplace}.0&gt;,
+ &#39;u_0&#39;: &lt;bound method Variable.eval of u&gt;,
+ &#39;u_1&#39;: &lt;bound method Variable.eval of u&gt;,
+ &#39;w_0&#39;: &lt;bound method Variable.eval of w&gt;,
+ &#39;w_1&#39;: &lt;bound method Variable.eval of w&gt;}
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">inference</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="mi">30000</span><span class="p">,</span> <span class="n">obj_optimizer</span><span class="o">=</span><span class="n">pm</span><span class="o">.</span><span class="n">adagrad_window</span><span class="p">(</span><span class="n">learning_rate</span><span class="o">=.</span><span class="mo">01</span><span class="p">),</span> <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="n">tracker</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+Average Loss = -0.7863: 100%|██████████| 30000/30000 [00:55&lt;00:00, 541.29it/s]
+Finished [100%]: Average Loss = -0.79931
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[21]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>&lt;pymc3.variational.approximations.NormalizingFlow at 0x1166a64e0&gt;
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">dftrace</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">trace_to_dataframe</span><span class="p">(</span><span class="n">inference</span><span class="o">.</span><span class="n">approx</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">jointplot</span><span class="p">(</span><span class="n">dftrace</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dftrace</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;kde&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[22]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>&lt;seaborn.axisgrid.JointGrid at 0x11e519860&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_normalizing_flows_overview_41_1.png" src="../_images/notebooks_normalizing_flows_overview_41_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">inference</span><span class="o">.</span><span class="n">hist</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_normalizing_flows_overview_42_0.png" src="../_images/notebooks_normalizing_flows_overview_42_0.png" />
+</div>
+</div>
+<p>As you can see, the objective history is not very informative here. This
+is where the gradient tracker can be more informative.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">trackername</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;u_0&#39;</span><span class="p">,</span> <span class="s1">&#39;w_0&#39;</span><span class="p">,</span> <span class="s1">&#39;b_0&#39;</span><span class="p">,</span> <span class="s1">&#39;u_1&#39;</span><span class="p">,</span> <span class="s1">&#39;w_1&#39;</span><span class="p">,</span> <span class="s1">&#39;b_1&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;grad_u_0&#39;</span><span class="p">,</span> <span class="s1">&#39;grad_w_0&#39;</span><span class="p">,</span> <span class="s1">&#39;grad_b_0&#39;</span><span class="p">,</span> <span class="s1">&#39;grad_u_1&#39;</span><span class="p">,</span> <span class="s1">&#39;grad_w_1&#39;</span><span class="p">,</span> <span class="s1">&#39;grad_b_1&#39;</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">plot_tracker_results</span><span class="p">(</span><span class="n">tracker</span><span class="p">):</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tracker</span><span class="o">.</span><span class="n">hist</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">tracker</span><span class="o">.</span><span class="n">hist</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="o">*</span><span class="mf">2.3</span><span class="p">))</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="c1">#names = list(tracker.hist.keys())</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="n">trackername</span>
+    <span class="n">gnames</span> <span class="o">=</span> <span class="n">names</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="p">:]</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="n">names</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">pairnames</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">gnames</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">plot_params_and_grads</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">gname</span><span class="p">):</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="o">*</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="o">*</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">grads</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">tracker</span><span class="p">[</span><span class="n">gname</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">grads</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">grads</span> <span class="o">=</span> <span class="n">grads</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">]</span>
+        <span class="n">grads</span> <span class="o">=</span> <span class="n">grads</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">tracker</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="n">params</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">]</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">right</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Gradient of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+        <span class="n">left</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Param trace of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">grads</span><span class="p">)):</span>
+            <span class="n">left</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+            <span class="n">right</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="o">/</span><span class="n">s</span><span class="o">/</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">left</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">j</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">))])</span>
+        <span class="n">right</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="n">gname</span> <span class="o">+</span> <span class="s1">&#39;_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">j</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">))])</span>
+
+    <span class="k">for</span> <span class="n">vn</span><span class="p">,</span> <span class="n">gn</span> <span class="ow">in</span> <span class="n">pairnames</span><span class="p">:</span>
+        <span class="n">plot_params_and_grads</span><span class="p">(</span><span class="n">vn</span><span class="p">,</span> <span class="n">gn</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">plot_tracker_results</span><span class="p">(</span><span class="n">tracker</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_normalizing_flows_overview_45_0.png" src="../_images/notebooks_normalizing_flows_overview_45_0.png" />
+</div>
+</div>
+<p>Inference <strong>is often unstable</strong>, some parameters are not well fitted as
+they poorly influence the resulting posterior.</p>
+<p>In a multimodal setting, the dominant mode might well change from run to
+run.</p>
+</div>
+</div>
+<div class="section" id="Going-deeper">
+<h3>Going deeper<a class="headerlink" href="#Going-deeper" title="Permalink to this headline">¶</a></h3>
+<p>We can try to improve our approximation by adding flows; in the original
+paper they used both 8 and 32. Let’s try using 8 here.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">pot1m</span><span class="p">:</span>
+    <span class="n">inference</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">NFVI</span><span class="p">(</span><span class="s1">&#39;planar*8&#39;</span><span class="p">,</span> <span class="n">jitter</span><span class="o">=</span><span class="mf">1.</span><span class="p">)</span>
+
+<span class="n">dftrace</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">trace_to_dataframe</span><span class="p">(</span><span class="n">inference</span><span class="o">.</span><span class="n">approx</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">jointplot</span><span class="p">(</span><span class="n">dftrace</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dftrace</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;kde&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_normalizing_flows_overview_48_0.png" src="../_images/notebooks_normalizing_flows_overview_48_0.png" />
+</div>
+</div>
+<p>We can try for a more robust fit by allocating more samples to
+<code class="docutils literal notranslate"><span class="pre">obj_n_mc</span></code> in <code class="docutils literal notranslate"><span class="pre">fit</span></code>, which controls the number of Monte Carlo
+samples used to approximate the gradient.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">inference</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="mi">25000</span><span class="p">,</span> <span class="n">obj_optimizer</span><span class="o">=</span><span class="n">pm</span><span class="o">.</span><span class="n">adam</span><span class="p">(</span><span class="n">learning_rate</span><span class="o">=.</span><span class="mo">01</span><span class="p">),</span> <span class="n">obj_n_mc</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+              <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="n">pm</span><span class="o">.</span><span class="n">callbacks</span><span class="o">.</span><span class="n">CheckParametersConvergence</span><span class="p">()])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+Average Loss = -1.7429: 100%|██████████| 25000/25000 [01:56&lt;00:00, 215.40it/s]
+Finished [100%]: Average Loss = -1.7428
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[27]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>&lt;pymc3.variational.approximations.NormalizingFlow at 0x11cfa3198&gt;
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">dftrace</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">trace_to_dataframe</span><span class="p">(</span><span class="n">inference</span><span class="o">.</span><span class="n">approx</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">jointplot</span><span class="p">(</span><span class="n">dftrace</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dftrace</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;kde&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[28]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>&lt;seaborn.axisgrid.JointGrid at 0x122108ac8&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_normalizing_flows_overview_51_1.png" src="../_images/notebooks_normalizing_flows_overview_51_1.png" />
+</div>
+</div>
+<p>This is a noticeable improvement. Here, we see that flows are able to
+characterize the multimodality of a given posterior, but as we have
+seen, they are hard to fit. The initial point of the optimization
+matters in general for the multimodal case.</p>
+</div>
+<div class="section" id="MCMC-vs-NFVI">
+<h3>MCMC vs NFVI<a class="headerlink" href="#MCMC-vs-NFVI" title="Permalink to this headline">¶</a></h3>
+<p>Let’s use another potential function, and compare the sampling using
+NUTS to what we get with NF:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">def</span> <span class="nf">cust_logp</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+    <span class="k">return</span> <span class="o">-</span><span class="n">pot4</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">pot_m</span><span class="p">:</span>
+    <span class="n">pm</span><span class="o">.</span><span class="n">DensityDist</span><span class="p">(</span><span class="s1">&#39;pot_func&#39;</span><span class="p">,</span> <span class="n">logp</span><span class="o">=</span><span class="n">cust_logp</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,))</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">pot_m</span><span class="p">:</span>
+    <span class="n">traceNUTS</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">3000</span><span class="p">,</span> <span class="n">tune</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">target_accept</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">cores</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+ 99%|█████████▉| 3969/4000 [00:09&lt;00:00, 393.42it/s]/Users/ferres/dev/pymc3/pymc3/step_methods/hmc/nuts.py:467: UserWarning: Chain 0 contains 94 diverging samples after tuning. If increasing `target_accept` does not help try to reparameterize.
+  % (self._chain_id, n_diverging))
+100%|██████████| 4000/4000 [00:09&lt;00:00, 402.32it/s]
+/Users/ferres/dev/pymc3/pymc3/step_methods/hmc/nuts.py:451: UserWarning: The acceptance probability in chain 1 does not match the target. It is 0.632933350266, but should be close to 0.8. Try to increase the number of tuning steps.
+  % (self._chain_id, mean_accept, target_accept))
+/Users/ferres/dev/pymc3/pymc3/step_methods/hmc/nuts.py:467: UserWarning: Chain 1 contains 84 diverging samples after tuning. If increasing `target_accept` does not help try to reparameterize.
+  % (self._chain_id, n_diverging))
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">formula</span> <span class="o">=</span> <span class="s1">&#39;planar*10&#39;</span>
+<span class="k">with</span> <span class="n">pot_m</span><span class="p">:</span>
+    <span class="n">inference</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">NFVI</span><span class="p">(</span><span class="n">formula</span><span class="p">,</span> <span class="n">jitter</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+
+<span class="n">inference</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="mi">25000</span><span class="p">,</span> <span class="n">obj_optimizer</span><span class="o">=</span><span class="n">pm</span><span class="o">.</span><span class="n">adam</span><span class="p">(</span><span class="n">learning_rate</span><span class="o">=.</span><span class="mo">01</span><span class="p">),</span> <span class="n">obj_n_mc</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">traceNF</span> <span class="o">=</span> <span class="n">inference</span><span class="o">.</span><span class="n">approx</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">5000</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+Average Loss = -2.212: 100%|██████████| 25000/25000 [01:05&lt;00:00, 381.94it/s]
+Finished [100%]: Average Loss = -2.2131
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [33]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">contour_pot</span><span class="p">(</span><span class="n">pot4f</span><span class="p">,</span> <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;Target Potential Function&#39;</span><span class="p">);</span>
+
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">traceNUTS</span><span class="p">[</span><span class="s1">&#39;pot_func&#39;</span><span class="p">][:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">traceNUTS</span><span class="p">[</span><span class="s1">&#39;pot_func&#39;</span><span class="p">][:,</span><span class="mi">1</span><span class="p">],</span><span class="n">c</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span><span class="n">alpha</span><span class="o">=.</span><span class="mo">05</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;NUTS&#39;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">traceNF</span><span class="p">[</span><span class="s1">&#39;pot_func&#39;</span><span class="p">][:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">traceNF</span><span class="p">[</span><span class="s1">&#39;pot_func&#39;</span><span class="p">][:,</span><span class="mi">1</span><span class="p">],</span><span class="n">c</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">,</span><span class="n">alpha</span><span class="o">=.</span><span class="mo">05</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;NF with &#39;</span> <span class="o">+</span> <span class="n">formula</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_normalizing_flows_overview_57_0.png" src="../_images/notebooks_normalizing_flows_overview_57_0.png" />
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/pymc3_logo.jpg" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="../index.html">PyMC3</a></h1>
+
+
+
+<p class="blurb">Probabilistic Programming in Python: Bayesian Modeling and Probabilistic Machine Learning with Theano</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../prob_dists.html">Probability Distributions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../examples.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#howto">Howto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#applied">Applied</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#glm">GLM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#survival-analysis">Survival Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#gaussian-processes">Gaussian Processes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#mixture-models">Mixture Models</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../examples.html#variational-inference">Variational Inference</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="GLM-hierarchical-advi-minibatch.html">GLM: Mini-batch ADVI on hierarchical regression model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lda-advi-aevb.html">Automatic autoencoding variational Bayes for latent dirichlet allocation with PyMC3</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bayesian_neural_network_advi.html">Variational Inference: Bayesian Neural Networks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="convolutional_vae_keras_advi.html">Convolutional variational autoencoder with PyMC3 and Keras</a></li>
+<li class="toctree-l3"><a class="reference internal" href="empirical-approx-overview.html">Empirical Approximation overview</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Normalizing Flows Overview</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#stochastic-gradient">Stochastic Gradient</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, The PyMC Development Team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="../_sources/notebooks/normalizing_flows_overview.ipynb.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

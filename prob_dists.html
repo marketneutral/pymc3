@@ -1,0 +1,198 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Probability Distributions &#8212; PyMC3 3.5 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="shortcut icon" href="_static/PyMC3.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Examples" href="examples.html" />
+    <link rel="prev" title="Advanced usage of Theano in PyMC3" href="advanced_theano.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="probability-distributions">
+<span id="prob-dists"></span><h1>Probability Distributions<a class="headerlink" href="#probability-distributions" title="Permalink to this headline">¶</a></h1>
+<p>The most fundamental step in building Bayesian models is the specification of a full probability model for the problem at hand. This primarily involves assigning parametric statistical distributions to unknown quantities in the model, in addition to appropriate functional forms for likelihoods to represent the information from the data. To this end, PyMC3 includes a comprehensive set of pre-defined statistical distributions that can be used as model building blocks.</p>
+<p>For example, if we wish to define a particular variable as having a normal prior, we can specify that using an instance of the <code class="docutils literal notranslate"><span class="pre">Normal</span></code> class.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">():</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>A variable requires at least a <code class="docutils literal notranslate"><span class="pre">name</span></code> argument, and zero or more model parameters, depending on the distribution. Parameter names vary by distribution, using conventional names wherever possible. The example above defines a scalar variable. To make a vector-valued variable, a <code class="docutils literal notranslate"><span class="pre">shape</span></code> argument should be provided; for example, a 3x3 matrix of beta random variables could be defined with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">():</span>
+
+    <span class="n">p</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Beta</span><span class="p">(</span><span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Probability distributions are all subclasses of <code class="docutils literal notranslate"><span class="pre">Distribution</span></code>, which in turn has two major subclasses: <code class="docutils literal notranslate"><span class="pre">Discrete</span></code> and <code class="docutils literal notranslate"><span class="pre">Continuous</span></code>. In terms of data types, a <code class="docutils literal notranslate"><span class="pre">Continuous</span></code> random variable is given whichever floating point type is defined by <code class="docutils literal notranslate"><span class="pre">theano.config.floatX</span></code>, while <code class="docutils literal notranslate"><span class="pre">Discrete</span></code> variables are given <code class="docutils literal notranslate"><span class="pre">int16</span></code> types when <code class="docutils literal notranslate"><span class="pre">theano.config.floatX</span></code> is <code class="docutils literal notranslate"><span class="pre">float32</span></code>, and <code class="docutils literal notranslate"><span class="pre">int64</span></code> otherwise.</p>
+<p>All distributions in <code class="docutils literal notranslate"><span class="pre">pm.distributions</span></code> will have two important methods: <code class="docutils literal notranslate"><span class="pre">random()</span></code> and <code class="docutils literal notranslate"><span class="pre">logp()</span></code> with the following signatures:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">SomeDistribution</span><span class="p">(</span><span class="n">Continuous</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">random</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="o">...</span>
+        <span class="k">return</span> <span class="n">random_samples</span>
+
+    <span class="k">def</span> <span class="nf">logp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="o">...</span>
+        <span class="k">return</span> <span class="n">total_log_prob</span>
+</pre></div>
+</div>
+<p>PyMC3 expects the <code class="docutils literal notranslate"><span class="pre">logp()</span></code> method to return a log-probability evaluated at the passed <code class="docutils literal notranslate"><span class="pre">value</span></code> argument. This method is used internally by all of the inference methods to calculate the model log-probability that is used for fitting models. The <code class="docutils literal notranslate"><span class="pre">random()</span></code> method is used to simulate values from the variable, and is used internally for posterior predictive checks.</p>
+<div class="section" id="custom-distributions">
+<h2>Custom distributions<a class="headerlink" href="#custom-distributions" title="Permalink to this headline">¶</a></h2>
+<p>Despite the fact that PyMC3 ships with a large set of the most common probability distributions, some problems may require the use of functional forms that are less common, and not available in <code class="docutils literal notranslate"><span class="pre">pm.distributions</span></code>. One example of this is in survival analysis, where time-to-event data is modeled using probability densities that are designed to accommodate censored data.</p>
+<p>An exponential survival function is defined by:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}f(c, t) = \left\{ \begin{array}{l} \exp(\lambda t), \text{if c=1} \\
+           \lambda \exp(\lambda t), \text{if c=0}  \end{array} \right.\end{split}\]</div>
+<p>Such a function can be implemented as a PyMC3 distribution by writing a function that specifies the log-probability, then passing that function as an argument to the <code class="docutils literal notranslate"><span class="pre">DensityDist</span></code> function, which creates an instance of a PyMC3 distribution with the custom function as its log-probability.</p>
+<p>For the exponential survival function, this is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">logp</span><span class="p">(</span><span class="n">failure</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">failure</span> <span class="o">*</span> <span class="n">log</span><span class="p">(</span><span class="n">λ</span><span class="p">)</span> <span class="o">-</span> <span class="n">λ</span> <span class="o">*</span> <span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+<span class="n">exp_surv</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">DensityDist</span><span class="p">(</span><span class="s1">&#39;exp_surv&#39;</span><span class="p">,</span> <span class="n">logp</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;failure&#39;</span><span class="p">:</span><span class="n">failure</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span><span class="n">t</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>Similarly, if a random number generator is required, a function returning random numbers corresponding to the probability distribution can be passed as the <code class="docutils literal notranslate"><span class="pre">random</span></code> argument.</p>
+</div>
+<div class="section" id="using-pymc-distributions-without-a-model">
+<h2>Using PyMC distributions without a Model<a class="headerlink" href="#using-pymc-distributions-without-a-model" title="Permalink to this headline">¶</a></h2>
+<p>Distribution objects, as we have defined them so far, are only usable inside of a <code class="docutils literal notranslate"><span class="pre">Model</span></code> context. If they are created outside of the model context manager, it raises an error.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">y</span> <span class="o">=</span> <span class="n">Binomial</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ne">TypeError</span><span class="p">:</span> <span class="n">No</span> <span class="n">context</span> <span class="n">on</span> <span class="n">context</span> <span class="n">stack</span>
+</pre></div>
+</div>
+<p>This is because the distribution classes are designed to integrate themselves automatically inside of a PyMC model. When a model cannot be found, it fails. However, each <code class="docutils literal notranslate"><span class="pre">Distribution</span></code> has a <code class="docutils literal notranslate"><span class="pre">dist</span></code> class method that returns a stripped-down distribution object that can be used outside of a PyMC model.</p>
+<p>For example, a standalone binomial distribution can be created by:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">y</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Binomial</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This allows for probabilities to be calculated and random numbers to be drawn.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">y</span><span class="o">.</span><span class="n">logp</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+<span class="go">array(-1.5843639373779297, dtype=float32)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">array([5, 4, 3])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="auto-transformation">
+<h2>Auto-transformation<a class="headerlink" href="#auto-transformation" title="Permalink to this headline">¶</a></h2>
+<p>To aid efficient MCMC sampling, any continuous variables that are constrained to a sub-interval of the real line are automatically transformed so that their support is unconstrained. This frees sampling algorithms from having to deal with boundary constraints.</p>
+<p>For example, the gamma distribution is positive-valued. If we define one for a model:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Gamma</span><span class="p">(</span><span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We notice a modified variable inside the model <code class="docutils literal notranslate"><span class="pre">vars</span></code> attribute, which holds the free variables in the model.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">vars</span>
+<span class="go">[g_log__]</span>
+</pre></div>
+</div>
+<p>As the name suggests, the variable <code class="docutils literal notranslate"><span class="pre">g</span></code> has been log-transformed, and this is the space over which sampling takes place.</p>
+<p>The original variable is simply treated as a deterministic variable, since the value of the transformed variable is simply back-transformed when a sample is drawn in order to recover the original variable. Hence, <code class="docutils literal notranslate"><span class="pre">g</span></code> resides in the <code class="docutils literal notranslate"><span class="pre">model.deterministics</span></code> list.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">deterministics</span>
+<span class="go">[g]</span>
+</pre></div>
+</div>
+<p>By default, auto-transformed variables are ignored when summarizing and plotting model output.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/pymc3_logo.jpg" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="index.html">PyMC3</a></h1>
+
+
+
+<p class="blurb">Probabilistic Programming in Python: Bayesian Modeling and Probabilistic Machine Learning with Theano</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Probability Distributions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#custom-distributions">Custom distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-pymc-distributions-without-a-model">Using PyMC distributions without a Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#auto-transformation">Auto-transformation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, The PyMC Development Team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="_sources/prob_dists.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,204 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Getting started &#8212; PyMC3 3.5 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="shortcut icon" href="_static/PyMC3.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Getting started with PyMC3" href="notebooks/getting_started.html" />
+    <link rel="prev" title="Introduction" href="intro.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="getting-started">
+<span id="id1"></span><h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/getting_started.html">Getting started with PyMC3</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/getting_started.html#Abstract">Abstract</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/getting_started.html#Introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/getting_started.html#Installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/getting_started.html#A-Motivating-Example:-Linear-Regression">A Motivating Example: Linear Regression</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/getting_started.html#Generating-data">Generating data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/getting_started.html#Model-Specification">Model Specification</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/getting_started.html#Model-fitting">Model fitting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="notebooks/getting_started.html#Maximum-a-posteriori-methods">Maximum a posteriori methods</a></li>
+<li class="toctree-l4"><a class="reference internal" href="notebooks/getting_started.html#Sampling-methods">Sampling methods</a></li>
+<li class="toctree-l4"><a class="reference internal" href="notebooks/getting_started.html#Gradient-based-sampling-methods">Gradient-based sampling methods</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/getting_started.html#Posterior-analysis">Posterior analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/getting_started.html#Case-study-1:-Stochastic-volatility">Case study 1: Stochastic volatility</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/getting_started.html#The-Model">The Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/getting_started.html#The-Data">The Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/getting_started.html#Model-Specification">Model Specification</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/getting_started.html#Fitting">Fitting</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/getting_started.html#Case-study-2:-Coal-mining-disasters">Case study 2: Coal mining disasters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/getting_started.html#Arbitrary-deterministics">Arbitrary deterministics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/getting_started.html#Arbitrary-distributions">Arbitrary distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/getting_started.html#Generalized-Linear-Models">Generalized Linear Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/getting_started.html#Discussion">Discussion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/getting_started.html#References">References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/api_quickstart.html">API quickstart</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/api_quickstart.html#1.-Model-creation">1. Model creation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/api_quickstart.html#2.-Probability-Distributions">2. Probability Distributions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/api_quickstart.html#Unobserved-Random-Variables">Unobserved Random Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/api_quickstart.html#Observed-Random-Variables">Observed Random Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/api_quickstart.html#Deterministic-transforms">Deterministic transforms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/api_quickstart.html#Automatic-transforms-of-bounded-RVs">Automatic transforms of bounded RVs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/api_quickstart.html#Transformed-distributions-and-changes-of-variables">Transformed distributions and changes of variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/api_quickstart.html#Lists-of-RVs-/-higher-dimensional-RVs">Lists of RVs / higher-dimensional RVs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/api_quickstart.html#Initialization-with-test_values">Initialization with test_values</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/api_quickstart.html#3.-Inference">3. Inference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/api_quickstart.html#3.1-Sampling">3.1 Sampling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/api_quickstart.html#3.2-Analyze-sampling-results">3.2 Analyze sampling results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/api_quickstart.html#3.3-Variational-inference">3.3 Variational inference</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/api_quickstart.html#4.-Posterior-Predictive-Sampling">4. Posterior Predictive Sampling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/api_quickstart.html#4.1-Predicting-on-hold-out-data">4.1 Predicting on hold-out data</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/variational_api_quickstart.html">Variational API quickstart</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/variational_api_quickstart.html#Basic-setup">Basic setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/variational_api_quickstart.html#Checking-convergence">Checking convergence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/variational_api_quickstart.html#Tracking-parameters">Tracking parameters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/variational_api_quickstart.html#Converting-a-Trace-to-an-Approximation">Converting a Trace to an Approximation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/variational_api_quickstart.html#Multilabel-logistic-regression">Multilabel logistic regression</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/variational_api_quickstart.html#Applying-replacements-in-practice">Applying replacements in practice</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/variational_api_quickstart.html#Minibatches">Minibatches</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gp.html">Gaussian Processes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gp.html#gp-basics">GP Basics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gp.html#mean-and-covariance-functions">Mean and covariance functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gp.html#gp-implementations">GP Implementations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gp.html#additive-gps">Additive GPs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="theano.html">PyMC3 and Theano</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="theano.html#what-is-theano">What is Theano</a></li>
+<li class="toctree-l2"><a class="reference internal" href="theano.html#how-pymc3-uses-theano">How PyMC3 uses Theano</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="advanced_theano.html">Advanced usage of Theano in PyMC3</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="advanced_theano.html#using-shared-variables">Using shared variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced_theano.html#writing-custom-theano-ops">Writing custom Theano Ops</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="advanced_theano.html#finding-the-root-of-a-function">Finding the root of a function</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/pymc3_logo.jpg" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="index.html">PyMC3</a></h1>
+
+
+
+<p class="blurb">Probabilistic Programming in Python: Bayesian Modeling and Probabilistic Machine Learning with Theano</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/getting_started.html">Getting started with PyMC3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/api_quickstart.html">API quickstart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/variational_api_quickstart.html">Variational API quickstart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gp.html">Gaussian Processes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="theano.html">PyMC3 and Theano</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced_theano.html">Advanced usage of Theano in PyMC3</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="prob_dists.html">Probability Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, The PyMC Development Team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="_sources/getting_started.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

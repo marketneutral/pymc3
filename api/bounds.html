@@ -1,0 +1,218 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Bounded Variables &#8212; PyMC3 3.5 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="shortcut icon" href="../_static/PyMC3.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Inference" href="inference.html" />
+    <link rel="prev" title="Timeseries" href="distributions/timeseries.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="bounded-variables">
+<h1>Bounded Variables<a class="headerlink" href="#bounded-variables" title="Permalink to this headline">¶</a></h1>
+<p>PyMC3 includes the construct <a class="reference internal" href="#pymc3.distributions.bound.Bound" title="pymc3.distributions.bound.Bound"><code class="xref py py-class docutils literal notranslate"><span class="pre">Bound</span></code></a> for
+placing constraints on existing probability distributions.  It modifies a given
+distribution to take values only within a specified interval.</p>
+<p>Some types of variables require constraints.  For instance, it doesn’t make
+sense for a standard deviation to have a negative value, so something like a
+Normal prior on a parameter that represents a standard deviation would be
+inappropriate.  PyMC3 includes distributions that have positive support, such
+as <a class="reference internal" href="distributions/continuous.html#pymc3.distributions.continuous.Gamma" title="pymc3.distributions.continuous.Gamma"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gamma</span></code></a> or
+<a class="reference internal" href="distributions/continuous.html#pymc3.distributions.continuous.Exponential" title="pymc3.distributions.continuous.Exponential"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exponential</span></code></a>.  PyMC3 also includes
+several bounded distributions, such as
+<a class="reference internal" href="distributions/continuous.html#pymc3.distributions.continuous.Uniform" title="pymc3.distributions.continuous.Uniform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Uniform</span></code></a>,
+<a class="reference internal" href="distributions/continuous.html#pymc3.distributions.continuous.HalfNormal" title="pymc3.distributions.continuous.HalfNormal"><code class="xref py py-class docutils literal notranslate"><span class="pre">HalfNormal</span></code></a>, and
+<a class="reference internal" href="distributions/continuous.html#pymc3.distributions.continuous.HalfCauchy" title="pymc3.distributions.continuous.HalfCauchy"><code class="xref py py-class docutils literal notranslate"><span class="pre">HalfCauchy</span></code></a>, that are restricted to a
+specific domain.</p>
+<p>All univariate distributions in PyMC3 can be given bounds.  The distribution of
+a continuous variable that has been bounded is automatically transformed into
+an unnormalized distribution whose domain is unconstrained.  The transformation
+improves the efficiency of sampling and variational inference algorithms.</p>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>For example, one may have prior information that suggests that the value of a
+parameter representing a standard deviation is near one.  One could use a
+Normal distribution while constraining the support to be positive.  The
+specification of a bounded distribution should go within the model block:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pymc3</span> <span class="k">as</span> <span class="nn">pm</span>
+
+<span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">BoundedNormal</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Bound</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">BoundedNormal</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If the bound will be applied to a single variable in the model, it may be
+cleaner notationally to define both the bound and variable together.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Bound</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Bounds can also be applied to a vector of random variables.  With the same
+<code class="docutils literal notranslate"><span class="pre">BoundedNormal</span></code> object we created previously we can write:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">x_vector</span> <span class="o">=</span> <span class="n">BoundedNormal</span><span class="p">(</span><span class="s1">&#39;x_vector&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="caveats">
+<h2>Caveats<a class="headerlink" href="#caveats" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Bounds cannot be given to variables that are <code class="docutils literal notranslate"><span class="pre">observed</span></code>.  To model
+truncated data, use a <a class="reference internal" href="model.html#pymc3.model.Potential" title="pymc3.model.Potential"><code class="xref py py-func docutils literal notranslate"><span class="pre">Potential()</span></code></a> in combination with a cumulative
+probability function.  See <a class="reference external" href="https://github.com/pymc-devs/pymc3/blob/master/docs/source/notebooks/weibull_aft.ipynb">this example notebook</a>.</li>
+<li>The automatic transformation applied to continuous distributions results in
+an unnormalized probability distribution.  This doesn’t effect inference
+algorithms but may complicate some model comparison procedures.</li>
+</ul>
+</div>
+<div class="section" id="module-pymc3.distributions.bound">
+<span id="api"></span><h2>API<a class="headerlink" href="#module-pymc3.distributions.bound" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pymc3.distributions.bound.Bound">
+<em class="property">class </em><code class="descclassname">pymc3.distributions.bound.</code><code class="descname">Bound</code><span class="sig-paren">(</span><em>distribution</em>, <em>lower=None</em>, <em>upper=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.distributions.bound.Bound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new upper, lower or upper+lower bounded distribution.</p>
+<p>The resulting distribution is not normalized anymore. This
+is usually fine if the bounds are constants. If you need
+truncated distributions, use <cite>Bound</cite> in combination with
+a <a class="reference internal" href="model.html#pymc3.model.Potential" title="pymc3.model.Potential"><code class="xref py py-class docutils literal notranslate"><span class="pre">Potential</span></code></a> with the cumulative probability function.</p>
+<p>The bounds are inclusive for discrete distributions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>distribution</strong> (<em>pymc3 distribution</em>) – Distribution to be transformed into a bounded distribution.</li>
+<li><strong>lower</strong> (<em>float</em><em> or </em><em>array like</em><em>, </em><em>optional</em>) – Lower bound of the distribution.</li>
+<li><strong>upper</strong> (<em>float</em><em> or </em><em>array like</em><em>, </em><em>optional</em>) – Upper bound of the distribution.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">():</span>
+    <span class="n">NegativeNormal</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Bound</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">par1</span> <span class="o">=</span> <span class="n">NegativeNormal</span><span class="p">(</span><span class="s1">&#39;par2&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">testval</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+
+    <span class="c1"># or you can define it implicitly within the model context</span>
+    <span class="n">par2</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Bound</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">,</span> <span class="n">lower</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)(</span>
+            <span class="s1">&#39;par2&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">testval</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/pymc3_logo.jpg" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="../index.html">PyMC3</a></h1>
+
+
+
+<p class="blurb">Probabilistic Programming in Python: Bayesian Modeling and Probabilistic Machine Learning with Theano</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../prob_dists.html">Probability Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="distributions.html">Distributions</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Bounded Variables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#caveats">Caveats</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pymc3.distributions.bound">API</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="inference.html">Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glm.html">Generalized Linear Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gp.html">GP Implementations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gp.html#mean-functions">Mean Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gp.html#covariance-functions">Covariance Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plots.html">Plots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stats.html">Stats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="diagnostics.html">Diagnostics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html">Backends</a></li>
+<li class="toctree-l2"><a class="reference internal" href="math.html">Math</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html">Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html">Model</a></li>
+</ul>
+</li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, The PyMC Development Team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="../_sources/api/bounds.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

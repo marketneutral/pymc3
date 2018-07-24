@@ -1,0 +1,1189 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Bayesian Parametric Survival Analysis with PyMC3 &#8212; PyMC3 3.5 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="shortcut icon" href="../_static/PyMC3.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Reparameterizing the Weibull Accelerated Failure Time Model" href="weibull_aft.html" />
+    <link rel="prev" title="Bayesian Survival Analysis" href="survival_analysis.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #303F9F;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #D84315;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 8ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #cfcfcf;
+    border-radius: 2px;
+    background: #f7f7f7;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.pngmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+</style>
+<div class="section" id="Bayesian-Parametric-Survival-Analysis-with-PyMC3">
+<h1>Bayesian Parametric Survival Analysis with PyMC3<a class="headerlink" href="#Bayesian-Parametric-Survival-Analysis-with-PyMC3" title="Permalink to this headline">¶</a></h1>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="nn">matplotlib.ticker</span> <span class="kn">import</span> <span class="n">StrMethodFormatter</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pymc3</span> <span class="kn">as</span> <span class="nn">pm</span>
+<span class="kn">import</span> <span class="nn">scipy</span> <span class="kn">as</span> <span class="nn">sp</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="kn">as</span> <span class="nn">sns</span>
+<span class="kn">from</span> <span class="nn">statsmodels</span> <span class="kn">import</span> <span class="n">datasets</span>
+<span class="kn">from</span> <span class="nn">theano</span> <span class="kn">import</span> <span class="n">shared</span><span class="p">,</span> <span class="n">tensor</span> <span class="k">as</span> <span class="n">tt</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;seaborn-darkgrid&#39;</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Running on PyMC3 v{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">__version__</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Running on PyMC3 v3.4.1
+</pre></div></div>
+</div>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/Survival_analysis">Survival analysis</a>
+studies the distribution of the time between when a subject comes under
+observation and when that subject experiences an event of interest. One
+of the fundamental challenges of survival analysis (which also makes is
+mathematically interesting) is that, in general, not every subject will
+experience the event of interest before we conduct our analysis. In more
+concrete terms, if we are studying the time between cancer treatment and
+death (as we will in this post), we will often want to analyze our data
+before every subject has died. This phenomenon is called censoring and
+is fundamental to survival analysis.</p>
+<p>I have previously
+<a class="reference external" href="http://austinrochford.com/posts/2015-10-05-bayes-survival.html">written</a>
+about Bayesian survival analysis using the
+<a class="reference external" href="https://en.wikipedia.org/wiki/Semiparametric_model">semiparametric</a>
+<a class="reference external" href="https://en.wikipedia.org/wiki/Proportional_hazards_model#The_Cox_model">Cox proportional hazards
+model</a>.
+Implementing that semiparametric model in PyMC3 involved some fairly
+complex <code class="docutils literal notranslate"><span class="pre">numpy</span></code> code and nonobvious probability theory equivalences.
+This post illustrates a parametric approach to Bayesian survival
+analysis in PyMC3. Parametric models of survival are simpler to both
+implement and understand than semiparametric models; statistically, they
+are also more
+<a class="reference external" href="https://en.wikipedia.org/wiki/Statistical_power">powerful</a> than non-
+or semiparametric methods <em>when they are correctly specified</em>. This post
+will not further cover the differences between parametric and
+nonparametric models or the various methods for chosing between them.</p>
+<p>As in the previous post, we will analyze <a class="reference external" href="https://vincentarelbundock.github.io/Rdatasets/doc/HSAUR/mastectomy.html">mastectomy
+data</a>
+from <code class="docutils literal notranslate"><span class="pre">R</span></code>’s
+<code class="docutils literal notranslate"><span class="pre">`HSAUR</span></code> &lt;<a class="reference external" href="https://cran.r-project.org/web/packages/HSAUR/index.html">https://cran.r-project.org/web/packages/HSAUR/index.html</a>&gt;`__
+package. First, we load the data.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">sns</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+<span class="n">blue</span><span class="p">,</span> <span class="n">green</span><span class="p">,</span> <span class="n">red</span><span class="p">,</span> <span class="n">purple</span><span class="p">,</span> <span class="n">gold</span><span class="p">,</span> <span class="n">teal</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">color_palette</span><span class="p">()</span>
+
+<span class="n">pct_formatter</span> <span class="o">=</span> <span class="n">StrMethodFormatter</span><span class="p">(</span><span class="s1">&#39;{x:.1%}&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">df</span> <span class="o">=</span> <span class="p">(</span><span class="n">datasets</span><span class="o">.</span><span class="n">get_rdataset</span><span class="p">(</span><span class="s1">&#39;mastectomy&#39;</span><span class="p">,</span> <span class="s1">&#39;HSAUR&#39;</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+              <span class="o">.</span><span class="n">data</span>
+              <span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">metastized</span><span class="o">=</span><span class="k">lambda</span> <span class="n">df</span><span class="p">:</span> <span class="mf">1.</span> <span class="o">*</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">metastized</span> <span class="o">==</span> <span class="s2">&quot;yes&quot;</span><span class="p">),</span>
+                      <span class="n">event</span><span class="o">=</span><span class="k">lambda</span> <span class="n">df</span><span class="p">:</span> <span class="mf">1.</span> <span class="o">*</span> <span class="n">df</span><span class="o">.</span><span class="n">event</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[4]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>time</th>
+      <th>event</th>
+      <th>metastized</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>23</td>
+      <td>1.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>47</td>
+      <td>1.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>69</td>
+      <td>1.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>70</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>100</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>The column <code class="docutils literal notranslate"><span class="pre">time</span></code> represents the survival time for a breast cancer
+patient after a mastectomy, measured in months. The column <code class="docutils literal notranslate"><span class="pre">event</span></code>
+indicates whether or not the observation is censored. If <code class="docutils literal notranslate"><span class="pre">event</span></code> is
+one, the patient’s death was observed during the study; if <code class="docutils literal notranslate"><span class="pre">event</span></code> is
+zero, the patient lived past the end of the study and their survival
+time is censored. The column <code class="docutils literal notranslate"><span class="pre">metastized</span></code> indicates whether the cancer
+had <a class="reference external" href="https://en.wikipedia.org/wiki/Metastasis">metastized</a> prior to
+the mastectomy. In this post, we will use Bayesian parametric survival
+regression to quantify the difference in survival times for patients
+whose cancer had and had not metastized.</p>
+<div class="section" id="Accelerated-failure-time-models">
+<h2>Accelerated failure time models<a class="headerlink" href="#Accelerated-failure-time-models" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/Accelerated_failure_time_model">Accenterated failure time
+models</a>
+are the most common type of parametric survival regression models. The
+fundamental quantity of survival analysis is the <a class="reference external" href="https://en.wikipedia.org/wiki/Survival_function">survival
+function</a>; if
+<span class="math notranslate nohighlight">\(T\)</span> is the random variable representing the time to the event in
+question, the survival function is <span class="math notranslate nohighlight">\(S(t) = P(T &gt; t)\)</span>. Accelerated
+failure time models incorporate covariates <span class="math notranslate nohighlight">\(\mathbf{x}\)</span> into the
+survival function as</p>
+<div class="math notranslate nohighlight">
+\[S(t\ |\ \beta, \mathbf{x}) = S_0\left(\exp\left(\beta^{\top} \mathbf{x}\right) \cdot t\right),\]</div>
+<p>where <span class="math notranslate nohighlight">\(S_0(t)\)</span> is a fixed baseline survival function. These models
+are called “accelerated failure time” because, when
+<span class="math notranslate nohighlight">\(\beta^{\top} \mathbf{x} &gt; 0\)</span>,
+<span class="math notranslate nohighlight">\(\exp\left(\beta^{\top} \mathbf{x}\right) \cdot t &gt; t\)</span>, so the
+effect of the covariates is to accelerate the <em>effective</em> passage of
+time for the individual in question. The following plot illustrates this
+phenomenon using an exponential survival function.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">S0</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">expon</span><span class="o">.</span><span class="n">sf</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+<span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">S0</span><span class="p">(</span><span class="mi">5</span> <span class="o">*</span> <span class="n">t</span><span class="p">),</span>
+        <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$\beta^{\top} \mathbf{x} = \log\ 5$&quot;</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">S0</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">t</span><span class="p">),</span>
+        <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$\beta^{\top} \mathbf{x} = \log\ 2$&quot;</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">S0</span><span class="p">(</span><span class="n">t</span><span class="p">),</span>
+        <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$\beta^{\top} \mathbf{x} = 0$ ($S_0$)&quot;</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">S0</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">t</span><span class="p">),</span>
+        <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$\beta^{\top} \mathbf{x} = -\log\ 2$&quot;</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">S0</span><span class="p">(</span><span class="mf">0.2</span> <span class="o">*</span> <span class="n">t</span><span class="p">),</span>
+        <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$\beta^{\top} \mathbf{x} = -\log\ 5$&quot;</span><span class="p">);</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$t$&quot;</span><span class="p">);</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">pct_formatter</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.025</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Survival probability, $S(t\ |\ \beta, \mathbf{x})$&quot;</span><span class="p">);</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">1</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Accelerated failure times&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_bayes_param_survival_pymc3_9_0.png" src="../_images/notebooks_bayes_param_survival_pymc3_9_0.png" />
+</div>
+</div>
+<p>Accelerated failure time models are equivalent to log-linear models for
+<span class="math notranslate nohighlight">\(T\)</span>,</p>
+<div class="math notranslate nohighlight">
+\[Y = \log T = \beta^{\top} \mathbf{x} + \varepsilon.\]</div>
+<p>A choice of distribution for the error term <span class="math notranslate nohighlight">\(\varepsilon\)</span>
+determines baseline survival function, <span class="math notranslate nohighlight">\(S_0\)</span>, of the accelerated
+failure time model. The following table shows the correspondence between
+the distribution of <span class="math notranslate nohighlight">\(\varepsilon\)</span> and <span class="math notranslate nohighlight">\(S_0\)</span> for several
+common accelerated failure time models.</p>
+<center>
+<table border="1">
+    <tr>
+        <th><p>Log-linear error distribution (<span class="math notranslate nohighlight">\(\varepsilon\)</span>)</p>
+</th>
+        <th><p>Baseline survival function (<span class="math notranslate nohighlight">\(S_0\)</span>)</p>
+</th>
+    </tr>
+    <tr>
+        <td><p><a class="reference external" href="https://en.wikipedia.org/wiki/Normal_distribution">Normal</a></p>
+</td>
+        <td><p><a class="reference external" href="https://en.wikipedia.org/wiki/Log-normal_distribution">Log-normal</a></p>
+</td>
+    </tr>
+    <tr>
+        <td><p>Extreme value
+(<a class="reference external" href="https://en.wikipedia.org/wiki/Gumbel_distribution">Gumbel</a>)</p>
+</td>
+        <td><p><a class="reference external" href="https://en.wikipedia.org/wiki/Weibull_distribution">Weibull</a></p>
+</td>
+    </tr>
+    <tr>
+        <td><p><a class="reference external" href="https://en.wikipedia.org/wiki/Logistic_distribution">Logistic</a></p>
+</td>
+        <td><p><a class="reference external" href="https://en.wikipedia.org/wiki/Log-logistic_distribution">Log-logistic</a></p>
+</td>
+    </tr>
+</table>
+</center><p>Accelerated failure time models are conventionally named after their
+baseline survival function, <span class="math notranslate nohighlight">\(S_0\)</span>. The rest of this post will show
+how to implement Weibull and log-logistic survival regression models in
+PyMC3 using the mastectomy data.</p>
+<div class="section" id="Weibull-survival-regression">
+<h3>Weibull survival regression<a class="headerlink" href="#Weibull-survival-regression" title="Permalink to this headline">¶</a></h3>
+<p>In this example, the covariates are
+<span class="math notranslate nohighlight">\(\mathbf{x}_i = \left(1\ x^{\textrm{met}}_i\right)^{\top}\)</span>, where</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align*}
+x^{\textrm{met}}_i
+    &amp; = \begin{cases}
+        0 &amp; \textrm{if the } i\textrm{-th patient's cancer had not metastized} \\
+        1 &amp; \textrm{if the } i\textrm{-th patient's cancer had metastized}
+    \end{cases}.
+\end{align*}\end{split}\]</div>
+<p>We construct the matrix of covariates <span class="math notranslate nohighlight">\(\mathbf{X}\)</span>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">n_patient</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">shape</span>
+
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_patient</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="n">X</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.</span>
+<span class="n">X</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">metastized</span>
+</pre></div>
+</div>
+</div>
+<p>We place independent, vague normal prior distributions on the regression
+coefficients,</p>
+<div class="math notranslate nohighlight">
+\[\beta \sim N(0, 5^2 I_2).\]</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">VAGUE_PRIOR_SD</span> <span class="o">=</span> <span class="mf">5.</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">weibull_model</span><span class="p">:</span>
+    <span class="err">β</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;β&#39;</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">VAGUE_PRIOR_SD</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>The covariates, <span class="math notranslate nohighlight">\(\mathbf{x}\)</span>, affect value of <span class="math notranslate nohighlight">\(Y = \log T\)</span>
+through <span class="math notranslate nohighlight">\(\eta = \beta^{\top} \mathbf{x}\)</span>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">X_</span> <span class="o">=</span> <span class="n">shared</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">weibull_model</span><span class="p">:</span>
+    <span class="err">η</span> <span class="o">=</span> <span class="err">β</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X_</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>For Weibull regression, we use</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align*}
+    \varepsilon
+        &amp; \sim \textrm{Gumbel}(0, s) \\
+    s
+        &amp; \sim \textrm{HalfNormal(5)}.
+\end{align*}\end{split}\]</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">weibull_model</span><span class="p">:</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfNormal</span><span class="p">(</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="mf">5.</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>We are nearly ready to specify the likelihood of the observations given
+these priors. Before doing so, we transform the observed times to the
+log scale and standardize them.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+<span class="n">y_std</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>The likelihood of the data is specified in two parts, one for uncensored
+samples, and one for censored samples. Since
+<span class="math notranslate nohighlight">\(Y = \eta + \varepsilon\)</span>, and
+<span class="math notranslate nohighlight">\(\varepsilon \sim \textrm{Gumbel}(0, s)\)</span>,
+<span class="math notranslate nohighlight">\(Y \sim \textrm{Gumbel}(\eta, s)\)</span>. For the uncensored survival
+times, the likelihood is implemented as</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">cens</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">values</span> <span class="o">==</span> <span class="mf">0.</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">cens_</span> <span class="o">=</span> <span class="n">shared</span><span class="p">(</span><span class="n">cens</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">weibull_model</span><span class="p">:</span>
+    <span class="n">y_obs</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Gumbel</span><span class="p">(</span>
+        <span class="s1">&#39;y_obs&#39;</span><span class="p">,</span> <span class="err">η</span><span class="p">[</span><span class="o">~</span><span class="n">cens_</span><span class="p">],</span> <span class="n">s</span><span class="p">,</span>
+        <span class="n">observed</span><span class="o">=</span><span class="n">y_std</span><span class="p">[</span><span class="o">~</span><span class="n">cens</span><span class="p">]</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>For censored observations, we only know that their true survival time
+exceeded the total time that they were under observation. This
+probability is given by the survival function of the Gumbel
+distribution,</p>
+<div class="math notranslate nohighlight">
+\[P(Y \geq y) = 1 - \exp\left(-\exp\left(-\frac{y - \mu}{s}\right)\right).\]</div>
+<p>This survival function is implemented below.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">def</span> <span class="nf">gumbel_sf</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="err">μ</span><span class="p">,</span> <span class="err">σ</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mf">1.</span> <span class="o">-</span> <span class="n">tt</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">tt</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="err">μ</span><span class="p">)</span> <span class="o">/</span> <span class="err">σ</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<p>We now specify the likelihood for the censored observations.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">weibull_model</span><span class="p">:</span>
+    <span class="n">y_cens</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Potential</span><span class="p">(</span>
+        <span class="s1">&#39;y_cens&#39;</span><span class="p">,</span> <span class="n">gumbel_sf</span><span class="p">(</span><span class="n">y_std</span><span class="p">[</span><span class="n">cens</span><span class="p">],</span> <span class="err">η</span><span class="p">[</span><span class="n">cens_</span><span class="p">],</span> <span class="n">s</span><span class="p">)</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>We now sample from the model.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">SEED</span> <span class="o">=</span> <span class="mi">845199</span> <span class="c1"># from random.org, for reproducibility</span>
+
+<span class="n">SAMPLE_KWARGS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;njobs&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s1">&#39;tune&#39;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+    <span class="s1">&#39;random_seed&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">SEED</span><span class="p">,</span>
+        <span class="n">SEED</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">SEED</span> <span class="o">+</span> <span class="mi">2</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">weibull_model</span><span class="p">:</span>
+    <span class="n">weibull_trace</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="o">**</span><span class="n">SAMPLE_KWARGS</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (3 chains in 3 jobs)
+NUTS: [s, β]
+Sampling 3 chains: 100%|██████████| 4500/4500 [00:03&lt;00:00, 1133.00draws/s]
+The acceptance probability does not match the target. It is 0.9186031973056857, but should be close to 0.8. Try to increase the number of tuning steps.
+</pre></div></div>
+</div>
+<p>The energy plot and Bayesian fraction of missing information give no
+cause for concern about poor mixing in NUTS.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pm</span><span class="o">.</span><span class="n">energyplot</span><span class="p">(</span><span class="n">weibull_trace</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_bayes_param_survival_pymc3_33_0.png" src="../_images/notebooks_bayes_param_survival_pymc3_33_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pm</span><span class="o">.</span><span class="n">bfmi</span><span class="p">(</span><span class="n">weibull_trace</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[20]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>1.0895766652410845
+</pre></div>
+</div>
+</div>
+<p>The Gelman-Rubin statistics also indicate convergence.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">gr_stats</span><span class="p">)</span> <span class="k">for</span> <span class="n">gr_stats</span> <span class="ow">in</span> <span class="n">pm</span><span class="o">.</span><span class="n">gelman_rubin</span><span class="p">(</span><span class="n">weibull_trace</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[21]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>1.0033842131318067
+</pre></div>
+</div>
+</div>
+<p>Below we plot posterior distributions of the parameters.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pm</span><span class="o">.</span><span class="n">plot_posterior</span><span class="p">(</span><span class="n">weibull_trace</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_bayes_param_survival_pymc3_38_0.png" src="../_images/notebooks_bayes_param_survival_pymc3_38_0.png" />
+</div>
+</div>
+<p>These are somewhat interesting (espescially the fact that the posterior
+of <span class="math notranslate nohighlight">\(\beta_1\)</span> is fairly well-separated from zero), but the
+posterior predictive survival curves will be much more interpretable.</p>
+<p>The advantage of using
+<code class="docutils literal notranslate"><span class="pre">`theano.shared</span></code> &lt;<a class="reference external" href="http://deeplearning.net/software/theano_versions/dev/library/compile/shared.html">http://deeplearning.net/software/theano_versions/dev/library/compile/shared.html</a>&gt;`__
+variables is that we can now change their values to perform posterior
+predictive sampling. For posterior prediction, we set <span class="math notranslate nohighlight">\(X\)</span> to have
+two rows, one for a subject whose cancer had not metastized and one for
+a subject whose cancer had metastized. Since we want to predict actual
+survival times, none of the posterior predictive rows are censored.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">X_pp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="n">X_pp</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.</span>
+<span class="n">X_pp</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">X_</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">X_pp</span><span class="p">)</span>
+
+<span class="n">cens_pp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">cens_</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">cens_pp</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">weibull_model</span><span class="p">:</span>
+    <span class="n">pp_weibull_trace</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample_ppc</span><span class="p">(</span>
+        <span class="n">weibull_trace</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">1500</span><span class="p">,</span> <span class="nb">vars</span><span class="o">=</span><span class="p">[</span><span class="n">y_obs</span><span class="p">]</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+100%|██████████| 1500/1500 [00:00&lt;00:00, 1787.17it/s]
+</pre></div></div>
+</div>
+<p>The posterior predictive survival times show that, on average, patients
+whose cancer had not metastized survived longer than those whose cancer
+had metastized.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">t_plot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">230</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+<span class="n">weibull_pp_surv</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">greater_equal</span>
+                     <span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">+</span> <span class="n">y</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="o">*</span> <span class="n">pp_weibull_trace</span><span class="p">[</span><span class="s1">&#39;y_obs&#39;</span><span class="p">]),</span>
+                            <span class="n">t_plot</span><span class="p">))</span>
+<span class="n">weibull_pp_surv_mean</span> <span class="o">=</span> <span class="n">weibull_pp_surv</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t_plot</span><span class="p">,</span> <span class="n">weibull_pp_surv_mean</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">c</span><span class="o">=</span><span class="n">blue</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Not metastized&quot;</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t_plot</span><span class="p">,</span> <span class="n">weibull_pp_surv_mean</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="n">c</span><span class="o">=</span><span class="n">red</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Metastized&quot;</span><span class="p">);</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">230</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Weeks since mastectomy&quot;</span><span class="p">);</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mi">1</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">pct_formatter</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Survival probability&quot;</span><span class="p">);</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">1</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Weibull survival regression model&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_bayes_param_survival_pymc3_44_0.png" src="../_images/notebooks_bayes_param_survival_pymc3_44_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Log-logistic-survival-regression">
+<h3>Log-logistic survival regression<a class="headerlink" href="#Log-logistic-survival-regression" title="Permalink to this headline">¶</a></h3>
+<p>Other accelerated failure time models can be specificed in a modular way
+by changing the prior distribution on <span class="math notranslate nohighlight">\(\varepsilon\)</span>. A
+log-logistic model corresponds to a
+<a class="reference external" href="https://en.wikipedia.org/wiki/Logistic_distribution">logistic</a> prior
+on <span class="math notranslate nohighlight">\(\varepsilon\)</span>. Most of the model specification is the same as
+for the Weibull model above.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">X_</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="n">cens_</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">cens</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">log_logistic_model</span><span class="p">:</span>
+    <span class="err">β</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;β&#39;</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">VAGUE_PRIOR_SD</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="err">η</span> <span class="o">=</span> <span class="err">β</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X_</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+    <span class="n">s</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfNormal</span><span class="p">(</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="mf">5.</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>We use the prior <span class="math notranslate nohighlight">\(\varepsilon \sim \textrm{Logistic}(0, s)\)</span>. The
+survival function of the logistic distribution is</p>
+<div class="math notranslate nohighlight">
+\[P(Y \geq y) = 1 - \frac{1}{1 + \exp\left(-\left(\frac{y - \mu}{s}\right)\right)},\]</div>
+<p>so we get the likelihood</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">def</span> <span class="nf">logistic_sf</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="err">μ</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mf">1.</span> <span class="o">-</span> <span class="n">pm</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">((</span><span class="n">y</span> <span class="o">-</span> <span class="err">μ</span><span class="p">)</span> <span class="o">/</span> <span class="n">s</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">log_logistic_model</span><span class="p">:</span>
+    <span class="n">y_obs</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Logistic</span><span class="p">(</span>
+        <span class="s1">&#39;y_obs&#39;</span><span class="p">,</span> <span class="err">η</span><span class="p">[</span><span class="o">~</span><span class="n">cens_</span><span class="p">],</span> <span class="n">s</span><span class="p">,</span>
+        <span class="n">observed</span><span class="o">=</span><span class="n">y_std</span><span class="p">[</span><span class="o">~</span><span class="n">cens</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">y_cens</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Potential</span><span class="p">(</span>
+        <span class="s1">&#39;y_cens&#39;</span><span class="p">,</span> <span class="n">logistic_sf</span><span class="p">(</span><span class="n">y_std</span><span class="p">[</span><span class="n">cens</span><span class="p">],</span> <span class="err">η</span><span class="p">[</span><span class="n">cens_</span><span class="p">],</span> <span class="n">s</span><span class="p">)</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>We now sample from the log-logistic model.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">log_logistic_model</span><span class="p">:</span>
+    <span class="n">log_logistic_trace</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="o">**</span><span class="n">SAMPLE_KWARGS</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (3 chains in 3 jobs)
+NUTS: [s, β]
+Sampling 3 chains: 100%|██████████| 4500/4500 [00:03&lt;00:00, 1192.46draws/s]
+</pre></div></div>
+</div>
+<p>All of the sampling diagnostics look good for this model.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pm</span><span class="o">.</span><span class="n">energyplot</span><span class="p">(</span><span class="n">log_logistic_trace</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_bayes_param_survival_pymc3_53_0.png" src="../_images/notebooks_bayes_param_survival_pymc3_53_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pm</span><span class="o">.</span><span class="n">bfmi</span><span class="p">(</span><span class="n">log_logistic_trace</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[32]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>1.1175174682253362
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [33]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">gr_stats</span><span class="p">)</span> <span class="k">for</span> <span class="n">gr_stats</span> <span class="ow">in</span> <span class="n">pm</span><span class="o">.</span><span class="n">gelman_rubin</span><span class="p">(</span><span class="n">log_logistic_trace</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[33]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>1.0005486775766363
+</pre></div>
+</div>
+</div>
+<p>Again, we calculate the posterior expected survival functions for this
+model.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [34]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">X_</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">X_pp</span><span class="p">)</span>
+<span class="n">cens_</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">cens_pp</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">log_logistic_model</span><span class="p">:</span>
+    <span class="n">pp_log_logistic_trace</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample_ppc</span><span class="p">(</span>
+        <span class="n">log_logistic_trace</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">1500</span><span class="p">,</span> <span class="nb">vars</span><span class="o">=</span><span class="p">[</span><span class="n">y_obs</span><span class="p">]</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+100%|██████████| 1500/1500 [00:00&lt;00:00, 1685.72it/s]
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [35]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">log_logistic_pp_surv</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">greater_equal</span>
+                          <span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">+</span> <span class="n">y</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="o">*</span> <span class="n">pp_log_logistic_trace</span><span class="p">[</span><span class="s1">&#39;y_obs&#39;</span><span class="p">]),</span>
+                                 <span class="n">t_plot</span><span class="p">))</span>
+<span class="n">log_logistic_pp_surv_mean</span> <span class="o">=</span> <span class="n">log_logistic_pp_surv</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [36]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t_plot</span><span class="p">,</span> <span class="n">weibull_pp_surv_mean</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">c</span><span class="o">=</span><span class="n">blue</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Weibull, not metastized&quot;</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t_plot</span><span class="p">,</span> <span class="n">weibull_pp_surv_mean</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="n">c</span><span class="o">=</span><span class="n">red</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Weibull, metastized&quot;</span><span class="p">);</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t_plot</span><span class="p">,</span> <span class="n">log_logistic_pp_surv_mean</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">blue</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Log-logistic, not metastized&quot;</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t_plot</span><span class="p">,</span> <span class="n">log_logistic_pp_surv_mean</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">red</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Log-logistic, metastized&quot;</span><span class="p">);</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">230</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Weeks since mastectomy&quot;</span><span class="p">);</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mi">1</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">pct_formatter</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Survival probability&quot;</span><span class="p">);</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">1</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Weibull and log-logistic</span><span class="se">\n</span><span class="s2">survival regression models&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_bayes_param_survival_pymc3_59_0.png" src="../_images/notebooks_bayes_param_survival_pymc3_59_0.png" />
+</div>
+</div>
+<p>This post has been a short introduction to implementing parametric
+survival regression models in PyMC3 with a fairly simple data set. The
+modular nature of probabilistic programming with PyMC3 should make it
+straightforward to generalize these techniques to more complex and
+interesting data set.</p>
+</div>
+</div>
+<div class="section" id="Authors">
+<h2>Authors<a class="headerlink" href="#Authors" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Originally authored as a blog post by <a class="reference external" href="https://austinrochford.com/posts/2017-10-02-bayes-param-survival.html">Austin
+Rochford</a>
+on October 2, 2017.</li>
+<li>Updated by <a class="reference external" href="https://eigenfoo.xyz/">George Ho</a> on July 18, 2018.</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/pymc3_logo.jpg" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="../index.html">PyMC3</a></h1>
+
+
+
+<p class="blurb">Probabilistic Programming in Python: Bayesian Modeling and Probabilistic Machine Learning with Theano</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../prob_dists.html">Probability Distributions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../examples.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#howto">Howto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#applied">Applied</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#glm">GLM</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../examples.html#survival-analysis">Survival Analysis</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="survival_analysis.html">Bayesian Survival Analysis</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Bayesian Parametric Survival Analysis with PyMC3</a></li>
+<li class="toctree-l3"><a class="reference internal" href="weibull_aft.html">Reparameterizing the Weibull Accelerated Failure Time Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="censored_data.html">Censored Data Models</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#gaussian-processes">Gaussian Processes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#mixture-models">Mixture Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#variational-inference">Variational Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#stochastic-gradient">Stochastic Gradient</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, The PyMC Development Team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="../_sources/notebooks/bayes_param_survival_pymc3.ipynb.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,811 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Examples &#8212; PyMC3 3.5 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="shortcut icon" href="_static/PyMC3.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Sampler statistics" href="notebooks/sampler-stats.html" />
+    <link rel="prev" title="Probability Distributions" href="prob_dists.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="examples">
+<span id="id1"></span><h1>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="howto">
+<h2>Howto<a class="headerlink" href="#howto" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/sampler-stats.html">Sampler statistics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/sampler-stats.html#Multiple-samplers">Multiple samplers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/Diagnosing_biased_Inference_with_Divergences.html">Diagnosing Biased Inference with Divergences</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/Diagnosing_biased_Inference_with_Divergences.html#The-Eight-Schools-Model">The Eight Schools Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/Diagnosing_biased_Inference_with_Divergences.html#A-Centered-Eight-Schools-Implementation">A Centered Eight Schools Implementation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/Diagnosing_biased_Inference_with_Divergences.html#A-Dangerously-Short-Markov-Chain">A Dangerously-Short Markov Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/Diagnosing_biased_Inference_with_Divergences.html#A-Safer,-Longer-Markov-Chain">A Safer, Longer Markov Chain</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/Diagnosing_biased_Inference_with_Divergences.html#Mitigating-Divergences-by-Adjusting-PyMC3's-Adaptation-Routine">Mitigating Divergences by Adjusting PyMC3’s Adaptation Routine</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/Diagnosing_biased_Inference_with_Divergences.html#Adjusting-Adaptation-Routine">Adjusting Adaptation Routine</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/Diagnosing_biased_Inference_with_Divergences.html#A-Non-Centered-Eight-Schools-Implementation">A Non-Centered Eight Schools Implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/posterior_predictive.html">Posterior Predictive Checks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/posterior_predictive.html#Comparison-between-PPC-and-other-model-evaluation-methods.">Comparison between PPC and other model evaluation methods.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/posterior_predictive.html#Prediction">Prediction</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/posterior_predictive.html#Mean-predicted-values-plus-error-bars-to-give-sense-of-uncertainty-in-prediction">Mean predicted values plus error bars to give sense of uncertainty in prediction</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/model_comparison.html">Model comparison</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/model_comparison.html#Pooled-model">Pooled model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/model_comparison.html#Hierarchical-model">Hierarchical model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/model_comparison.html#Widely-applicable-Information-Criterion-(WAIC)">Widely-applicable Information Criterion (WAIC)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/model_comparison.html#Leave-one-out-Cross-validation-(LOO)">Leave-one-out Cross-validation (LOO)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/model_comparison.html#Interpretation">Interpretation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/model_comparison.html#Reference">Reference</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/model_averaging.html">Model averaging</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/model_averaging.html#Pseudo-Bayesian-model-averaging">Pseudo Bayesian model averaging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/model_averaging.html#Pseudo-Bayesian-model-averaging-with-Bayesian-Bootstrapping">Pseudo Bayesian model averaging with Bayesian Bootstrapping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/model_averaging.html#Stacking">Stacking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/model_averaging.html#Weighted-posterior-predictive-samples">Weighted posterior predictive samples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/Bayes_factor.html">Bayes Factors and Marginal Likelihood</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/Bayes_factor.html#Bayesian-model-selection">Bayesian model selection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/Bayes_factor.html#Bayesian-model-averaging">Bayesian model averaging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/Bayes_factor.html#Some-remarks">Some remarks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/Bayes_factor.html#Computing-Bayes-factors">Computing Bayes factors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/Bayes_factor.html#Using-a-hierarchical-model">Using a hierarchical model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/Bayes_factor.html#Analytically">Analytically</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/Bayes_factor.html#Bayes-factors-and-inference">Bayes factors and inference</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/howto_debugging.html">How to debug a model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/PyMC3_tips_and_heuristic.html">PyMC3 Modeling tips and heuristic</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/PyMC3_tips_and_heuristic.html#Background-information">Background information</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/PyMC3_tips_and_heuristic.html#A-WinBugs/PyMC2-implementation">A WinBugs/PyMC2 implementation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/PyMC3_tips_and_heuristic.html#PyMC3-implementation-using-theano.scan">PyMC3 implementation using <code class="docutils literal notranslate"><span class="pre">theano.scan</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/PyMC3_tips_and_heuristic.html#PyMC3-implementation-using-matrix-&quot;trick&quot;">PyMC3 implementation using matrix “trick”</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/PyMC3_tips_and_heuristic.html#PyMC3-implementation-using-Matrix-multiplication">PyMC3 implementation using Matrix multiplication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/PyMC3_tips_and_heuristic.html#PyMC3-implementation-using-Sparse-Matrix">PyMC3 implementation using Sparse Matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/PyMC3_tips_and_heuristic.html#A-few-other-warnings">A few other warnings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/PyMC3_tips_and_heuristic.html#Final-remarks">Final remarks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/LKJ.html">LKJ Cholesky Covariance Priors for Multivariate Normal Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/live_sample_plots.html">Live sample plots</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="applied">
+<h2>Applied<a class="headerlink" href="#applied" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/BEST.html">Bayesian Estimation Supersedes the T-Test</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/BEST.html#The-Problem">The Problem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/BEST.html#Example:-Drug-trial-evaluation">Example: Drug trial evaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/BEST.html#References">References</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/multilevel_modeling.html">A Primer on Bayesian Methods for Multilevel Modeling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/multilevel_modeling.html#Example:-Radon-contamination-(Gelman-and-Hill-2006)">Example: Radon contamination (Gelman and Hill 2006)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/multilevel_modeling.html#Data-organization">Data organization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/multilevel_modeling.html#Conventional-approaches">Conventional approaches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/multilevel_modeling.html#Multilevel-and-hierarchical-models">Multilevel and hierarchical models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/multilevel_modeling.html#Partial-pooling-model">Partial pooling model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/multilevel_modeling.html#Varying-intercept-model">Varying intercept model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/multilevel_modeling.html#Varying-slope-model">Varying slope model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/multilevel_modeling.html#Varying-intercept-and-slope-model">Varying intercept and slope model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/multilevel_modeling.html#Adding-group-level-predictors">Adding group-level predictors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/multilevel_modeling.html#Correlations-among-levels">Correlations among levels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/multilevel_modeling.html#Prediction">Prediction</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/multilevel_modeling.html#Benefits-of-Multilevel-Models">Benefits of Multilevel Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/multilevel_modeling.html#References">References</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/stochastic_volatility.html">Stochastic Volatility model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/stochastic_volatility.html#Build-Model">Build Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/stochastic_volatility.html#Fit-Model">Fit Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/stochastic_volatility.html#References">References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/probabilistic_matrix_factorization.html">Probabilistic Matrix Factorization for Making Personalized Recommendations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/probabilistic_matrix_factorization.html#Motivation">Motivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/probabilistic_matrix_factorization.html#Intuition">Intuition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/probabilistic_matrix_factorization.html#Formalization">Formalization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/probabilistic_matrix_factorization.html#Data">Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/probabilistic_matrix_factorization.html#Methods">Methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/probabilistic_matrix_factorization.html#Baselines">Baselines</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="notebooks/probabilistic_matrix_factorization.html#Uniform-Random-Baseline">Uniform Random Baseline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="notebooks/probabilistic_matrix_factorization.html#Global-Mean-Baseline">Global Mean Baseline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="notebooks/probabilistic_matrix_factorization.html#Mean-of-Means-Baseline">Mean of Means Baseline</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/probabilistic_matrix_factorization.html#Probabilistic-Matrix-Factorization">Probabilistic Matrix Factorization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/probabilistic_matrix_factorization.html#Evaluation">Evaluation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/probabilistic_matrix_factorization.html#Metrics">Metrics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/probabilistic_matrix_factorization.html#Training-Data-vs.-Test-Data">Training Data vs. Test Data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/probabilistic_matrix_factorization.html#Results">Results</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/probabilistic_matrix_factorization.html#Predictions-Using-MAP">Predictions Using MAP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/probabilistic_matrix_factorization.html#Predictions-using-MCMC">Predictions using MCMC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/probabilistic_matrix_factorization.html#Diagnostics-and-Posterior-Predictive-Check">Diagnostics and Posterior Predictive Check</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/probabilistic_matrix_factorization.html#Summary-of-Results">Summary of Results</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/probabilistic_matrix_factorization.html#Summary">Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/probabilistic_matrix_factorization.html#References">References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/rugby_analytics.html">A Hierarchical model for Rugby prediction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/rugby_analytics.html#Motivation">Motivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/rugby_analytics.html#What-do-we-want-to-infer?">What do we want to infer?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/rugby_analytics.html#What-do-we-want?">What do we want?</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/rugby_analytics.html#Visualization/EDA">Visualization/EDA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/rugby_analytics.html#What-assumptions-do-we-know-for-our-'generative-story'?">What assumptions do we know for our ‘generative story’?</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/rugby_analytics.html#The-model.">The model.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/rugby_analytics.html#Building-of-the-model">Building of the model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/rugby_analytics.html#Results">Results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/rugby_analytics.html#Covariates">Covariates</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/dawid-skene.html">The Dawid-Skene model with priors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/dawid-skene.html#Introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/dawid-skene.html#Data">Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/dawid-skene.html#Model">Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/dawid-skene.html#Results">Results</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="glm">
+<h2>GLM<a class="headerlink" href="#glm" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/GLM-linear.html">GLM: Linear regression</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-linear.html#Linear-Regression">Linear Regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-linear.html#Probabilistic-Reformulation">Probabilistic Reformulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-linear.html#Bayesian-GLMs-in-PyMC3">Bayesian GLMs in PyMC3</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-linear.html#Generating-data">Generating data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-linear.html#Estimating-the-model">Estimating the model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-linear.html#Analyzing-the-model">Analyzing the model</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-linear.html#Summary">Summary</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-linear.html#Further-reading">Further reading</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/GLM-robust.html">GLM: Robust Linear Regression</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-robust.html#Robust-Regression">Robust Regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-robust.html#Summary">Summary</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/GLM-robust-with-outlier-detection.html">GLM: Robust Regression with Outlier Detection</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-robust-with-outlier-detection.html#Setup">Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-robust-with-outlier-detection.html#Load-and-Prepare-Data">Load and Prepare Data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-robust-with-outlier-detection.html#Create-Conventional-OLS-Model">Create Conventional OLS Model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-robust-with-outlier-detection.html#Define-model">Define model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-robust-with-outlier-detection.html#Sample">Sample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-robust-with-outlier-detection.html#View-Traces">View Traces</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-robust-with-outlier-detection.html#Create-Robust-Model:-Student-T-Method">Create Robust Model: Student-T Method</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-robust-with-outlier-detection.html#Define-Model">Define Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-robust-with-outlier-detection.html#Sample">Sample</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="notebooks/GLM-robust-with-outlier-detection.html#View-Traces">View Traces</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-robust-with-outlier-detection.html#Create-Robust-Model-with-Outliers:-Hogg-Method">Create Robust Model with Outliers: Hogg Method</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-robust-with-outlier-detection.html#Define-model">Define model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-robust-with-outlier-detection.html#Sample">Sample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-robust-with-outlier-detection.html#View-Traces">View Traces</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-robust-with-outlier-detection.html#Declare-Outliers-and-Compare-Plots">Declare Outliers and Compare Plots</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-robust-with-outlier-detection.html#View-ranges-for-inliers-/-outlier-predictions">View ranges for inliers / outlier predictions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-robust-with-outlier-detection.html#Declare-outliers">Declare outliers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-robust-with-outlier-detection.html#Posterior-Prediction-Plots-for-OLS-vs-StudentT-vs-SignalNoise">Posterior Prediction Plots for OLS vs StudentT vs SignalNoise</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/GLM-model-selection.html">GLM: Model Selection</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-model-selection.html#Local-Functions">Local Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-model-selection.html#Generate-toy-datasets">Generate toy datasets</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-model-selection.html#Interactively-draft-data">Interactively draft data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-model-selection.html#Create-datasets-for-modelling">Create datasets for modelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-model-selection.html#Standardize">Standardize</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-model-selection.html#Demonstrate-simple-linear-model">Demonstrate simple linear model</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-model-selection.html#Define-model-using-explicit-PyMC3-method">Define model using explicit PyMC3 method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-model-selection.html#Define-model-using-PyMC3-GLM-method">Define model using PyMC3 GLM method</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-model-selection.html#Create-higher-order-linear-models">Create higher-order linear models</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-model-selection.html#Create-and-run-polynomial-models">Create and run polynomial models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-model-selection.html#A-really-bad-method-for-model-selection:-compare-likelihoods">A really bad method for model selection: compare likelihoods</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-model-selection.html#View-posterior-predictive-fit">View posterior predictive fit</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-model-selection.html#Compare-models-using-WAIC">Compare models using WAIC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-model-selection.html#Compare-leave-one-out-Cross-Validation-[LOO]">Compare leave-one-out Cross-Validation [LOO]</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-model-selection.html#Final-remarks-and-tips">Final remarks and tips</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-model-selection.html#Reference">Reference</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/GLM-rolling-regression.html">Rolling Regression</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-rolling-regression.html#Rolling-regression">Rolling regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-rolling-regression.html#Analysis-of-results">Analysis of results</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/GLM-hierarchical.html">GLM: Hierarchical Linear Regression</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-hierarchical.html#The-data-set">The data set</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-hierarchical.html#The-Models">The Models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-hierarchical.html#Pooling-of-measurements">Pooling of measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-hierarchical.html#Unpooled-measurements:-separate-regressions">Unpooled measurements: separate regressions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-hierarchical.html#Partial-pooling:-Hierarchical-Regression-aka,-the-best-of-both-worlds">Partial pooling: Hierarchical Regression aka, the best of both worlds</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-hierarchical.html#Probabilistic-Programming">Probabilistic Programming</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-hierarchical.html#Unpooled/non-hierarchical-model">Unpooled/non-hierarchical model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-hierarchical.html#Hierarchical-Model">Hierarchical Model</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-hierarchical.html#Posterior-Predictive-Check">Posterior Predictive Check</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-hierarchical.html#The-Root-Mean-Square-Deviation">The Root Mean Square Deviation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-hierarchical.html#Shrinkage">Shrinkage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-hierarchical.html#Connections-to-Frequentist-statistics">Connections to Frequentist statistics</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-hierarchical.html#Summary">Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-hierarchical.html#References">References</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-hierarchical.html#Acknowledgements">Acknowledgements</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/GLM-poisson-regression.html">GLM: Poisson Regression</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-poisson-regression.html#Local-Functions">Local Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-poisson-regression.html#Generate-Data">Generate Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-poisson-regression.html#Assumptions:">Assumptions:</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="notebooks/GLM-poisson-regression.html#View-means-of-the-various-combinations-(Poisson-mean-values)">View means of the various combinations (Poisson mean values)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-poisson-regression.html#Briefly-Describe-Dataset">Briefly Describe Dataset</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-poisson-regression.html#Poisson-Regression">Poisson Regression</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-poisson-regression.html#1.-Manual-method,-create-design-matrices-and-manually-specify-model">1. Manual method, create design matrices and manually specify model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-poisson-regression.html#Transform-coeffs-and-recover-theta-values">Transform coeffs and recover theta values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-poisson-regression.html#2.-Alternative-method,-using-pymc.glm">2. Alternative method, using <code class="docutils literal notranslate"><span class="pre">pymc.glm</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-poisson-regression.html#Transform-coeffs">Transform coeffs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/hierarchical_partial_pooling.html">Hierarchical Partial Pooling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/hierarchical_partial_pooling.html#Data">Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/hierarchical_partial_pooling.html#Approach">Approach</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/GLM-negative-binomial-regression.html">GLM: Negative Binomial Regression</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-negative-binomial-regression.html#Convenience-Functions">Convenience Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-negative-binomial-regression.html#Generate-Data">Generate Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-negative-binomial-regression.html#Poisson-Data">Poisson Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-negative-binomial-regression.html#Negative-Binomial-Data">Negative Binomial Data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-negative-binomial-regression.html#Visualize-the-Data">Visualize the Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-negative-binomial-regression.html#Create-GLM-Model">Create GLM Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-negative-binomial-regression.html#View-Results">View Results</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/GLM-hierarchical-binominal-model.html">Hierarchical Binominal Model: Rat Tumor Example</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-hierarchical-binominal-model.html#A-Directly-Computed-Solution">A Directly Computed Solution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-hierarchical-binominal-model.html#Computing-the-Posterior-using-PyMC3">Computing the Posterior using PyMC3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-hierarchical-binominal-model.html#Conclusion">Conclusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GLM-hierarchical-binominal-model.html#References">References</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="survival-analysis">
+<h2>Survival Analysis<a class="headerlink" href="#survival-analysis" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/survival_analysis.html">Bayesian Survival Analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/survival_analysis.html#A-crash-course-in-survival-analysis">A crash course in survival analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/survival_analysis.html#Bayesian-proportional-hazards-model">Bayesian proportional hazards model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/survival_analysis.html#Time-varying-effects">Time varying effects</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/bayes_param_survival_pymc3.html">Bayesian Parametric Survival Analysis with PyMC3</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/bayes_param_survival_pymc3.html#Accelerated-failure-time-models">Accelerated failure time models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/bayes_param_survival_pymc3.html#Weibull-survival-regression">Weibull survival regression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/bayes_param_survival_pymc3.html#Log-logistic-survival-regression">Log-logistic survival regression</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/bayes_param_survival_pymc3.html#Authors">Authors</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/weibull_aft.html">Reparameterizing the Weibull Accelerated Failure Time Model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/weibull_aft.html#Dataset">Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/weibull_aft.html#Using-pm.Potential">Using <code class="docutils literal notranslate"><span class="pre">pm.Potential</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/weibull_aft.html#Parameterization-1">Parameterization 1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/weibull_aft.html#Parameterization-2">Parameterization 2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/weibull_aft.html#Parameterization-3">Parameterization 3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/weibull_aft.html#Authors">Authors</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/censored_data.html">Censored Data Models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/censored_data.html#Baseline---Uncensored-Model-of-Uncensored-Data">Baseline - Uncensored Model of Uncensored Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/censored_data.html#Model-1---Imputed-Censored-Model-of-Censored-Data">Model 1 - Imputed Censored Model of Censored Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/censored_data.html#Model-2---Unimputed-Censored-Model-of-Censored-Data">Model 2 - Unimputed Censored Model of Censored Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/censored_data.html#Sampling">Sampling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/censored_data.html#Discussion">Discussion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/censored_data.html#Authors">Authors</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="gaussian-processes">
+<h2>Gaussian Processes<a class="headerlink" href="#gaussian-processes" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html">Mean and Covariance Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html#Mean-functions">Mean functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html#Zero">Zero</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html#Constant">Constant</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html#Linear">Linear</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html#Defining-a-custom-mean-function">Defining a custom mean function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html#Covariance-functions">Covariance functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html#Exponentiated-Quadratic">Exponentiated Quadratic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html#Two-(and-higher)-Dimensional-Inputs">Two (and higher) Dimensional Inputs</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html#Both-dimensions-active">Both dimensions active</a></li>
+<li class="toctree-l4"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html#One-dimension-active">One dimension active</a></li>
+<li class="toctree-l4"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html#Product-of-covariances-over-different-dimensions">Product of covariances over different dimensions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html#White-Noise">White Noise</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html#Constant">Constant</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html#Rational-Quadratic">Rational Quadratic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html#Exponential">Exponential</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html#Matern-5/2">Matern 5/2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html#Matern-3/2">Matern 3/2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html#Cosine">Cosine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html#Linear">Linear</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html#Polynomial">Polynomial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html#Multiplication-with-a-precomputed-covariance-matrix">Multiplication with a precomputed covariance matrix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html#Applying-an-arbitary-warping-function-on-the-inputs">Applying an arbitary warping function on the inputs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html#Constructing-Periodic-using-WarpedInput">Constructing <code class="docutils literal notranslate"><span class="pre">Periodic</span></code> using <code class="docutils literal notranslate"><span class="pre">WarpedInput</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html#Periodic">Periodic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html#Gibbs">Gibbs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html#Defining-a-custom-covariance-function">Defining a custom covariance function</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/GP-Marginal.html">Marginal Likelihood Implementation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-Marginal.html#The-.marginal_likelihood-method">The <code class="docutils literal notranslate"><span class="pre">.marginal_likelihood</span></code> method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-Marginal.html#The-.conditional-distribution">The <code class="docutils literal notranslate"><span class="pre">.conditional</span></code> distribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-Marginal.html#Making-predictions">Making predictions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-Marginal.html#Example:-Regression-with-white,-Gaussian-noise">Example: Regression with white, Gaussian noise</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-Marginal.html#Using-.conditional">Using <code class="docutils literal notranslate"><span class="pre">.conditional</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-Marginal.html#Using-.predict">Using <code class="docutils literal notranslate"><span class="pre">.predict</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/GP-Latent.html">Latent Variable Implementation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-Latent.html#.prior"><code class="docutils literal notranslate"><span class="pre">.prior</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-Latent.html#.conditional"><code class="docutils literal notranslate"><span class="pre">.conditional</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-Latent.html#Example-1:-Regression-with-Student-T-distributed-noise">Example 1: Regression with Student-T distributed noise</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-Latent.html#Coding-the-model-in-PyMC3">Coding the model in PyMC3</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-Latent.html#Results">Results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-Latent.html#Using-.conditional">Using <code class="docutils literal notranslate"><span class="pre">.conditional</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-Latent.html#Example-2:-Classification">Example 2: Classification</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/GP-SparseApprox.html">Sparse Approximations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-SparseApprox.html#Examples">Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-SparseApprox.html#Initializing-the-inducing-points-with-K-means">Initializing the inducing points with K-means</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-SparseApprox.html#Optimizing-inducing-point-locations-as-part-of-the-model">Optimizing inducing point locations as part of the model</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/GP-TProcess.html">Student-t Process</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-TProcess.html#Samples-from-a-TP-prior">Samples from a TP prior</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-TProcess.html#Poisson-data-generated-by-a-T-process">Poisson data generated by a T process</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/GP-MaunaLoa.html">Example: CO<span class="math notranslate nohighlight">\(_2\)</span> at Mauna Loa</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-MaunaLoa.html#Preparing-the-data">Preparing the data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-MaunaLoa.html#Modeling-the-Keeling-Curve-using-GPs">Modeling the Keeling Curve using GPs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-MaunaLoa.html#Hyperparameter-priors">Hyperparameter priors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-MaunaLoa.html#The-model-in-PyMC3">The model in PyMC3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-MaunaLoa.html#Examining-the-fit">Examining the fit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-MaunaLoa.html#Prediction">Prediction</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/GP-slice-sampling.html">Gaussian Process Regression and Classification with Elliptical Slice Sampling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-slice-sampling.html#Gaussian-Process-Regression">Gaussian Process Regression</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-slice-sampling.html#Generate-some-example-data">Generate some example data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-slice-sampling.html#Examine-actual-posterior-distribution">Examine actual posterior distribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-slice-sampling.html#Sample-from-posterior-distribution">Sample from posterior distribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-slice-sampling.html#Evaluate-posterior-fit">Evaluate posterior fit</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-slice-sampling.html#Gaussian-Process-Classification">Gaussian Process Classification</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-slice-sampling.html#Generate-some-example-data">Generate some example data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-slice-sampling.html#Sample-from-posterior-distribution">Sample from posterior distribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-slice-sampling.html#Evaluate-posterior-fit">Evaluate posterior fit</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/GP-smoothing.html">Gaussian Process (GP) smoothing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-smoothing.html#Let's-try-a-linear-regression-first">Let’s try a linear regression first</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-smoothing.html#Linear-regression-model-recap">Linear regression model recap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-smoothing.html#Gaussian-Process-smoothing-model">Gaussian Process smoothing model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-smoothing.html#Let's-describe-the-above-GP-smoothing-model-in-PyMC3">Let’s describe the above GP-smoothing model in PyMC3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-smoothing.html#Exploring-different-levels-of-smoothing">Exploring different levels of smoothing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/GP-smoothing.html#Smoothing-&quot;to-the-limits&quot;">Smoothing “to the limits”</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="mixture-models">
+<h2>Mixture Models<a class="headerlink" href="#mixture-models" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/gaussian_mixture_model.html">Gaussian Mixture Model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/gaussian_mixture_model.html#Full-trace">Full trace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/gaussian_mixture_model.html#After-convergence">After convergence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/gaussian_mixture_model.html#Sampling-of-cluster-for-individual-data-point">Sampling of cluster for individual data point</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/marginalized_gaussian_mixture_model.html">Marginalized Gaussian Mixture Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/gaussian-mixture-model-advi.html">Gaussian Mixture Model with ADVI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/dp_mix.html">Dirichlet process mixtures for density estimation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/dp_mix.html#Dirichlet-processes">Dirichlet processes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/dp_mix.html#Dirichlet-process-mixtures">Dirichlet process mixtures</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/dependent_density_regression.html">Dependent density regression</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="variational-inference">
+<h2>Variational Inference<a class="headerlink" href="#variational-inference" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/GLM-hierarchical-advi-minibatch.html">GLM: Mini-batch ADVI on hierarchical regression model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/lda-advi-aevb.html">Automatic autoencoding variational Bayes for latent dirichlet allocation with PyMC3</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/lda-advi-aevb.html#Dataset">Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/lda-advi-aevb.html#Log-likelihood-of-documents-for-LDA">Log-likelihood of documents for LDA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/lda-advi-aevb.html#LDA-model">LDA model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/lda-advi-aevb.html#Encoder">Encoder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/lda-advi-aevb.html#AEVB-with-ADVI">AEVB with ADVI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/lda-advi-aevb.html#Extraction-of-characteristic-words-of-topics-based-on-posterior-samples">Extraction of characteristic words of topics based on posterior samples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/lda-advi-aevb.html#Predictive-distribution">Predictive distribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/lda-advi-aevb.html#Summary">Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/lda-advi-aevb.html#References">References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/bayesian_neural_network_advi.html">Variational Inference: Bayesian Neural Networks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/bayesian_neural_network_advi.html#Current-trends-in-Machine-Learning">Current trends in Machine Learning</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/bayesian_neural_network_advi.html#Probabilistic-Programming-at-scale">Probabilistic Programming at scale</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/bayesian_neural_network_advi.html#Deep-Learning">Deep Learning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/bayesian_neural_network_advi.html#Bridging-Deep-Learning-and-Probabilistic-Programming">Bridging Deep Learning and Probabilistic Programming</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/bayesian_neural_network_advi.html#Bayesian-Neural-Networks-in-PyMC3">Bayesian Neural Networks in PyMC3</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/bayesian_neural_network_advi.html#Generating-data">Generating data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/bayesian_neural_network_advi.html#Model-specification">Model specification</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/bayesian_neural_network_advi.html#Variational-Inference:-Scaling-model-complexity">Variational Inference: Scaling model complexity</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/bayesian_neural_network_advi.html#Lets-look-at-what-the-classifier-has-learned">Lets look at what the classifier has learned</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/bayesian_neural_network_advi.html#Probability-surface">Probability surface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/bayesian_neural_network_advi.html#Uncertainty-in-predicted-value">Uncertainty in predicted value</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/bayesian_neural_network_advi.html#Mini-batch-ADVI">Mini-batch ADVI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/bayesian_neural_network_advi.html#Summary">Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/bayesian_neural_network_advi.html#Next-steps">Next steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/bayesian_neural_network_advi.html#Acknowledgements">Acknowledgements</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/convolutional_vae_keras_advi.html">Convolutional variational autoencoder with PyMC3 and Keras</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/convolutional_vae_keras_advi.html#Load-images">Load images</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/convolutional_vae_keras_advi.html#Use-Keras">Use Keras</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/convolutional_vae_keras_advi.html#Encoder-and-decoder">Encoder and decoder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/convolutional_vae_keras_advi.html#Generative-model">Generative model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/convolutional_vae_keras_advi.html#Inference">Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/convolutional_vae_keras_advi.html#Results">Results</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/empirical-approx-overview.html">Empirical Approximation overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/empirical-approx-overview.html#Multimodal-density">Multimodal density</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/empirical-approx-overview.html#2d-density">2d density</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/normalizing_flows_overview.html">Normalizing Flows Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/normalizing_flows_overview.html#Theory">Theory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/normalizing_flows_overview.html#Flow-Formulas">Flow Formulas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/normalizing_flows_overview.html#Flow-patterns">Flow patterns</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/normalizing_flows_overview.html#Mean-Field-connectivity">Mean Field connectivity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/normalizing_flows_overview.html#Full-Rank-Normal-connectivity">Full Rank Normal connectivity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/normalizing_flows_overview.html#Planar-and-Radial-Flows">Planar and Radial Flows</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/normalizing_flows_overview.html#Simulated-data-example">Simulated data example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/normalizing_flows_overview.html#Reproducing-first-potential-function">Reproducing first potential function</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/normalizing_flows_overview.html#NUTS">NUTS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/normalizing_flows_overview.html#Normalizing-flows">Normalizing flows</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="notebooks/normalizing_flows_overview.html#Tracking-gradients">Tracking gradients</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/normalizing_flows_overview.html#Going-deeper">Going deeper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/normalizing_flows_overview.html#MCMC-vs-NFVI">MCMC vs NFVI</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="stochastic-gradient">
+<h2>Stochastic Gradient<a class="headerlink" href="#stochastic-gradient" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/constant_stochastic_gradient.html">Constant Stochastic Gradient</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/constant_stochastic_gradient.html#Load-dataset">Load dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/constant_stochastic_gradient.html#NUTS-Trace-Plot">NUTS Trace Plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/constant_stochastic_gradient.html#Preconditioned-CSG-Trace-Plot">Preconditioned CSG Trace Plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/constant_stochastic_gradient.html#SGFS-Trace-Plot">SGFS Trace Plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/constant_stochastic_gradient.html#Mean-Absolute-Error-on-Test-Dataset">Mean Absolute Error on Test Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/constant_stochastic_gradient.html#Sample-covariance-projections-on-the-smallest-and-largest-components">Sample covariance projections on the smallest and largest components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/constant_stochastic_gradient.html#Between-CSG-and-NUTS">Between CSG and NUTS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/constant_stochastic_gradient.html#Between-SGFS-and-NUTS">Between SGFS and NUTS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/constant_stochastic_gradient.html#Result">Result</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/sgfs_simple_optimization.html">Stochastic Gradient Fisher Scoring</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/sgfs_simple_optimization.html#Quadratic-problem">Quadratic problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/sgfs_simple_optimization.html#True-data">True data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/sgfs_simple_optimization.html#Final-task">Final task</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/sgfs_simple_optimization.html#Inference-results">Inference results</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/bayesian_neural_network_with_sgfs.html">Bayesian Neural Networks in PyMC3 with Stochastic Gradient Algorithms</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/bayesian_neural_network_with_sgfs.html#Stochastic-Gradient-Fisher-Scoring">Stochastic Gradient Fisher Scoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/bayesian_neural_network_with_sgfs.html#Generating-data">Generating data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/bayesian_neural_network_with_sgfs.html#Model-specification">Model specification</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/bayesian_neural_network_with_sgfs.html#Lets-look-at-what-the-classifier-has-learned">Lets look at what the classifier has learned</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/bayesian_neural_network_with_sgfs.html#Probability-surface">Probability surface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/bayesian_neural_network_with_sgfs.html#Uncertainty-in-predicted-value">Uncertainty in predicted value</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/bayesian_neural_network_with_sgfs.html#Next-steps">Next steps</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/pymc3_logo.jpg" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="index.html">PyMC3</a></h1>
+
+
+
+<p class="blurb">Probabilistic Programming in Python: Bayesian Modeling and Probabilistic Machine Learning with Theano</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prob_dists.html">Probability Distributions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#howto">Howto</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/sampler-stats.html">Sampler statistics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/Diagnosing_biased_Inference_with_Divergences.html">Diagnosing Biased Inference with Divergences</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/posterior_predictive.html">Posterior Predictive Checks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/model_comparison.html">Model comparison</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/model_averaging.html">Model averaging</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/Bayes_factor.html">Bayes Factors and Marginal Likelihood</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/howto_debugging.html">How to debug a model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/PyMC3_tips_and_heuristic.html">PyMC3 Modeling tips and heuristic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/LKJ.html">LKJ Cholesky Covariance Priors for Multivariate Normal Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/live_sample_plots.html">Live sample plots</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#applied">Applied</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/BEST.html">Bayesian Estimation Supersedes the T-Test</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/multilevel_modeling.html">A Primer on Bayesian Methods for Multilevel Modeling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/stochastic_volatility.html">Stochastic Volatility model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/probabilistic_matrix_factorization.html">Probabilistic Matrix Factorization for Making Personalized Recommendations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/rugby_analytics.html">A Hierarchical model for Rugby prediction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/dawid-skene.html">The Dawid-Skene model with priors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#glm">GLM</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-linear.html">GLM: Linear regression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-robust.html">GLM: Robust Linear Regression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-robust-with-outlier-detection.html">GLM: Robust Regression with Outlier Detection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-model-selection.html">GLM: Model Selection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-rolling-regression.html">Rolling Regression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-hierarchical.html">GLM: Hierarchical Linear Regression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-poisson-regression.html">GLM: Poisson Regression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/hierarchical_partial_pooling.html">Hierarchical Partial Pooling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-negative-binomial-regression.html">GLM: Negative Binomial Regression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-hierarchical-binominal-model.html">Hierarchical Binominal Model: Rat Tumor Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#survival-analysis">Survival Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/survival_analysis.html">Bayesian Survival Analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/bayes_param_survival_pymc3.html">Bayesian Parametric Survival Analysis with PyMC3</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/weibull_aft.html">Reparameterizing the Weibull Accelerated Failure Time Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/censored_data.html">Censored Data Models</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#gaussian-processes">Gaussian Processes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-MeansAndCovs.html">Mean and Covariance Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-Marginal.html">Marginal Likelihood Implementation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-Latent.html">Latent Variable Implementation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-SparseApprox.html">Sparse Approximations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-TProcess.html">Student-t Process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-MaunaLoa.html">Example: CO<span class="math notranslate nohighlight">\(_2\)</span> at Mauna Loa</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-slice-sampling.html">Gaussian Process Regression and Classification with Elliptical Slice Sampling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GP-smoothing.html">Gaussian Process (GP) smoothing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#mixture-models">Mixture Models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/gaussian_mixture_model.html">Gaussian Mixture Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/marginalized_gaussian_mixture_model.html">Marginalized Gaussian Mixture Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/gaussian-mixture-model-advi.html">Gaussian Mixture Model with ADVI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/dp_mix.html">Dirichlet process mixtures for density estimation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/dependent_density_regression.html">Dependent density regression</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#variational-inference">Variational Inference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/GLM-hierarchical-advi-minibatch.html">GLM: Mini-batch ADVI on hierarchical regression model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/lda-advi-aevb.html">Automatic autoencoding variational Bayes for latent dirichlet allocation with PyMC3</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/bayesian_neural_network_advi.html">Variational Inference: Bayesian Neural Networks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/convolutional_vae_keras_advi.html">Convolutional variational autoencoder with PyMC3 and Keras</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/empirical-approx-overview.html">Empirical Approximation overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/normalizing_flows_overview.html">Normalizing Flows Overview</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#stochastic-gradient">Stochastic Gradient</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/constant_stochastic_gradient.html">Constant Stochastic Gradient</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/sgfs_simple_optimization.html">Stochastic Gradient Fisher Scoring</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notebooks/bayesian_neural_network_with_sgfs.html">Bayesian Neural Networks in PyMC3 with Stochastic Gradient Algorithms</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, The PyMC Development Team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="_sources/examples.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

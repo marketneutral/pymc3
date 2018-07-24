@@ -1,0 +1,1927 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Diagnosing Biased Inference with Divergences &#8212; PyMC3 3.5 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="shortcut icon" href="../_static/PyMC3.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Posterior Predictive Checks" href="posterior_predictive.html" />
+    <link rel="prev" title="Sampler statistics" href="sampler-stats.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #303F9F;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #D84315;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 8ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #cfcfcf;
+    border-radius: 2px;
+    background: #f7f7f7;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.pngmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+</style>
+<div class="section" id="Diagnosing-Biased-Inference-with-Divergences">
+<h1>Diagnosing Biased Inference with Divergences<a class="headerlink" href="#Diagnosing-Biased-Inference-with-Divergences" title="Permalink to this headline">¶</a></h1>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="kn">import</span> <span class="nn">pymc3</span> <span class="kn">as</span> <span class="nn">pm</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;seaborn-darkgrid&#39;</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="o">%</span><span class="k">config</span> InlineBackend.figure_format = &#39;retina&#39;
+<span class="n">SEED</span> <span class="o">=</span> <span class="p">[</span><span class="mi">20100420</span><span class="p">,</span> <span class="mi">20100234</span><span class="p">]</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Runing on PyMC3 v{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">__version__</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Runing on PyMC3 v3.3
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+/home/osvaldo/anaconda3/lib/python3.6/site-packages/h5py/__init__.py:36: FutureWarning: Conversion of the second argument of issubdtype from `float` to `np.floating` is deprecated. In future, it will be treated as `np.float64 == np.dtype(float).type`.
+  from ._conv import register_converters as _register_converters
+</pre></div></div>
+</div>
+<p>This notebook is a PyMC3 port of <a class="reference external" href="http://mc-stan.org/documentation/case-studies/divergences_and_bias.html">Michael Betancourt’s post on
+ms-stan</a>.
+For detailed explanation of the underlying mechanism please check <a class="reference external" href="http://mc-stan.org/documentation/case-studies/divergences_and_bias.html">the
+original
+post</a>
+and Betancourt’s <a class="reference external" href="https://arxiv.org/abs/1701.02434">excellent paper</a>.</p>
+<p>Bayesian statistics is all about building a model and estimating the
+parameters in that model. However, a naive or direct parameterization of
+our probability model can sometimes be ineffective, you can check out
+<a class="reference external" href="http://twiecki.github.io/blog/2017/02/08/bayesian-hierchical-non-centered/">Thomas Wiecki’s blog
+post</a>
+on the same issue in PyMC3. Suboptimal parameterization often leads to
+slow sampling, and more problematic, biased MCMC estimators.</p>
+<p>More formally, as explained in <a class="reference external" href="http://mc-stan.org/documentation/case-studies/divergences_and_bias.html">the original
+post</a>:</p>
+<p>Markov chain Monte Carlo (MCMC) approximates expectations with respect
+to a given target distribution,</p>
+<div class="math notranslate nohighlight">
+\[\mathbb{E}{\pi} [ f ] = \int \mathrm{d}q \, \pi (q) \, f(q)\]</div>
+<p>using the states of a Markov chain, <span class="math notranslate nohighlight">\({q{0}, \ldots, q_{N} }\)</span>,</p>
+<div class="math notranslate nohighlight">
+\[\mathbb{E}{\pi} [ f ] \approx \hat{f}{N} = \frac{1}{N + 1} \sum_{n = 0}^{N} f(q_{n})\]</div>
+<p>These estimators, however, are guaranteed to be accurate only
+asymptotically as the chain grows to be infinitely long,</p>
+<div class="math notranslate nohighlight">
+\[\lim_{N \rightarrow \infty} \hat{f}{N} = \mathbb{E}{\pi} [ f ]\]</div>
+<p>To be useful in applied analyses, we need MCMC estimators to converge to
+the true expectation values sufficiently quickly that they are
+reasonably accurate before we exhaust our finite computational
+resources. This fast convergence requires strong ergodicity conditions
+to hold, in particular geometric ergodicity between a Markov transition
+and a target distribution. Geometric ergodicity is usually the necessary
+condition for MCMC estimators to follow a central limit theorem, which
+ensures not only that they are unbiased even after only a finite number
+of iterations but also that we can empirically quantify their precision
+using the MCMC standard error.</p>
+<p>Unfortunately, proving geometric ergodicity is infeasible for any
+nontrivial problem. Instead we must rely on empirical diagnostics that
+identify obstructions to geometric ergodicity, and hence well-behaved
+MCMC estimators. For a general Markov transition and target
+distribution, the best known diagnostic is the split <span class="math notranslate nohighlight">\(\hat{R}\)</span>
+statistic over an ensemble of Markov chains initialized from diffuse
+points in parameter space; to do any better we need to exploit the
+particular structure of a given transition or target distribution.</p>
+<p>Hamiltonian Monte Carlo, for example, is especially powerful in this
+regard as its failures to be geometrically ergodic with respect to any
+target distribution manifest in distinct behaviors that have been
+developed into sensitive diagnostics. One of these behaviors is the
+appearance of divergences that indicate the Hamiltonian Markov chain has
+encountered regions of high curvature in the target distribution which
+it cannot adequately explore.</p>
+<p>In this notebook we aim to identify divergences and the underlying
+pathologies in <code class="docutils literal notranslate"><span class="pre">PyMC3</span></code>.</p>
+<div class="section" id="The-Eight-Schools-Model">
+<h2>The Eight Schools Model<a class="headerlink" href="#The-Eight-Schools-Model" title="Permalink to this headline">¶</a></h2>
+<p>The hierarchical model of the Eight Schools dataset (Rubin 1981) as seen
+in <code class="docutils literal notranslate"><span class="pre">Stan</span></code>:</p>
+<div class="math notranslate nohighlight">
+\[\mu \sim \mathcal{N}(0, 5)\]</div>
+<div class="math notranslate nohighlight">
+\[\tau \sim \text{Half-Cauchy}(0, 5)\]</div>
+<div class="math notranslate nohighlight">
+\[\theta_{n} \sim \mathcal{N}(\mu, \tau)\]</div>
+<div class="math notranslate nohighlight">
+\[y_{n} \sim \mathcal{N}(\theta_{n}, \sigma_{n}),\]</div>
+<p>where <span class="math notranslate nohighlight">\(n \in \{1, \ldots, 8 \}\)</span> and the
+<span class="math notranslate nohighlight">\(\{ y_{n}, \sigma_{n} \}\)</span> are given as data.</p>
+<p>Inferring the hierarchical hyperparameters, <span class="math notranslate nohighlight">\(\mu\)</span> and
+<span class="math notranslate nohighlight">\(\sigma\)</span>, together with the group-level parameters,
+<span class="math notranslate nohighlight">\(\theta_{1}, \ldots, \theta_{8}\)</span>, allows the model to pool data
+across the groups and reduce their posterior variance. Unfortunately,
+the direct <em>centered</em> parameterization also squeezes the posterior
+distribution into a particularly challenging geometry that obstructs
+geometric ergodicity and hence biases MCMC estimation.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Data of the Eight Schools Model</span>
+<span class="n">J</span> <span class="o">=</span> <span class="mi">8</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">28.</span><span class="p">,</span>  <span class="mf">8.</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.</span><span class="p">,</span>  <span class="mf">7.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">,</span>  <span class="mf">1.</span><span class="p">,</span> <span class="mf">18.</span><span class="p">,</span> <span class="mf">12.</span><span class="p">])</span>
+<span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">15.</span><span class="p">,</span> <span class="mf">10.</span><span class="p">,</span> <span class="mf">16.</span><span class="p">,</span> <span class="mf">11.</span><span class="p">,</span>  <span class="mf">9.</span><span class="p">,</span> <span class="mf">11.</span><span class="p">,</span> <span class="mf">10.</span><span class="p">,</span> <span class="mf">18.</span><span class="p">])</span>
+<span class="c1"># tau = 25.</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="A-Centered-Eight-Schools-Implementation">
+<h2>A Centered Eight Schools Implementation<a class="headerlink" href="#A-Centered-Eight-Schools-Implementation" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Stan</span></code> model:</p>
+<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="p">{</span>
+  <span class="kt">int</span><span class="o">&lt;</span><span class="n">lower</span><span class="o">=</span><span class="mi">0</span><span class="o">&gt;</span> <span class="n">J</span><span class="p">;</span>
+  <span class="n">real</span> <span class="n">y</span><span class="p">[</span><span class="n">J</span><span class="p">];</span>
+  <span class="n">real</span><span class="o">&lt;</span><span class="n">lower</span><span class="o">=</span><span class="mi">0</span><span class="o">&gt;</span> <span class="n">sigma</span><span class="p">[</span><span class="n">J</span><span class="p">];</span>
+<span class="p">}</span>
+
+<span class="n">parameters</span> <span class="p">{</span>
+  <span class="n">real</span> <span class="n">mu</span><span class="p">;</span>
+  <span class="n">real</span><span class="o">&lt;</span><span class="n">lower</span><span class="o">=</span><span class="mi">0</span><span class="o">&gt;</span> <span class="n">tau</span><span class="p">;</span>
+  <span class="n">real</span> <span class="n">theta</span><span class="p">[</span><span class="n">J</span><span class="p">];</span>
+<span class="p">}</span>
+
+<span class="n">model</span> <span class="p">{</span>
+  <span class="n">mu</span> <span class="o">~</span> <span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>
+  <span class="n">tau</span> <span class="o">~</span> <span class="n">cauchy</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>
+  <span class="n">theta</span> <span class="o">~</span> <span class="n">normal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">tau</span><span class="p">);</span>
+  <span class="n">y</span> <span class="o">~</span> <span class="n">normal</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">sigma</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Similarly, we can easily implemented it in <code class="docutils literal notranslate"><span class="pre">PyMC3</span></code></p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">Centered_eight</span><span class="p">:</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;mu&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">tau</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfCauchy</span><span class="p">(</span><span class="s1">&#39;tau&#39;</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;theta&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">tau</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">J</span><span class="p">)</span>
+    <span class="n">obs</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;obs&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Unfortunately, this direct implementation of the model exhibits a
+pathological geometry that frustrates geometric ergodicity. Even more
+worrisome, the resulting bias is subtle and may not be obvious upon
+inspection of the Markov chain alone. To understand this bias, let’s
+consider first a short Markov chain, commonly used when computational
+expediency is a motivating factor, and only afterwards a longer Markov
+chain.</p>
+<div class="section" id="A-Dangerously-Short-Markov-Chain">
+<h3>A Dangerously-Short Markov Chain<a class="headerlink" href="#A-Dangerously-Short-Markov-Chain" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">Centered_eight</span><span class="p">:</span>
+    <span class="n">short_trace</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">600</span><span class="p">,</span> <span class="n">chains</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="n">SEED</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (2 chains in 2 jobs)
+NUTS: [theta, tau_log__, mu]
+100%|██████████| 1100/1100 [00:02&lt;00:00, 486.04it/s]
+There were 10 divergences after tuning. Increase `target_accept` or reparameterize.
+There were 9 divergences after tuning. Increase `target_accept` or reparameterize.
+The estimated number of effective samples is smaller than 200 for some parameters.
+</pre></div></div>
+</div>
+<p>In the <a class="reference external" href="http://mc-stan.org/documentation/case-studies/divergences_and_bias.html">original
+post</a>
+a single chain of 1200 sample is applied. However, since split
+<span class="math notranslate nohighlight">\(\hat{R}\)</span> is not implemented in <code class="docutils literal notranslate"><span class="pre">PyMC3</span></code> we fit 2 chains with 600
+sample each instead.</p>
+<p>The Gelman-Rubin diagnostic <span class="math notranslate nohighlight">\(\hat{R}\)</span> doesn’t indicate any
+problems (values are all close to 1). You could try re-running the model
+with a different seed and see if this still holds.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pm</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">short_trace</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[5]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>mc_error</th>
+      <th>hpd_2.5</th>
+      <th>hpd_97.5</th>
+      <th>n_eff</th>
+      <th>Rhat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>mu</th>
+      <td>4.18</td>
+      <td>3.31</td>
+      <td>0.18</td>
+      <td>-1.99</td>
+      <td>10.30</td>
+      <td>193.53</td>
+      <td>1.01</td>
+    </tr>
+    <tr>
+      <th>theta__0</th>
+      <td>6.37</td>
+      <td>5.94</td>
+      <td>0.26</td>
+      <td>-4.14</td>
+      <td>18.85</td>
+      <td>418.80</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>theta__1</th>
+      <td>4.99</td>
+      <td>4.65</td>
+      <td>0.21</td>
+      <td>-4.28</td>
+      <td>13.13</td>
+      <td>380.18</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>theta__2</th>
+      <td>3.41</td>
+      <td>6.07</td>
+      <td>0.25</td>
+      <td>-8.09</td>
+      <td>15.29</td>
+      <td>345.68</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>theta__3</th>
+      <td>4.50</td>
+      <td>4.89</td>
+      <td>0.19</td>
+      <td>-6.26</td>
+      <td>13.37</td>
+      <td>544.63</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>theta__4</th>
+      <td>3.20</td>
+      <td>4.89</td>
+      <td>0.20</td>
+      <td>-6.48</td>
+      <td>12.77</td>
+      <td>397.12</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>theta__5</th>
+      <td>3.91</td>
+      <td>4.86</td>
+      <td>0.21</td>
+      <td>-6.60</td>
+      <td>12.81</td>
+      <td>312.51</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>theta__6</th>
+      <td>6.24</td>
+      <td>5.17</td>
+      <td>0.23</td>
+      <td>-3.35</td>
+      <td>16.33</td>
+      <td>405.45</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>theta__7</th>
+      <td>4.81</td>
+      <td>5.85</td>
+      <td>0.24</td>
+      <td>-6.81</td>
+      <td>16.03</td>
+      <td>438.11</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>tau</th>
+      <td>4.28</td>
+      <td>3.03</td>
+      <td>0.20</td>
+      <td>0.89</td>
+      <td>10.31</td>
+      <td>123.81</td>
+      <td>1.02</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Moreover, the trace plots all look fine. Let’s consider, for example,
+the hierarchical standard deviation <span class="math notranslate nohighlight">\(\tau\)</span>, or more specifically,
+its logarithm, <span class="math notranslate nohighlight">\(log(\tau)\)</span>. Because <span class="math notranslate nohighlight">\(\tau\)</span> is constrained to
+be positive, its logarithm will allow us to better resolve behavior for
+small values. Indeed the chains seems to be exploring both small and
+large values reasonably well,</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># plot the trace of log(tau)</span>
+<span class="n">pm</span><span class="o">.</span><span class="n">traceplot</span><span class="p">(</span><span class="n">short_trace</span><span class="p">,</span> <span class="n">varnames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;tau&#39;</span><span class="p">],</span> <span class="n">transform</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_14_0.png" src="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_14_0.png" />
+</div>
+</div>
+<p>Unfortunately, the resulting estimate for the mean of <span class="math notranslate nohighlight">\(log(\tau)\)</span>
+is strongly biased away from the true value, here shown in grey.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># plot the estimate for the mean of log(τ) cumulating mean</span>
+<span class="n">logtau</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">short_trace</span><span class="p">[</span><span class="s1">&#39;tau&#39;</span><span class="p">])</span>
+<span class="n">mlogtau</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">logtau</span><span class="p">[:</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">logtau</span><span class="p">))]</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mf">0.7657852</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mlogtau</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Iteration&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;MCMC mean of log(tau)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;MCMC estimation of log(tau)&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_16_0.png" src="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_16_0.png" />
+</div>
+</div>
+<p>Hamiltonian Monte Carlo, however, is not so oblivious to these issues as
+<span class="math notranslate nohighlight">\(\approx\)</span> 3% of the iterations in our lone Markov chain ended with
+a divergence.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># display the total number and percentage of divergent</span>
+<span class="n">divergent</span> <span class="o">=</span> <span class="n">short_trace</span><span class="p">[</span><span class="s1">&#39;diverging&#39;</span><span class="p">]</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Number of Divergent </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">divergent</span><span class="o">.</span><span class="n">nonzero</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+<span class="n">divperc</span> <span class="o">=</span> <span class="n">divergent</span><span class="o">.</span><span class="n">nonzero</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">short_trace</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Percentage of Divergent </span><span class="si">%.1f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">divperc</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Number of Divergent 19
+Percentage of Divergent 3.2
+</pre></div></div>
+</div>
+<p>Even with a single short chain these divergences are able to identity
+the bias and advise skepticism of any resulting MCMC estimators.</p>
+<p>Additionally, because the divergent transitions, here shown in green,
+tend to be located near the pathologies we can use them to identify the
+location of the problematic neighborhoods in parameter space.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pm</span><span class="o">.</span><span class="n">pairplot</span><span class="p">(</span><span class="n">short_trace</span><span class="p">,</span>
+           <span class="n">sub_varnames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;theta_0&#39;</span><span class="p">,</span><span class="s1">&#39;tau_log__&#39;</span><span class="p">],</span>
+           <span class="n">divergences</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+           <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C3&#39;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">kwargs_divergence</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;color&#39;</span><span class="p">:</span><span class="s1">&#39;C2&#39;</span><span class="p">})</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;scatter plot between log(tau) and theta[0]&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_20_0.png" src="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_20_0.png" />
+</div>
+</div>
+<p>It is important to point out that the pathological samples from the
+trace are not necessarily concentrated at the funnel: when a divergence
+is encountered, the subtree being constructed is rejected and the
+transition samples uniformly from the existing discrete trajectory.
+Consequently, divergent samples will not be located exactly in the
+region of high curvature.</p>
+<p>In <code class="docutils literal notranslate"><span class="pre">pymc3</span></code>, we recently implemented a warning system that also saves
+the information of <em>where</em> the divergence occurs, and hence you can
+visualize them directly. To be more precise, what we include as the
+divergence point in the warning is the point where that problematic
+leapfrog step started. Some could also be because the divergence happens
+in one of the leapfrog step (which strictly speaking is not a point).
+But nonetheless, visualizing these should give a closer proximate where
+the funnel is.</p>
+<p>Notices that only the first 100 divergences are stored, so that we don’t
+eat all memory.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">divergent_point</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+
+<span class="n">chain_warn</span> <span class="o">=</span> <span class="n">short_trace</span><span class="o">.</span><span class="n">report</span><span class="o">.</span><span class="n">_chain_warnings</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">chain_warn</span><span class="p">)):</span>
+    <span class="k">for</span> <span class="n">warning_</span> <span class="ow">in</span> <span class="n">chain_warn</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">warning_</span><span class="o">.</span><span class="n">step</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">warning_</span><span class="o">.</span><span class="n">extra</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">RV</span> <span class="ow">in</span> <span class="n">Centered_eight</span><span class="o">.</span><span class="n">free_RVs</span><span class="p">:</span>
+                <span class="n">para_name</span> <span class="o">=</span> <span class="n">RV</span><span class="o">.</span><span class="n">name</span>
+                <span class="n">divergent_point</span><span class="p">[</span><span class="n">para_name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">warning_</span><span class="o">.</span><span class="n">extra</span><span class="p">[</span><span class="n">para_name</span><span class="p">])</span>
+
+<span class="k">for</span> <span class="n">RV</span> <span class="ow">in</span> <span class="n">Centered_eight</span><span class="o">.</span><span class="n">free_RVs</span><span class="p">:</span>
+    <span class="n">para_name</span> <span class="o">=</span> <span class="n">RV</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">divergent_point</span><span class="p">[</span><span class="n">para_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">divergent_point</span><span class="p">[</span><span class="n">para_name</span><span class="p">])</span>
+<span class="n">ii</span> <span class="o">=</span> <span class="mi">5</span>
+
+<span class="n">tau_log_d</span> <span class="o">=</span> <span class="n">divergent_point</span><span class="p">[</span><span class="s1">&#39;tau_log__&#39;</span><span class="p">]</span>
+<span class="n">theta0_d</span> <span class="o">=</span> <span class="n">divergent_point</span><span class="p">[</span><span class="s1">&#39;theta&#39;</span><span class="p">][:,</span> <span class="n">ii</span><span class="p">]</span>
+<span class="n">Ndiv_recorded</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tau_log_d</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">sharex</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="n">pm</span><span class="o">.</span><span class="n">pairplot</span><span class="p">(</span><span class="n">short_trace</span><span class="p">,</span>
+               <span class="n">sub_varnames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;theta_0&#39;</span><span class="p">,</span> <span class="s1">&#39;tau_log__&#39;</span><span class="p">],</span>
+               <span class="n">divergences</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+               <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+               <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C7&#39;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+               <span class="n">kwargs_divergence</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;color&#39;</span><span class="p">:</span><span class="s1">&#39;C2&#39;</span><span class="p">})</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;scatter plot between log(tau) and theta[5]&#39;</span><span class="p">)</span>
+
+<span class="n">pm</span><span class="o">.</span><span class="n">pairplot</span><span class="p">(</span><span class="n">short_trace</span><span class="p">,</span>
+               <span class="n">sub_varnames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;theta_0&#39;</span><span class="p">,</span> <span class="s1">&#39;tau_log__&#39;</span><span class="p">],</span>
+               <span class="n">divergences</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+               <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+               <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C7&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+               <span class="n">kwargs_divergence</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;color&#39;</span><span class="p">:</span><span class="s1">&#39;C2&#39;</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">:</span><span class="s1">&#39;Divergent samples&#39;</span><span class="p">})</span>
+
+<span class="n">theta_trace</span> <span class="o">=</span> <span class="n">short_trace</span><span class="p">[</span><span class="s1">&#39;theta&#39;</span><span class="p">]</span>
+<span class="n">theta0</span> <span class="o">=</span> <span class="n">theta_trace</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">theta0</span><span class="p">[</span><span class="n">divergent</span> <span class="o">==</span> <span class="mi">1</span><span class="p">][:</span><span class="n">Ndiv_recorded</span><span class="p">],</span> <span class="n">theta0_d</span><span class="p">],</span>
+           <span class="p">[</span><span class="n">logtau</span><span class="p">[</span><span class="n">divergent</span> <span class="o">==</span> <span class="mi">1</span><span class="p">][:</span><span class="n">Ndiv_recorded</span><span class="p">],</span> <span class="n">tau_log_d</span><span class="p">],</span>
+           <span class="s1">&#39;k-&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">25</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">theta0_d</span><span class="p">,</span> <span class="n">tau_log_d</span><span class="p">,</span>
+              <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C3&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Location of Energy error (start location of leapfrog)&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;scatter plot between log(tau) and theta[0]&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_23_0.png" src="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_23_0.png" />
+</div>
+</div>
+<p>There are many other ways to explore and visualize the pathological
+region in the parameter space. For example, we can reproduce Figure 5b
+in <a class="reference external" href="https://arxiv.org/pdf/1709.01449.pdf">Visualization in Bayesian
+workflow</a></p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">tracedf</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">trace_to_dataframe</span><span class="p">(</span><span class="n">short_trace</span><span class="p">)</span>
+<span class="n">plotorder</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;mu&#39;</span><span class="p">,</span> <span class="s1">&#39;tau&#39;</span><span class="p">,</span> <span class="s1">&#39;theta__0&#39;</span><span class="p">,</span> <span class="s1">&#39;theta__1&#39;</span><span class="p">,</span> <span class="s1">&#39;theta__2&#39;</span><span class="p">,</span> <span class="s1">&#39;theta__3&#39;</span><span class="p">,</span> <span class="s1">&#39;theta__4&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;theta__5&#39;</span><span class="p">,</span> <span class="s1">&#39;theta__6&#39;</span><span class="p">,</span> <span class="s1">&#39;theta__7&#39;</span><span class="p">]</span>
+<span class="n">tracedf</span> <span class="o">=</span> <span class="n">tracedf</span><span class="p">[</span><span class="n">plotorder</span><span class="p">]</span>
+
+<span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">sharex</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tracedf</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">divergent</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mo">025</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tracedf</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">divergent</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C2&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=.</span><span class="mi">5</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tracedf</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">divergent</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mo">025</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tracedf</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">divergent</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C2&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=.</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">divsp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">divergent_point</span><span class="p">[</span><span class="s1">&#39;mu&#39;</span><span class="p">][:,</span><span class="bp">None</span><span class="p">],</span>
+                   <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">divergent_point</span><span class="p">[</span><span class="s1">&#39;tau_log__&#39;</span><span class="p">])[:,</span><span class="bp">None</span><span class="p">],</span>
+                   <span class="n">divergent_point</span><span class="p">[</span><span class="s1">&#39;theta&#39;</span><span class="p">]])</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">divsp</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;C3&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=.</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span><span class="mi">40</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="n">plotorder</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_25_0.png" src="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_25_0.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># A small wrapper function for displaying the MCMC sampler diagnostics as above</span>
+<span class="k">def</span> <span class="nf">report_trace</span><span class="p">(</span><span class="n">trace</span><span class="p">):</span>
+    <span class="c1"># plot the trace of log(tau)</span>
+    <span class="n">pm</span><span class="o">.</span><span class="n">traceplot</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span> <span class="n">varnames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;tau&#39;</span><span class="p">],</span> <span class="n">transform</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+
+    <span class="c1"># plot the estimate for the mean of log(τ) cumulating mean</span>
+    <span class="n">logtau</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">trace</span><span class="p">[</span><span class="s1">&#39;tau&#39;</span><span class="p">])</span>
+    <span class="n">mlogtau</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">logtau</span><span class="p">[:</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">logtau</span><span class="p">))]</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mf">0.7657852</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mlogtau</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.5</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Iteration&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;MCMC mean of log(tau)&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;MCMC estimation of log(tau)&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="c1"># display the total number and percentage of divergent</span>
+    <span class="n">divergent</span> <span class="o">=</span> <span class="n">trace</span><span class="p">[</span><span class="s1">&#39;diverging&#39;</span><span class="p">]</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Number of Divergent </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">divergent</span><span class="o">.</span><span class="n">nonzero</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+    <span class="n">divperc</span> <span class="o">=</span> <span class="n">divergent</span><span class="o">.</span><span class="n">nonzero</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Percentage of Divergent </span><span class="si">%.1f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">divperc</span><span class="p">)</span>
+
+    <span class="c1"># scatter plot between log(tau) and theta[0]</span>
+    <span class="c1"># for the identifcation of the problematic neighborhoods in parameter space</span>
+    <span class="n">pm</span><span class="o">.</span><span class="n">pairplot</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span>
+               <span class="n">sub_varnames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;theta_0&#39;</span><span class="p">,</span> <span class="s1">&#39;tau_log__&#39;</span><span class="p">],</span>
+               <span class="n">divergences</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+               <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C3&#39;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">kwargs_divergence</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;color&#39;</span><span class="p">:</span><span class="s1">&#39;C2&#39;</span><span class="p">})</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;scatter plot between log(tau) and theta[0]&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="A-Safer,-Longer-Markov-Chain">
+<h3>A Safer, Longer Markov Chain<a class="headerlink" href="#A-Safer,-Longer-Markov-Chain" title="Permalink to this headline">¶</a></h3>
+<p>Given the potential insensitivity of split <span class="math notranslate nohighlight">\(\hat{R}\)</span> on single
+short chains, <code class="docutils literal notranslate"><span class="pre">Stan</span></code> recommend always running multiple chains as long
+as possible to have the best chance to observe any obstructions to
+geometric ergodicity. Because it is not always possible to run long
+chains for complex models, however, divergences are an incredibly
+powerful diagnostic for biased MCMC estimation.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">Centered_eight</span><span class="p">:</span>
+    <span class="n">longer_trace</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">4000</span><span class="p">,</span> <span class="n">chains</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">tune</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="n">SEED</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (2 chains in 2 jobs)
+NUTS: [theta, tau_log__, mu]
+100%|██████████| 5000/5000 [00:10&lt;00:00, 455.96it/s]
+There were 105 divergences after tuning. Increase `target_accept` or reparameterize.
+There were 228 divergences after tuning. Increase `target_accept` or reparameterize.
+The acceptance probability does not match the target. It is 0.5192263333577541, but should be close to 0.8. Try to increase the number of tuning steps.
+The estimated number of effective samples is smaller than 200 for some parameters.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">report_trace</span><span class="p">(</span><span class="n">longer_trace</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_29_0.png" src="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_29_0.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_29_1.png" src="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_29_1.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Number of Divergent 333
+Percentage of Divergent 8.3
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_29_3.png" src="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_29_3.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pm</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">longer_trace</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[16]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>mc_error</th>
+      <th>hpd_2.5</th>
+      <th>hpd_97.5</th>
+      <th>n_eff</th>
+      <th>Rhat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>mu</th>
+      <td>4.32</td>
+      <td>3.22</td>
+      <td>0.12</td>
+      <td>-1.98</td>
+      <td>10.62</td>
+      <td>458.33</td>
+      <td>1.02</td>
+    </tr>
+    <tr>
+      <th>theta__0</th>
+      <td>6.19</td>
+      <td>5.56</td>
+      <td>0.16</td>
+      <td>-4.27</td>
+      <td>18.22</td>
+      <td>432.74</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>theta__1</th>
+      <td>4.78</td>
+      <td>4.77</td>
+      <td>0.16</td>
+      <td>-4.43</td>
+      <td>14.66</td>
+      <td>113.48</td>
+      <td>1.02</td>
+    </tr>
+    <tr>
+      <th>theta__2</th>
+      <td>3.92</td>
+      <td>5.36</td>
+      <td>0.13</td>
+      <td>-7.19</td>
+      <td>14.98</td>
+      <td>1549.72</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>theta__3</th>
+      <td>4.69</td>
+      <td>4.70</td>
+      <td>0.12</td>
+      <td>-4.90</td>
+      <td>14.15</td>
+      <td>864.23</td>
+      <td>1.01</td>
+    </tr>
+    <tr>
+      <th>theta__4</th>
+      <td>3.46</td>
+      <td>4.64</td>
+      <td>0.13</td>
+      <td>-5.48</td>
+      <td>13.34</td>
+      <td>793.89</td>
+      <td>1.01</td>
+    </tr>
+    <tr>
+      <th>theta__5</th>
+      <td>4.06</td>
+      <td>4.70</td>
+      <td>0.12</td>
+      <td>-5.94</td>
+      <td>13.29</td>
+      <td>1261.23</td>
+      <td>1.01</td>
+    </tr>
+    <tr>
+      <th>theta__6</th>
+      <td>6.39</td>
+      <td>4.99</td>
+      <td>0.15</td>
+      <td>-2.45</td>
+      <td>17.32</td>
+      <td>707.78</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>theta__7</th>
+      <td>4.73</td>
+      <td>5.27</td>
+      <td>0.14</td>
+      <td>-5.62</td>
+      <td>15.67</td>
+      <td>850.21</td>
+      <td>1.01</td>
+    </tr>
+    <tr>
+      <th>tau</th>
+      <td>3.80</td>
+      <td>3.18</td>
+      <td>0.16</td>
+      <td>0.60</td>
+      <td>10.03</td>
+      <td>75.81</td>
+      <td>1.00</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Similar to the result in <code class="docutils literal notranslate"><span class="pre">Stan</span></code>, <span class="math notranslate nohighlight">\(\hat{R}\)</span> does not indicate any
+serious issues. However, the effective sample size per iteration has
+drastically fallen, indicating that we are exploring less efficiently
+the longer we run. This odd behavior is a clear sign that something
+problematic is afoot. As shown in the trace plot, the chain occasionally
+“sticks” as it approaches small values of <span class="math notranslate nohighlight">\(\tau\)</span>, exactly where we
+saw the divergences concentrating. This is a clear indication of the
+underlying pathologies. These sticky intervals induce severe
+oscillations in the MCMC estimators early on, until they seem to finally
+settle into biased values.</p>
+<p>In fact the sticky intervals are the Markov chain trying to correct the
+biased exploration. If we ran the chain even longer then it would
+eventually get stuck again and drag the MCMC estimator down towards the
+true value. Given an infinite number of iterations this delicate balance
+asymptotes to the true expectation as we’d expect given the consistency
+guarantee of MCMC. Stopping after any finite number of iterations,
+however, destroys this balance and leaves us with a significant bias.</p>
+<p>More details can be found in Betancourt’s <a class="reference external" href="https://arxiv.org/abs/1701.02434">recent
+paper</a>.</p>
+</div>
+</div>
+<div class="section" id="Mitigating-Divergences-by-Adjusting-PyMC3's-Adaptation-Routine">
+<h2>Mitigating Divergences by Adjusting PyMC3’s Adaptation Routine<a class="headerlink" href="#Mitigating-Divergences-by-Adjusting-PyMC3's-Adaptation-Routine" title="Permalink to this headline">¶</a></h2>
+<p>Divergences in Hamiltonian Monte Carlo arise when the Hamiltonian
+transition encounters regions of extremely large curvature, such as the
+opening of the hierarchical funnel. Unable to accurate resolve these
+regions, the transition malfunctions and flies off towards infinity.
+With the transitions unable to completely explore these regions of
+extreme curvature, we lose geometric ergodicity and our MCMC estimators
+become biased.</p>
+<p>Algorithm implemented in <code class="docutils literal notranslate"><span class="pre">Stan</span></code> uses a heuristic to quickly identify
+these misbehaving trajectories, and hence label divergences, without
+having to wait for them to run all the way to infinity. This heuristic
+can be a bit aggressive, however, and sometimes label transitions as
+divergent even when we have not lost geometric ergodicity.</p>
+<p>To resolve this potential ambiguity we can adjust the step size,
+<span class="math notranslate nohighlight">\(\epsilon\)</span>, of the Hamiltonian transition. The smaller the step
+size the more accurate the trajectory and the less likely it will be
+mislabeled as a divergence. In other words, if we have geometric
+ergodicity between the Hamiltonian transition and the target
+distribution then decreasing the step size will reduce and then
+ultimately remove the divergences entirely. If we do not have geometric
+ergodicity, however, then decreasing the step size will not completely
+remove the divergences.</p>
+<p>Like <code class="docutils literal notranslate"><span class="pre">Stan</span></code>, the step size in <code class="docutils literal notranslate"><span class="pre">PyMC3</span></code> is tuned automatically during
+warm up, but we can coerce smaller step sizes by tweaking the
+configuration of <code class="docutils literal notranslate"><span class="pre">PyMC3</span></code>’s adaptation routine. In particular, we can
+increase the <code class="docutils literal notranslate"><span class="pre">target_accept</span></code> parameter from its default value of 0.8
+closer to its maximum value of 1.</p>
+<div class="section" id="Adjusting-Adaptation-Routine">
+<h3>Adjusting Adaptation Routine<a class="headerlink" href="#Adjusting-Adaptation-Routine" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">Centered_eight</span><span class="p">:</span>
+    <span class="n">fit_cp85</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">5000</span><span class="p">,</span> <span class="n">chains</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">tune</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
+                         <span class="n">nuts_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">target_accept</span><span class="o">=.</span><span class="mi">85</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (2 chains in 2 jobs)
+NUTS: [theta, tau_log__, mu]
+100%|██████████| 7000/7000 [00:16&lt;00:00, 431.92it/s]
+There were 210 divergences after tuning. Increase `target_accept` or reparameterize.
+There were 122 divergences after tuning. Increase `target_accept` or reparameterize.
+The number of effective samples is smaller than 10% for some parameters.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">Centered_eight</span><span class="p">:</span>
+    <span class="n">fit_cp90</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">5000</span><span class="p">,</span> <span class="n">chains</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">tune</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
+                         <span class="n">nuts_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">target_accept</span><span class="o">=.</span><span class="mi">90</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (2 chains in 2 jobs)
+NUTS: [theta, tau_log__, mu]
+100%|██████████| 7000/7000 [00:15&lt;00:00, 444.34it/s]
+There were 108 divergences after tuning. Increase `target_accept` or reparameterize.
+The acceptance probability does not match the target. It is 0.7681042731609842, but should be close to 0.9. Try to increase the number of tuning steps.
+There were 186 divergences after tuning. Increase `target_accept` or reparameterize.
+The number of effective samples is smaller than 10% for some parameters.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">Centered_eight</span><span class="p">:</span>
+    <span class="n">fit_cp95</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">5000</span><span class="p">,</span> <span class="n">chains</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">tune</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
+                         <span class="n">nuts_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">target_accept</span><span class="o">=.</span><span class="mi">95</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (2 chains in 2 jobs)
+NUTS: [theta, tau_log__, mu]
+100%|██████████| 7000/7000 [00:32&lt;00:00, 214.59it/s]
+There were 59 divergences after tuning. Increase `target_accept` or reparameterize.
+There were 246 divergences after tuning. Increase `target_accept` or reparameterize.
+The acceptance probability does not match the target. It is 0.8854456149540602, but should be close to 0.95. Try to increase the number of tuning steps.
+The number of effective samples is smaller than 10% for some parameters.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">Centered_eight</span><span class="p">:</span>
+    <span class="n">fit_cp99</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">5000</span><span class="p">,</span> <span class="n">chains</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">tune</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
+                         <span class="n">nuts_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">target_accept</span><span class="o">=.</span><span class="mi">99</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (2 chains in 2 jobs)
+NUTS: [theta, tau_log__, mu]
+100%|██████████| 7000/7000 [00:58&lt;00:00, 120.01it/s]
+There were 20 divergences after tuning. Increase `target_accept` or reparameterize.
+There were 51 divergences after tuning. Increase `target_accept` or reparameterize.
+The acceptance probability does not match the target. It is 0.9655538350420538, but should be close to 0.99. Try to increase the number of tuning steps.
+The number of effective samples is smaller than 10% for some parameters.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">longer_trace</span><span class="p">[</span><span class="s1">&#39;step_size&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+                  <span class="n">fit_cp85</span><span class="p">[</span><span class="s1">&#39;step_size&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+                  <span class="n">fit_cp90</span><span class="p">[</span><span class="s1">&#39;step_size&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+                  <span class="n">fit_cp95</span><span class="p">[</span><span class="s1">&#39;step_size&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+                  <span class="n">fit_cp99</span><span class="p">[</span><span class="s1">&#39;step_size&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()],</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Step_size&#39;</span><span class="p">])</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;Divergent&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">longer_trace</span><span class="p">[</span><span class="s1">&#39;diverging&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span>
+                            <span class="n">fit_cp85</span><span class="p">[</span><span class="s1">&#39;diverging&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span>
+                            <span class="n">fit_cp90</span><span class="p">[</span><span class="s1">&#39;diverging&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span>
+                            <span class="n">fit_cp95</span><span class="p">[</span><span class="s1">&#39;diverging&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span>
+                            <span class="n">fit_cp99</span><span class="p">[</span><span class="s1">&#39;diverging&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()])</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;delta_target&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="s1">&#39;.80&#39;</span><span class="p">,</span> <span class="s1">&#39;.85&#39;</span><span class="p">,</span> <span class="s1">&#39;.90&#39;</span><span class="p">,</span> <span class="s1">&#39;.95&#39;</span><span class="p">,</span> <span class="s1">&#39;.99&#39;</span><span class="p">])</span>
+<span class="n">df</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[21]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Step_size</th>
+      <th>Divergent</th>
+      <th>delta_target</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.375381</td>
+      <td>333</td>
+      <td>.80</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0.304575</td>
+      <td>332</td>
+      <td>.85</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.252309</td>
+      <td>294</td>
+      <td>.90</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.073495</td>
+      <td>305</td>
+      <td>.95</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0.032518</td>
+      <td>71</td>
+      <td>.99</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Here, the number of divergent transitions dropped dramatically when
+delta was increased to 0.99.</p>
+<p>This behavior also has a nice geometric intuition. The more we decrease
+the step size the more the Hamiltonian Markov chain can explore the neck
+of the funnel. Consequently, the marginal posterior distribution for
+<span class="math notranslate nohighlight">\(log (\tau)\)</span> stretches further and further towards negative values
+with the decreasing step size.</p>
+<p>Since in <code class="docutils literal notranslate"><span class="pre">PyMC3</span></code> after tuning we have a smaller step size than
+<code class="docutils literal notranslate"><span class="pre">Stan</span></code>, the geometery is better explored.</p>
+<p>However, the Hamiltonian transition is still not geometrically ergodic
+with respect to the centered implementation of the Eight Schools model.
+Indeed, this is expected given the observed bias.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+<span class="n">pm</span><span class="o">.</span><span class="n">pairplot</span><span class="p">(</span><span class="n">fit_cp99</span><span class="p">,</span> <span class="n">sub_varnames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;theta_1&#39;</span><span class="p">,</span> <span class="s1">&#39;tau_log__&#39;</span><span class="p">],</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+               <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C3&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Centered, delta=0.85&#39;</span><span class="p">)</span>
+
+<span class="n">pm</span><span class="o">.</span><span class="n">pairplot</span><span class="p">(</span><span class="n">longer_trace</span><span class="p">,</span> <span class="n">sub_varnames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;theta_1&#39;</span><span class="p">,</span> <span class="s1">&#39;tau_log__&#39;</span><span class="p">],</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+               <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C1&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Centered, delta=0.99&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;scatter plot between log(tau) and theta[1]&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_40_0.png" src="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_40_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">logtau0</span> <span class="o">=</span> <span class="n">longer_trace</span><span class="p">[</span><span class="s1">&#39;tau_log__&#39;</span><span class="p">]</span>
+<span class="n">logtau2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">fit_cp90</span><span class="p">[</span><span class="s1">&#39;tau&#39;</span><span class="p">])</span>
+<span class="n">logtau1</span> <span class="o">=</span> <span class="n">fit_cp99</span><span class="p">[</span><span class="s1">&#39;tau_log__&#39;</span><span class="p">]</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mf">0.7657852</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+<span class="n">mlogtau0</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">logtau0</span><span class="p">[:</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">logtau0</span><span class="p">))]</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mlogtau0</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Centered, delta=0.85&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.5</span><span class="p">)</span>
+<span class="n">mlogtau2</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">logtau2</span><span class="p">[:</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">logtau2</span><span class="p">))]</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mlogtau2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Centered, delta=0.90&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.5</span><span class="p">)</span>
+<span class="n">mlogtau1</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">logtau1</span><span class="p">[:</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">logtau1</span><span class="p">))]</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mlogtau1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Centered, delta=0.99&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Iteration&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;MCMC mean of log(tau)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;MCMC estimation of log(tau)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_41_0.png" src="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_41_0.png" />
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="A-Non-Centered-Eight-Schools-Implementation">
+<h2>A Non-Centered Eight Schools Implementation<a class="headerlink" href="#A-Non-Centered-Eight-Schools-Implementation" title="Permalink to this headline">¶</a></h2>
+<p>Although reducing the step size improves exploration, ultimately it only
+reveals the true extent the pathology in the centered implementation.
+Fortunately, there is another way to implement hierarchical models that
+does not suffer from the same pathologies.</p>
+<p>In a non-centered parameterization we do not try to fit the group-level
+parameters directly, rather we fit a latent Gaussian variable from which
+we can recover the group-level parameters with a scaling and a
+translation.</p>
+<div class="math notranslate nohighlight">
+\[\mu \sim \mathcal{N}(0, 5)\]</div>
+<div class="math notranslate nohighlight">
+\[\tau \sim \text{Half-Cauchy}(0, 5)\]</div>
+<div class="math notranslate nohighlight">
+\[\tilde{\theta}_{n} \sim \mathcal{N}(0, 1)\]</div>
+<div class="math notranslate nohighlight">
+\[\theta_{n} = \mu + \tau \cdot \tilde{\theta}_{n}.\]</div>
+<p>Stan model:</p>
+<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="p">{</span>
+  <span class="kt">int</span><span class="o">&lt;</span><span class="n">lower</span><span class="o">=</span><span class="mi">0</span><span class="o">&gt;</span> <span class="n">J</span><span class="p">;</span>
+  <span class="n">real</span> <span class="n">y</span><span class="p">[</span><span class="n">J</span><span class="p">];</span>
+  <span class="n">real</span><span class="o">&lt;</span><span class="n">lower</span><span class="o">=</span><span class="mi">0</span><span class="o">&gt;</span> <span class="n">sigma</span><span class="p">[</span><span class="n">J</span><span class="p">];</span>
+<span class="p">}</span>
+
+<span class="n">parameters</span> <span class="p">{</span>
+  <span class="n">real</span> <span class="n">mu</span><span class="p">;</span>
+  <span class="n">real</span><span class="o">&lt;</span><span class="n">lower</span><span class="o">=</span><span class="mi">0</span><span class="o">&gt;</span> <span class="n">tau</span><span class="p">;</span>
+  <span class="n">real</span> <span class="n">theta_tilde</span><span class="p">[</span><span class="n">J</span><span class="p">];</span>
+<span class="p">}</span>
+
+<span class="n">transformed</span> <span class="n">parameters</span> <span class="p">{</span>
+  <span class="n">real</span> <span class="n">theta</span><span class="p">[</span><span class="n">J</span><span class="p">];</span>
+  <span class="k">for</span> <span class="p">(</span><span class="n">j</span> <span class="n">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">J</span><span class="p">)</span>
+    <span class="n">theta</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">mu</span> <span class="o">+</span> <span class="n">tau</span> <span class="o">*</span> <span class="n">theta_tilde</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+<span class="p">}</span>
+
+<span class="n">model</span> <span class="p">{</span>
+  <span class="n">mu</span> <span class="o">~</span> <span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>
+  <span class="n">tau</span> <span class="o">~</span> <span class="n">cauchy</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>
+  <span class="n">theta_tilde</span> <span class="o">~</span> <span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+  <span class="n">y</span> <span class="o">~</span> <span class="n">normal</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">sigma</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">NonCentered_eight</span><span class="p">:</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;mu&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">tau</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfCauchy</span><span class="p">(</span><span class="s1">&#39;tau&#39;</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">theta_tilde</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;theta_t&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">J</span><span class="p">)</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Deterministic</span><span class="p">(</span><span class="s1">&#39;theta&#39;</span><span class="p">,</span> <span class="n">mu</span> <span class="o">+</span> <span class="n">tau</span> <span class="o">*</span> <span class="n">theta_tilde</span><span class="p">)</span>
+    <span class="n">obs</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;obs&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">NonCentered_eight</span><span class="p">:</span>
+    <span class="n">fit_ncp80</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">5000</span><span class="p">,</span> <span class="n">chains</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">tune</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="n">SEED</span><span class="p">,</span>
+                         <span class="n">nuts_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">target_accept</span><span class="o">=.</span><span class="mi">80</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (2 chains in 2 jobs)
+NUTS: [theta_t, tau_log__, mu]
+100%|██████████| 6000/6000 [00:06&lt;00:00, 964.62it/s]
+There were 5 divergences after tuning. Increase `target_accept` or reparameterize.
+There were 3 divergences after tuning. Increase `target_accept` or reparameterize.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pm</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">fit_ncp80</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[26]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>mc_error</th>
+      <th>hpd_2.5</th>
+      <th>hpd_97.5</th>
+      <th>n_eff</th>
+      <th>Rhat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>mu</th>
+      <td>4.38</td>
+      <td>3.30</td>
+      <td>0.03</td>
+      <td>-2.49</td>
+      <td>10.57</td>
+      <td>11024.33</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>theta_t__0</th>
+      <td>0.33</td>
+      <td>0.98</td>
+      <td>0.01</td>
+      <td>-1.62</td>
+      <td>2.21</td>
+      <td>14375.77</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>theta_t__1</th>
+      <td>0.09</td>
+      <td>0.96</td>
+      <td>0.01</td>
+      <td>-1.82</td>
+      <td>1.91</td>
+      <td>13212.45</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>theta_t__2</th>
+      <td>-0.08</td>
+      <td>0.95</td>
+      <td>0.01</td>
+      <td>-1.95</td>
+      <td>1.76</td>
+      <td>14160.93</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>theta_t__3</th>
+      <td>0.06</td>
+      <td>0.96</td>
+      <td>0.01</td>
+      <td>-1.86</td>
+      <td>1.91</td>
+      <td>14159.81</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>theta_t__4</th>
+      <td>-0.17</td>
+      <td>0.93</td>
+      <td>0.01</td>
+      <td>-1.94</td>
+      <td>1.74</td>
+      <td>13618.34</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>theta_t__5</th>
+      <td>-0.08</td>
+      <td>0.94</td>
+      <td>0.01</td>
+      <td>-1.85</td>
+      <td>1.86</td>
+      <td>14357.32</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>theta_t__6</th>
+      <td>0.36</td>
+      <td>0.97</td>
+      <td>0.01</td>
+      <td>-1.55</td>
+      <td>2.18</td>
+      <td>11769.38</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>theta_t__7</th>
+      <td>0.08</td>
+      <td>0.98</td>
+      <td>0.01</td>
+      <td>-1.81</td>
+      <td>2.00</td>
+      <td>12260.39</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>tau</th>
+      <td>3.71</td>
+      <td>3.32</td>
+      <td>0.04</td>
+      <td>0.00</td>
+      <td>10.31</td>
+      <td>6344.00</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>theta__0</th>
+      <td>6.31</td>
+      <td>5.71</td>
+      <td>0.06</td>
+      <td>-4.55</td>
+      <td>17.98</td>
+      <td>9310.19</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>theta__1</th>
+      <td>4.94</td>
+      <td>4.69</td>
+      <td>0.04</td>
+      <td>-4.49</td>
+      <td>14.38</td>
+      <td>11068.91</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>theta__2</th>
+      <td>3.92</td>
+      <td>5.19</td>
+      <td>0.06</td>
+      <td>-7.36</td>
+      <td>13.73</td>
+      <td>10019.67</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>theta__3</th>
+      <td>4.76</td>
+      <td>4.84</td>
+      <td>0.05</td>
+      <td>-4.90</td>
+      <td>14.65</td>
+      <td>11157.51</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>theta__4</th>
+      <td>3.51</td>
+      <td>4.61</td>
+      <td>0.04</td>
+      <td>-6.24</td>
+      <td>12.18</td>
+      <td>10478.96</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>theta__5</th>
+      <td>3.98</td>
+      <td>4.82</td>
+      <td>0.05</td>
+      <td>-5.71</td>
+      <td>13.64</td>
+      <td>10618.70</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>theta__6</th>
+      <td>6.35</td>
+      <td>5.13</td>
+      <td>0.05</td>
+      <td>-3.60</td>
+      <td>16.64</td>
+      <td>9684.43</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>theta__7</th>
+      <td>4.86</td>
+      <td>5.27</td>
+      <td>0.05</td>
+      <td>-6.19</td>
+      <td>15.27</td>
+      <td>10132.72</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>As shown above, the effective sample size per iteration has drastically
+improved, and the trace plots no longer show any “stickyness”. However,
+we do still see the rare divergence. These infrequent divergences do not
+seem concentrate anywhere in parameter space, which is indicative of the
+divergences being false positives.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">report_trace</span><span class="p">(</span><span class="n">fit_ncp80</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_47_0.png" src="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_47_0.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_47_1.png" src="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_47_1.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Number of Divergent 8
+Percentage of Divergent 0.2
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_47_3.png" src="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_47_3.png" />
+</div>
+</div>
+<p>As expected of false positives, we can remove the divergences entirely
+by decreasing the step size,</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">NonCentered_eight</span><span class="p">:</span>
+    <span class="n">fit_ncp90</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">5000</span><span class="p">,</span> <span class="n">chains</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">tune</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="n">SEED</span><span class="p">,</span>
+                         <span class="n">nuts_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">target_accept</span><span class="o">=.</span><span class="mi">90</span><span class="p">))</span>
+
+<span class="c1"># display the total number and percentage of divergent</span>
+<span class="n">divergent</span> <span class="o">=</span> <span class="n">fit_ncp90</span><span class="p">[</span><span class="s1">&#39;diverging&#39;</span><span class="p">]</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Number of Divergent </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">divergent</span><span class="o">.</span><span class="n">nonzero</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (2 chains in 2 jobs)
+NUTS: [theta_t, tau_log__, mu]
+100%|██████████| 6000/6000 [00:08&lt;00:00, 746.35it/s]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Number of Divergent 0
+</pre></div></div>
+</div>
+<p>The more agreeable geometry of the non-centered implementation allows
+the Markov chain to explore deep into the neck of the funnel, capturing
+even the smallest values of <span class="math notranslate nohighlight">\(\tau\)</span> that are consistent with the
+measurements. Consequently, MCMC estimators from the non-centered chain
+rapidly converge towards their true expectation values.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+<span class="n">pm</span><span class="o">.</span><span class="n">pairplot</span><span class="p">(</span><span class="n">fit_ncp80</span><span class="p">,</span> <span class="n">sub_varnames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;theta_0&#39;</span><span class="p">,</span> <span class="s1">&#39;tau_log__&#39;</span><span class="p">],</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+               <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C0&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Centered, delta=0.80&#39;</span><span class="p">)</span>
+
+<span class="n">pm</span><span class="o">.</span><span class="n">pairplot</span><span class="p">(</span><span class="n">fit_cp99</span><span class="p">,</span> <span class="n">sub_varnames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;theta_0&#39;</span><span class="p">,</span> <span class="s1">&#39;tau_log__&#39;</span><span class="p">],</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+               <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C3&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Centered, delta=0.99&#39;</span><span class="p">)</span>
+
+<span class="n">pm</span><span class="o">.</span><span class="n">pairplot</span><span class="p">(</span><span class="n">fit_cp90</span><span class="p">,</span> <span class="n">sub_varnames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;theta_0&#39;</span><span class="p">,</span> <span class="s1">&#39;tau_log__&#39;</span><span class="p">],</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+               <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C1&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Centered, delta=0.90&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;scatter plot between log(tau) and theta[1]&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
+
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_51_0.png" src="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_51_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">logtaun</span> <span class="o">=</span> <span class="n">fit_ncp80</span><span class="p">[</span><span class="s1">&#39;tau_log__&#39;</span><span class="p">]</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mf">0.7657852</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+<span class="n">mlogtaun</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">logtaun</span><span class="p">[:</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">logtaun</span><span class="p">))]</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mlogtaun</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C0&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Non-Centered, delta=0.80&#39;</span><span class="p">)</span>
+
+<span class="n">mlogtau1</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">logtau1</span><span class="p">[:</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">logtau1</span><span class="p">))]</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mlogtau1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C3&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Centered, delta=0.99&#39;</span><span class="p">)</span>
+
+<span class="n">mlogtau0</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">logtau0</span><span class="p">[:</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">logtau0</span><span class="p">))]</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mlogtau0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C1&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Centered, delta=0.90&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Iteration&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;MCMC mean of log(tau)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;MCMC estimation of log(tau)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_52_0.png" src="../_images/notebooks_Diagnosing_biased_Inference_with_Divergences_52_0.png" />
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/pymc3_logo.jpg" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="../index.html">PyMC3</a></h1>
+
+
+
+<p class="blurb">Probabilistic Programming in Python: Bayesian Modeling and Probabilistic Machine Learning with Theano</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../prob_dists.html">Probability Distributions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../examples.html">Examples</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../examples.html#howto">Howto</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="sampler-stats.html">Sampler statistics</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Diagnosing Biased Inference with Divergences</a></li>
+<li class="toctree-l3"><a class="reference internal" href="posterior_predictive.html">Posterior Predictive Checks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="model_comparison.html">Model comparison</a></li>
+<li class="toctree-l3"><a class="reference internal" href="model_averaging.html">Model averaging</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Bayes_factor.html">Bayes Factors and Marginal Likelihood</a></li>
+<li class="toctree-l3"><a class="reference internal" href="howto_debugging.html">How to debug a model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="PyMC3_tips_and_heuristic.html">PyMC3 Modeling tips and heuristic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="LKJ.html">LKJ Cholesky Covariance Priors for Multivariate Normal Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="live_sample_plots.html">Live sample plots</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#applied">Applied</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#glm">GLM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#survival-analysis">Survival Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#gaussian-processes">Gaussian Processes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#mixture-models">Mixture Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#variational-inference">Variational Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#stochastic-gradient">Stochastic Gradient</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, The PyMC Development Team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="../_sources/notebooks/Diagnosing_biased_Inference_with_Divergences.ipynb.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

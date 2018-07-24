@@ -1,0 +1,313 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Timeseries &#8212; PyMC3 3.5 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="shortcut icon" href="../../_static/PyMC3.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Bounded Variables" href="../bounds.html" />
+    <link rel="prev" title="Mixture" href="mixture.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="timeseries">
+<h1>Timeseries<a class="headerlink" href="#timeseries" title="Permalink to this headline">¶</a></h1>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#pymc3.distributions.timeseries.AR1" title="pymc3.distributions.timeseries.AR1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AR1</span></code></a>(k,&nbsp;tau_e,&nbsp;*args,&nbsp;**kwargs)</td>
+<td>Autoregressive process with 1 lag.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pymc3.distributions.timeseries.AR" title="pymc3.distributions.timeseries.AR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AR</span></code></a>(rho[,&nbsp;sd,&nbsp;tau,&nbsp;constant,&nbsp;init])</td>
+<td>Autoregressive process with p lags.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pymc3.distributions.timeseries.GaussianRandomWalk" title="pymc3.distributions.timeseries.GaussianRandomWalk"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GaussianRandomWalk</span></code></a>([tau,&nbsp;init,&nbsp;sd,&nbsp;mu])</td>
+<td>Random Walk with Normal innovations</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pymc3.distributions.timeseries.GARCH11" title="pymc3.distributions.timeseries.GARCH11"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GARCH11</span></code></a>(omega,&nbsp;alpha_1,&nbsp;beta_1,&nbsp;initial_vol,&nbsp;…)</td>
+<td>GARCH(1,1) with Normal innovations.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pymc3.distributions.timeseries.EulerMaruyama" title="pymc3.distributions.timeseries.EulerMaruyama"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EulerMaruyama</span></code></a>(dt,&nbsp;sde_fn,&nbsp;sde_pars,&nbsp;*args,&nbsp;…)</td>
+<td>Stochastic differential equation discretized with the Euler-Maruyama method.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pymc3.distributions.timeseries.MvGaussianRandomWalk" title="pymc3.distributions.timeseries.MvGaussianRandomWalk"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MvGaussianRandomWalk</span></code></a>([mu,&nbsp;cov,&nbsp;tau,&nbsp;chol,&nbsp;…])</td>
+<td>Multivariate Random Walk with Normal innovations</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pymc3.distributions.timeseries.MvStudentTRandomWalk" title="pymc3.distributions.timeseries.MvStudentTRandomWalk"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MvStudentTRandomWalk</span></code></a>(nu,&nbsp;*args,&nbsp;**kwargs)</td>
+<td>Multivariate Random Walk with StudentT innovations</td>
+</tr>
+</tbody>
+</table>
+<span class="target" id="module-pymc3.distributions.timeseries"></span><dl class="class">
+<dt id="pymc3.distributions.timeseries.AR1">
+<em class="property">class </em><code class="descclassname">pymc3.distributions.timeseries.</code><code class="descname">AR1</code><span class="sig-paren">(</span><em>k</em>, <em>tau_e</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.distributions.timeseries.AR1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Autoregressive process with 1 lag.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>k</strong> (<em>tensor</em>) – effect of lagged value on current value</li>
+<li><strong>tau_e</strong> (<em>tensor</em>) – precision for innovations</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pymc3.distributions.timeseries.AR">
+<em class="property">class </em><code class="descclassname">pymc3.distributions.timeseries.</code><code class="descname">AR</code><span class="sig-paren">(</span><em>rho</em>, <em>sd=None</em>, <em>tau=None</em>, <em>constant=False</em>, <em>init=&lt;pymc3.distributions.continuous.Flat object&gt;</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.distributions.timeseries.AR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Autoregressive process with p lags.</p>
+<div class="math notranslate nohighlight">
+\[x_t = \rho_0 + \rho_1 x_{t-1} + \ldots + \rho_p x_{t-p} + \epsilon_t,
+\epsilon_t \sim N(0,\sigma^2)\]</div>
+<p>The innovation can be parameterized either in terms of precision
+or standard deviation. The link between the two parametrizations is
+given by</p>
+<div class="math notranslate nohighlight">
+\[\tau = \dfrac{1}{\sigma^2}\]</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>rho</strong> (<em>tensor</em>) – Tensor of autoregressive coefficients. The first dimension is the p lag.</li>
+<li><strong>sd</strong> (<em>float</em>) – Standard deviation of innovation (sd &gt; 0). (only required if tau is not specified)</li>
+<li><strong>tau</strong> (<em>float</em>) – Precision of innovation (tau &gt; 0). (only required if sd is not specified)</li>
+<li><strong>constant</strong> (<em>bool</em><em> (</em><em>optional</em><em>, </em><em>default = False</em><em>)</em>) – Whether to include a constant.</li>
+<li><strong>init</strong> (<em>distribution</em>) – distribution for initial values (Defaults to Flat())</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pymc3.distributions.timeseries.GaussianRandomWalk">
+<em class="property">class </em><code class="descclassname">pymc3.distributions.timeseries.</code><code class="descname">GaussianRandomWalk</code><span class="sig-paren">(</span><em>tau=None</em>, <em>init=&lt;pymc3.distributions.continuous.Flat object&gt;</em>, <em>sd=None</em>, <em>mu=0.0</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.distributions.timeseries.GaussianRandomWalk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Random Walk with Normal innovations</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>mu</strong> (<em>tensor</em>) – innovation drift, defaults to 0.0</li>
+<li><strong>sd</strong> (<em>tensor</em>) – sd &gt; 0, innovation standard deviation (only required if tau is not specified)</li>
+<li><strong>tau</strong> (<em>tensor</em>) – tau &gt; 0, innovation precision (only required if sd is not specified)</li>
+<li><strong>init</strong> (<em>distribution</em>) – distribution for initial value (Defaults to Flat())</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pymc3.distributions.timeseries.GARCH11">
+<em class="property">class </em><code class="descclassname">pymc3.distributions.timeseries.</code><code class="descname">GARCH11</code><span class="sig-paren">(</span><em>omega</em>, <em>alpha_1</em>, <em>beta_1</em>, <em>initial_vol</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.distributions.timeseries.GARCH11" title="Permalink to this definition">¶</a></dt>
+<dd><p>GARCH(1,1) with Normal innovations. The model is specified by</p>
+<div class="math notranslate nohighlight">
+\[y_t = \sigma_t * z_t\]</div>
+<div class="math notranslate nohighlight">
+\[\sigma_t^2 = \omega + \alpha_1 * y_{t-1}^2 + \beta_1 * \sigma_{t-1}^2\]</div>
+<p>with z_t iid and Normal with mean zero and unit standard deviation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>omega</strong> (<em>tensor</em>) – omega &gt; 0, mean variance</li>
+<li><strong>alpha_1</strong> (<em>tensor</em>) – alpha_1 &gt;= 0, autoregressive term coefficient</li>
+<li><strong>beta_1</strong> (<em>tensor</em>) – beta_1 &gt;= 0, alpha_1 + beta_1 &lt; 1, moving average term coefficient</li>
+<li><strong>initial_vol</strong> (<em>tensor</em>) – initial_vol &gt;= 0, initial volatility, sigma_0</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pymc3.distributions.timeseries.EulerMaruyama">
+<em class="property">class </em><code class="descclassname">pymc3.distributions.timeseries.</code><code class="descname">EulerMaruyama</code><span class="sig-paren">(</span><em>dt</em>, <em>sde_fn</em>, <em>sde_pars</em>, <em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.distributions.timeseries.EulerMaruyama" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stochastic differential equation discretized with the Euler-Maruyama method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dt</strong> (<em>float</em>) – time step of discretization</li>
+<li><strong>sde_fn</strong> (<em>callable</em>) – function returning the drift and diffusion coefficients of SDE</li>
+<li><strong>sde_pars</strong> (<em>tuple</em>) – parameters of the SDE, passed as <a href="#id1"><span class="problematic" id="id2">*</span></a>args to sde_fn</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pymc3.distributions.timeseries.MvGaussianRandomWalk">
+<em class="property">class </em><code class="descclassname">pymc3.distributions.timeseries.</code><code class="descname">MvGaussianRandomWalk</code><span class="sig-paren">(</span><em>mu=0.0</em>, <em>cov=None</em>, <em>tau=None</em>, <em>chol=None</em>, <em>lower=True</em>, <em>init=&lt;pymc3.distributions.continuous.Flat object&gt;</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.distributions.timeseries.MvGaussianRandomWalk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multivariate Random Walk with Normal innovations</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>mu</strong> (<em>tensor</em>) – innovation drift, defaults to 0.0</li>
+<li><strong>cov</strong> (<em>tensor</em>) – pos def matrix, innovation covariance matrix</li>
+<li><strong>tau</strong> (<em>tensor</em>) – pos def matrix, inverse covariance matrix</li>
+<li><strong>chol</strong> (<em>tensor</em>) – Cholesky decomposition of covariance matrix</li>
+<li><strong>init</strong> (<em>distribution</em>) – distribution for initial value (Defaults to Flat())</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Only one of cov, tau or chol is required.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pymc3.distributions.timeseries.MvStudentTRandomWalk">
+<em class="property">class </em><code class="descclassname">pymc3.distributions.timeseries.</code><code class="descname">MvStudentTRandomWalk</code><span class="sig-paren">(</span><em>nu</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.distributions.timeseries.MvStudentTRandomWalk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multivariate Random Walk with StudentT innovations</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>nu</strong> (<em>degrees of freedom</em>) – </li>
+<li><strong>mu</strong> (<em>tensor</em>) – innovation drift, defaults to 0.0</li>
+<li><strong>cov</strong> (<em>tensor</em>) – pos def matrix, innovation covariance matrix</li>
+<li><strong>tau</strong> (<em>tensor</em>) – pos def matrix, inverse covariance matrix</li>
+<li><strong>chol</strong> (<em>tensor</em>) – Cholesky decomposition of covariance matrix</li>
+<li><strong>init</strong> (<em>distribution</em>) – distribution for initial value (Defaults to Flat())</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/pymc3_logo.jpg" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="../../index.html">PyMC3</a></h1>
+
+
+
+<p class="blurb">Probabilistic Programming in Python: Bayesian Modeling and Probabilistic Machine Learning with Theano</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prob_dists.html">Probability Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../distributions.html">Distributions</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="continuous.html">Continuous</a></li>
+<li class="toctree-l3"><a class="reference internal" href="discrete.html">Discrete</a></li>
+<li class="toctree-l3"><a class="reference internal" href="multivariate.html">Multivariate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mixture.html">Mixture</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Timeseries</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../bounds.html">Bounded Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../inference.html">Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../glm.html">Generalized Linear Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gp.html">GP Implementations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gp.html#mean-functions">Mean Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gp.html#covariance-functions">Covariance Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plots.html">Plots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stats.html">Stats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../diagnostics.html">Diagnostics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../backends.html">Backends</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../math.html">Math</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../data.html">Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../model.html">Model</a></li>
+</ul>
+</li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, The PyMC Development Team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="../../_sources/api/distributions/timeseries.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

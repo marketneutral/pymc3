@@ -1,0 +1,347 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Gaussian Processes &#8212; PyMC3 3.5 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="shortcut icon" href="_static/PyMC3.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="PyMC3 and Theano" href="theano.html" />
+    <link rel="prev" title="Variational API quickstart" href="notebooks/variational_api_quickstart.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="gaussian-processes">
+<h1>Gaussian Processes<a class="headerlink" href="#gaussian-processes" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="gp-basics">
+<h2>GP Basics<a class="headerlink" href="#gp-basics" title="Permalink to this headline">¶</a></h2>
+<p>Sometimes an unknown parameter or variable in a model is not a scalar value or
+a fixed-length vector, but a <em>function</em>.  A Gaussian process (GP) can be used
+as a prior probability distribution whose support is over the space of
+continuous functions.  A GP prior on the function <span class="math notranslate nohighlight">\(f(x)\)</span> is usually written,</p>
+<div class="math notranslate nohighlight">
+\[f(x) \sim \mathcal{GP}(m(x), \, k(x, x')) \,.\]</div>
+<p>The function values are modeled as a draw from a multivariate normal
+distribution that is parameterized by the mean function, <span class="math notranslate nohighlight">\(m(x)\)</span>, and the
+covariance function, <span class="math notranslate nohighlight">\(k(x, x')\)</span>.  Gaussian processes are a convenient
+choice as priors over functions due to the marginalization and conditioning
+properties of the multivariate normal distribution.  Usually, the marginal
+distribution over <span class="math notranslate nohighlight">\(f(x)\)</span> is evaluated during the inference step.  The
+conditional distribution is then used for predicting the function values
+<span class="math notranslate nohighlight">\(f(x_*)\)</span> at new points, <span class="math notranslate nohighlight">\(x_*\)</span>.</p>
+<p>The joint distribution of <span class="math notranslate nohighlight">\(f(x)\)</span> and <span class="math notranslate nohighlight">\(f(x_*)\)</span> is multivariate
+normal,</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{bmatrix} f(x) \\ f(x_*) \\ \end{bmatrix} \sim
+\text{N}\left(
+  \begin{bmatrix} m(x)  \\ m(x_*)    \\ \end{bmatrix} \,,
+  \begin{bmatrix} k(x,x')    &amp; k(x_*, x)    \\
+                  k(x_*, x) &amp;  k(x_*, x_*')  \\ \end{bmatrix}
+        \right) \,.\end{split}\]</div>
+<p>Starting from the joint distribution, one obtains the marginal distribution
+of <span class="math notranslate nohighlight">\(f(x)\)</span>, as <span class="math notranslate nohighlight">\(\text{N}(m(x),\, k(x, x'))\)</span>.  The conditional
+distribution is</p>
+<div class="math notranslate nohighlight">
+\[f(x_*) \mid f(x) \sim \text{N}\left( k(x_*, x) k(x, x)^{-1} [f(x) - m(x)] + m(x_*) ,\,
+  k(x_*, x_*) - k(x, x_*) k(x, x)^{-1} k(x, x_*) \right) \,.\]</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">For more information on GPs, check out the book <a class="reference external" href="http://www.gaussianprocess.org/gpml/">Gaussian Processes for
+Machine Learning</a> by Rasmussen &amp;
+Williams, or <a class="reference external" href="https://www.ics.uci.edu/~welling/teaching/KernelsICS273B/gpB.pdf">this introduction</a>
+by D. Mackay.</p>
+</div>
+<p>PyMC3 is a great environment for working with fully Bayesian Gaussian Process
+models.  GPs in PyMC3 have a clear syntax and are highly composable, and many
+predefined covariance functions (or kernels), mean functions, and several GP
+implementations are included.  GPs are treated as distributions that can be
+used within larger or hierarchical models, not just as standalone regression
+models.</p>
+</div>
+<div class="section" id="mean-and-covariance-functions">
+<h2>Mean and covariance functions<a class="headerlink" href="#mean-and-covariance-functions" title="Permalink to this headline">¶</a></h2>
+<p>Those who have used the GPy or GPflow Python packages will find the syntax for
+construction mean and covariance functions somewhat familiar.  When first
+instantiated, the mean and covariance functions are parameterized, but not
+given their inputs yet.  The covariance functions must additionally be provided
+with the number of dimensions of the input matrix, and a list that indexes
+which of those dimensions they are to operate on.  The reason for this design
+is so that covariance functions can be constructed that are combinations of
+other covariance functions.</p>
+<p>For example, to construct an exponentiated quadratic covariance function that
+operates on the second and third column of a three column matrix representing
+three predictor variables:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ls</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span> <span class="c1"># the lengthscales</span>
+<span class="n">cov_func</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">gp</span><span class="o">.</span><span class="n">cov</span><span class="o">.</span><span class="n">ExpQuad</span><span class="p">(</span><span class="n">input_dim</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="n">ls</span><span class="p">,</span> <span class="n">active_dims</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Here the <code class="code docutils literal notranslate"><span class="pre">ls</span></code>, or lengthscale, parameter is two dimensional, allowing the second
+and third dimension to have a different lengthscale.  The reason we have to
+specify <code class="code docutils literal notranslate"><span class="pre">input_dim</span></code>, the total number of columns of <code class="code docutils literal notranslate"><span class="pre">X</span></code>, and
+<code class="code docutils literal notranslate"><span class="pre">active_dims</span></code>, which of those columns or dimensions the covariance
+function will act on, is because <code class="code docutils literal notranslate"><span class="pre">cov_func</span></code> hasn’t actually seen the
+input data yet.  The <code class="code docutils literal notranslate"><span class="pre">active_dims</span></code> argument is optional, and defaults to
+all columns of the matrix of inputs.</p>
+<p>Covariance functions in PyMC3 closely follow the algebraic rules for kernels,
+which allows users to combine covariance functions into new ones, for example:</p>
+<ul>
+<li><p class="first">The sum two covariance functions is also a covariance function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cov_func</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">gp</span><span class="o">.</span><span class="n">cov</span><span class="o">.</span><span class="n">ExpQuad</span><span class="p">(</span><span class="o">...</span><span class="p">)</span> <span class="o">+</span> <span class="n">pm</span><span class="o">.</span><span class="n">gp</span><span class="o">.</span><span class="n">cov</span><span class="o">.</span><span class="n">ExpQuad</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">The product of two covariance functions is also a covariance function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cov_func</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">gp</span><span class="o">.</span><span class="n">cov</span><span class="o">.</span><span class="n">ExpQuad</span><span class="p">(</span><span class="o">...</span><span class="p">)</span> <span class="o">*</span> <span class="n">pm</span><span class="o">.</span><span class="n">gp</span><span class="o">.</span><span class="n">cov</span><span class="o">.</span><span class="n">Periodic</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">The product (or sum) of a covariance function with a scalar is a covariance</p>
+</li>
+</ul>
+<p>function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cov_func</span> <span class="o">=</span> <span class="n">eta</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pm</span><span class="o">.</span><span class="n">gp</span><span class="o">.</span><span class="n">cov</span><span class="o">.</span><span class="n">Matern32</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>After the covariance function is defined, it is now a function that is
+evaluated by calling <code class="code docutils literal notranslate"><span class="pre">cov_func(x,</span> <span class="pre">x)</span></code> (or <code class="code docutils literal notranslate"><span class="pre">mean_func(x)</span></code>).  Since
+PyMC3 is built on top of Theano, it is relatively easy to define and experiment
+with non-standard covariance and mean functons.  For more information check out
+the tutorial on covariance functions.</p>
+</div>
+<div class="section" id="gp-implementations">
+<h2>GP Implementations<a class="headerlink" href="#gp-implementations" title="Permalink to this headline">¶</a></h2>
+<p>PyMC3 includes several GP implementations, including marginal and latent
+variable models and also some fast approximations.  Their usage all follows a
+similar pattern:  First, a GP is instantiated with a mean function and a
+covariance function.  Then, GP objects can be added together, allowing for
+function characteristics to be carefully modeled and separated.  Finally, one
+of <cite>prior</cite>, <cite>marginal_likelihood</cite> or <cite>conditional</cite> methods is called on the GP
+object to actually construct the PyMC3 random variable that represents the
+function prior.</p>
+<p>Using <code class="code docutils literal notranslate"><span class="pre">gp.Latent</span></code> for the example, the syntax to first specify the GP
+is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gp</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">gp</span><span class="o">.</span><span class="n">Latent</span><span class="p">(</span><span class="n">mean_func</span><span class="p">,</span> <span class="n">cov_func</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The first argument is the mean function and the second is the covariance
+function.  We’ve made the GP object, but we haven’t made clear which function
+it is to be a prior for, what the inputs are, or what parameters it will be
+conditioned on.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The <code class="code docutils literal notranslate"><span class="pre">gp.Marginal</span></code> class and similar don’t have a <code class="code docutils literal notranslate"><span class="pre">prior</span></code> method.
+Instead they have a <code class="code docutils literal notranslate"><span class="pre">marginal_likelihood</span></code> method that is used similarly,
+but has additional required arguments, such as the observed data, noise,
+or other, depending on the implementation.  See the notebooks for examples.
+The <code class="code docutils literal notranslate"><span class="pre">conditional</span></code> method works similarly.</p>
+</div>
+<p>Calling the <cite>prior</cite> method will create a PyMC3 random variable that represents
+the latent function <span class="math notranslate nohighlight">\(f(x) = \mathbf{f}\)</span>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">prior</span><span class="p">(</span><span class="s2">&quot;f&quot;</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="code docutils literal notranslate"><span class="pre">f</span></code> is a random variable that can be used within a PyMC3 model like any
+other type of random variable.  The first argument is the name of the random
+variable representing the function we are placing the prior over.
+The second argument is the inputs to the function that the prior is over,
+<code class="code docutils literal notranslate"><span class="pre">X</span></code>.  The inputs are usually known and present in the data, but they can
+also be PyMC3 random variables.  If the inputs are a Theano tensor or a
+PyMC3 random variable, the <code class="code docutils literal notranslate"><span class="pre">shape</span></code> needs to be given.</p>
+<p>Usually at this point, inference is performed on the model.  The
+<code class="code docutils literal notranslate"><span class="pre">conditional</span></code> method creates the conditional, or predictive,
+distribution over the latent function at arbitrary <span class="math notranslate nohighlight">\(x_*\)</span> input points,
+<span class="math notranslate nohighlight">\(f(x_*)\)</span>.  To construct the conditional distribution we write:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f_star</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">conditional</span><span class="p">(</span><span class="s2">&quot;f_star&quot;</span><span class="p">,</span> <span class="n">X_star</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="additive-gps">
+<h2>Additive GPs<a class="headerlink" href="#additive-gps" title="Permalink to this headline">¶</a></h2>
+<p>The GP implementation in PyMC3 is constructed so that it is easy to define
+additive GPs and sample from individual GP components.  We can write:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gp1</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">gp</span><span class="o">.</span><span class="n">Marginal</span><span class="p">(</span><span class="n">mean_func1</span><span class="p">,</span> <span class="n">cov_func1</span><span class="p">)</span>
+<span class="n">gp2</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">gp</span><span class="o">.</span><span class="n">Marginal</span><span class="p">(</span><span class="n">mean_func2</span><span class="p">,</span> <span class="n">cov_func2</span><span class="p">)</span>
+<span class="n">gp3</span> <span class="o">=</span> <span class="n">gp1</span> <span class="o">+</span> <span class="n">gp2</span>
+</pre></div>
+</div>
+<p>The GP objects have to have the same type, <code class="code docutils literal notranslate"><span class="pre">gp.Marginal</span></code> cannot
+be added to <code class="code docutils literal notranslate"><span class="pre">gp.Latent</span></code>.</p>
+<p>Consider two independent GP distributed functions, <span class="math notranslate nohighlight">\(f_1(x) \sim
+\mathcal{GP}\left(m_1(x),\, k_1(x, x')\right)\)</span> and <span class="math notranslate nohighlight">\(f_2(x) \sim
+\mathcal{GP}\left( m_2(x),\, k_2(x, x')\right)\)</span>.  The joint distribution of
+<span class="math notranslate nohighlight">\(f_1,\, f_1^*,\, f_2,\, f_2^*,\, f_1 + f_2 and f_1^* + f_2^*\)</span> is</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{bmatrix} f_1 \\ f_1^* \\ f_2 \\ f_2^*
+             \\ f_1 + f_2    \\ f_1^* + f_2^* \end{bmatrix} \sim
+\text{N}\left(
+  \begin{bmatrix} m_1 \\ m_1^* \\ m_2 \\ m_2^* \\
+                  m_1 + m_2    \\ m_1^* + m_2^*   \\ \end{bmatrix} \,,\,
+  \begin{bmatrix}
+    K_1       &amp;  K_1^*     &amp;   0       &amp;    0      &amp; K_1        &amp; K_1^*              \\
+    K_1^{*^T} &amp;  K_1^{**}  &amp;   0       &amp;    0      &amp; K_1^*      &amp; K_1^{**}           \\
+    0         &amp;  0         &amp; K_2       &amp; K_2^*     &amp; K_2        &amp; K_2^{*}            \\
+    0         &amp;  0         &amp; K_2^{*^T} &amp; K_2^{**}  &amp; K_2^{*}    &amp; K_2^{**}           \\
+    K_1       &amp;  K_1^{*}   &amp; K_2       &amp; K_2^{*}   &amp; K_1 + K_2  &amp; K_1^{*} + K_2^{*}  \\
+    K_1^{*^T} &amp; K_1^{**} &amp; K_2^{*^T} &amp; K_2^{**} &amp; K_1^{*^T}+K_2^{*^T} &amp; K_1^{**}+K_2^{**}
+  \end{bmatrix}
+\right) \,.\end{split}\]</div>
+<p>Using the joint distribution to obtain the conditional distribution of <span class="math notranslate nohighlight">\(f_1^*\)</span>
+with the contribution due to <span class="math notranslate nohighlight">\(f_1 + f_2\)</span> factored out, we get</p>
+<div class="math notranslate nohighlight">
+\[f_1^* \mid f_1 + f_2 \sim \text{N}\left(
+  m_1^* + K_1^{*^T}(K_1 + K_2)^{-1}\left[f_1 + f_2 - m_1 - m_2\right] \,,\,
+  K_1^{**} - K_1^{*^T}(K_1 + K_2)^{-1}K_1^* \right) \,.\]</div>
+<p>These equations show how to break down GP models into individual components to see how each
+contributes to the data.  For more information, check out <a class="reference external" href="https://www.cs.toronto.edu/~duvenaud/thesis.pdf">David Duvenaud’s PhD
+thesis</a>.</p>
+<p>The GP objects in PyMC3 keeps track of these marginals automatically.  The
+following code sketch shows how to define the conditional distribution of
+<span class="math notranslate nohighlight">\(f_2^*\)</span>.  We use <cite>gp.Marginal</cite> in the example, but the same works for
+other implementations.  The first block fits the GP prior.  We denote
+<span class="math notranslate nohighlight">\(f_1 + f_2\)</span> as just <span class="math notranslate nohighlight">\(f\)</span> for brevity:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">gp1</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">gp</span><span class="o">.</span><span class="n">Marginal</span><span class="p">(</span><span class="n">mean_func1</span><span class="p">,</span> <span class="n">cov_func1</span><span class="p">)</span>
+    <span class="n">gp2</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">gp</span><span class="o">.</span><span class="n">Marginal</span><span class="p">(</span><span class="n">mean_func2</span><span class="p">,</span> <span class="n">cov_func2</span><span class="p">)</span>
+
+    <span class="c1"># gp represents f1 + f2.</span>
+    <span class="n">gp</span> <span class="o">=</span> <span class="n">gp1</span> <span class="o">+</span> <span class="n">gp2</span>
+
+    <span class="n">f</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">marginal_likelihood</span><span class="p">(</span><span class="s2">&quot;f&quot;</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">noise</span><span class="p">)</span>
+
+    <span class="n">trace</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To construct the conditional distribution of <code class="code docutils literal notranslate"><span class="pre">gp1</span></code> or <code class="code docutils literal notranslate"><span class="pre">gp2</span></code>, we
+also need to include the additional arguments, <code class="code docutils literal notranslate"><span class="pre">X</span></code>, <code class="code docutils literal notranslate"><span class="pre">y</span></code>, and
+<code class="code docutils literal notranslate"><span class="pre">noise</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">model</span><span class="p">:</span>
+    <span class="c1"># conditional distributions of f1 and f2</span>
+    <span class="n">f1_star</span> <span class="o">=</span> <span class="n">gp1</span><span class="o">.</span><span class="n">conditional</span><span class="p">(</span><span class="s2">&quot;f1_star&quot;</span><span class="p">,</span> <span class="n">X_star</span><span class="p">,</span>
+                              <span class="n">given</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;X&quot;</span><span class="p">:</span> <span class="n">X</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;noise&quot;</span><span class="p">:</span> <span class="n">noise</span><span class="p">,</span> <span class="s2">&quot;gp&quot;</span><span class="p">:</span> <span class="n">gp</span><span class="p">})</span>
+    <span class="n">f2_star</span> <span class="o">=</span> <span class="n">gp2</span><span class="o">.</span><span class="n">conditional</span><span class="p">(</span><span class="s2">&quot;f2_star&quot;</span><span class="p">,</span> <span class="n">X_star</span><span class="p">,</span>
+                              <span class="n">given</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;X&quot;</span><span class="p">:</span> <span class="n">X</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;noise&quot;</span><span class="p">:</span> <span class="n">noise</span><span class="p">,</span> <span class="s2">&quot;gp&quot;</span><span class="p">:</span> <span class="n">gp</span><span class="p">})</span>
+
+    <span class="c1"># conditional of f1 + f2, `given` not required</span>
+    <span class="n">f_star</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">conditional</span><span class="p">(</span><span class="s2">&quot;f_star&quot;</span><span class="p">,</span> <span class="n">X_star</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This second block produces the conditional distributions.  Notice that extra
+arguments are required for conditionals of <span class="math notranslate nohighlight">\(f1\)</span> and <span class="math notranslate nohighlight">\(f2\)</span>, but not
+<span class="math notranslate nohighlight">\(f\)</span>.  This is because those arguments are cached when
+<code class="code docutils literal notranslate"><span class="pre">.marginal_likelihood</span></code> is called on <code class="code docutils literal notranslate"><span class="pre">gp</span></code>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">When constructing conditionals, the additional arguments <code class="code docutils literal notranslate"><span class="pre">X</span></code>, <code class="code docutils literal notranslate"><span class="pre">y</span></code>,
+<code class="code docutils literal notranslate"><span class="pre">noise</span></code> and <code class="code docutils literal notranslate"><span class="pre">gp</span></code> must be provided as a dict called <cite>given</cite>!</p>
+</div>
+<p>Since the marginal likelihoood method of <code class="code docutils literal notranslate"><span class="pre">gp1</span></code> or <code class="code docutils literal notranslate"><span class="pre">gp2</span></code> weren’t called,
+their conditionals need to be provided with the required inputs.  In the same
+fashion as the prior, <code class="code docutils literal notranslate"><span class="pre">f_star</span></code>, <code class="code docutils literal notranslate"><span class="pre">f1_star</span></code> and <code class="code docutils literal notranslate"><span class="pre">f2_star</span></code> are random
+variables that can now be used like any other random variable in PyMC3.</p>
+<p>Check the notebooks for detailed demonstrations of the usage of GP functionality
+in PyMC3.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/pymc3_logo.jpg" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="index.html">PyMC3</a></h1>
+
+
+
+<p class="blurb">Probabilistic Programming in Python: Bayesian Modeling and Probabilistic Machine Learning with Theano</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="getting_started.html">Getting started</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="notebooks/getting_started.html">Getting started with PyMC3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/api_quickstart.html">API quickstart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/variational_api_quickstart.html">Variational API quickstart</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Gaussian Processes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#gp-basics">GP Basics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mean-and-covariance-functions">Mean and covariance functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gp-implementations">GP Implementations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#additive-gps">Additive GPs</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="theano.html">PyMC3 and Theano</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced_theano.html">Advanced usage of Theano in PyMC3</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="prob_dists.html">Probability Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, The PyMC Development Team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="_sources/gp.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

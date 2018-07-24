@@ -1,0 +1,316 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>PyMC3 and Theano &#8212; PyMC3 3.5 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="shortcut icon" href="_static/PyMC3.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Advanced usage of Theano in PyMC3" href="advanced_theano.html" />
+    <link rel="prev" title="Gaussian Processes" href="gp.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="pymc3-and-theano">
+<h1>PyMC3 and Theano<a class="headerlink" href="#pymc3-and-theano" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="what-is-theano">
+<h2>What is Theano<a class="headerlink" href="#what-is-theano" title="Permalink to this headline">¶</a></h2>
+<p>Theano is a package that allows us to define functions involving array
+operations and linear algebra. When we define a PyMC3 model, we implicitly
+build up a Theano function from the space of our parameters to
+their posterior probability density up to a constant factor. We then use
+symbolic manipulations of this function to also get access to its gradient.</p>
+<p>For a thorough introduction to Theano see the
+<a class="reference external" href="http://deeplearning.net/software/theano/introduction.html">theano docs</a>,
+but for the most part you don’t need detailed knowledge about it as long
+as you are not trying to define new distributions or other extensions
+of PyMC3. But let’s look at a simple example to get a rough
+idea about how it works. Say, we’d like to define the (completely
+arbitrarily chosen) function</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}f\colon \mathbb{R} \times \mathbb{R}^n \times \mathbb{N}^n \to \mathbb{R}\\
+(a, x, y) \mapsto \sum_{i=0}^{n} \exp(ax_i^3 + y_i^2).\end{split}\]</div>
+<p>First, we need to define symbolic variables for our inputs (this
+is similar to eg SymPy’s <cite>Symbol</cite>):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">theano</span>
+<span class="kn">import</span> <span class="nn">theano.tensor</span> <span class="k">as</span> <span class="nn">tt</span>
+<span class="c1"># We don&#39;t specify the dtype of our input variables, so it</span>
+<span class="c1"># defaults to using float64 without any special config.</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">tt</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">tt</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="c1"># `tt.ivector` creates a symbolic vector of integers.</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">tt</span><span class="o">.</span><span class="n">ivector</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Next, we use those variables to build up a symbolic representation
+of the output of our function. Note that no computation is actually
+being done at this point. We only record what operations we need to
+do to compute the output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">inner</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">3</span> <span class="o">+</span> <span class="n">y</span><span class="o">**</span><span class="mi">2</span>
+<span class="n">out</span> <span class="o">=</span> <span class="n">tt</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">inner</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">In this example we use <cite>tt.exp</cite> to create a symbolic representation
+of the exponential of <cite>inner</cite>. Somewhat surprisingly, it
+would also have worked if we used <cite>np.exp</cite>. This is because numpy
+gives objects it operates on a chance to define the results of
+operations themselves. Theano variables do this for a large number
+of operations. We usually still prefer the theano
+functions instead of the numpy versions, as that makes it clear that
+we are working with symbolic input instead of plain arrays.</p>
+</div>
+<p>Now we can tell Theano to build a function that does this computation.
+With a typical configuration, Theano generates C code, compiles it,
+and creates a python function which wraps the C function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">func</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">function</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">],</span> <span class="p">[</span><span class="n">out</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>We can call this function with actual arrays as many times as we want:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a_val</span> <span class="o">=</span> <span class="mf">1.2</span>
+<span class="n">x_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">y_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">out</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">a_val</span><span class="p">,</span> <span class="n">x_vals</span><span class="p">,</span> <span class="n">y_vals</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For the most part the symbolic Theano variables can be operated on
+like NumPy arrays. Most NumPy functions are available in <cite>theano.tensor</cite>
+(which is typically imported as <cite>tt</cite>). A lot of linear algebra operations
+can be found in <cite>tt.nlinalg</cite> and <cite>tt.slinalg</cite> (the NumPy and SciPy
+operations respectively). Some support for sparse matrices is available
+in <cite>theano.sparse</cite>. For a detailed overview of available operations,
+see <a class="reference external" href="http://deeplearning.net/software/theano/library/tensor/index.html">the theano api docs</a>.</p>
+<p>A notable exception where theano variables do <em>not</em> behave like
+NumPy arrays are operations involving conditional execution.</p>
+<p>Code like this won’t work as expected:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">tt</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">a</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">tt</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="o">-</span><span class="n">a</span>
+</pre></div>
+</div>
+<p><cite>(a &gt; 0).all()</cite> isn’t actually a boolean as it would be in NumPy, but
+still a symbolic variable. Python will convert this object to a boolean
+and according to the rules for this conversion, things that aren’t empty
+containers or zero are converted to <cite>True</cite>. So the code is equivalent
+to this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">tt</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">tt</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To get the desired behaviour, we can use <cite>tt.switch</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">tt</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">tt</span><span class="o">.</span><span class="n">switch</span><span class="p">((</span><span class="n">a</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(),</span> <span class="n">tt</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="o">-</span><span class="n">a</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Indexing also works similarly to NumPy:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">tt</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+<span class="c1"># Access the 10th element. This will fail when a function build</span>
+<span class="c1"># from this expression is executed with an array that is too short.</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span>
+
+<span class="c1"># Extract a subvector</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">a</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>Changing elements of an array is possible using <cite>tt.set_subtensor</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">tt</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">tt</span><span class="o">.</span><span class="n">set_subtensor</span><span class="p">(</span><span class="n">a</span><span class="p">[:</span><span class="mi">10</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># is roughly equivalent to this (although theano avoids</span>
+<span class="c1"># the copy if `a` isn&#39;t used anymore)</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">b</span><span class="p">[:</span><span class="mi">10</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="how-pymc3-uses-theano">
+<h2>How PyMC3 uses Theano<a class="headerlink" href="#how-pymc3-uses-theano" title="Permalink to this headline">¶</a></h2>
+<p>Now that we have a basic understanding of Theano we can look at what
+happens if we define a PyMC3 model. Let’s look at a simple example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">true_mu</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">true_mu</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;mu&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In this model we define two variables: <cite>mu</cite> and <cite>y</cite>. The first is
+a free variable that we want to infer, the second is an observed
+variable. To sample from the posterior we need to build the function</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\log P(μ|y) + C = \log P(y|μ) + \log P(μ) =: \text{logp}(μ)\\\end{split}\]</div>
+<p>where with the normal likelihood <span class="math notranslate nohighlight">\(N(x|μ,σ^2)\)</span></p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\text{logp}\colon \mathbb{R} \to \mathbb{R}\\
+μ \mapsto \log N(μ|0, 1) + \log N(y|μ, 1),\end{split}\]</div>
+<p>To build that function we need to keep track of two things: The parameter
+space (the <em>free variables</em>) and the logp function. For each free variable
+we generate a Theano variable. And for each variable (observed or otherwise)
+we add a term to the global logp. In the background something similar to
+this is happening:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># For illustration only, those functions don&#39;t actually exist</span>
+<span class="c1"># in exactly this way!</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span>
+
+<span class="n">mu</span> <span class="o">=</span> <span class="n">tt</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="s1">&#39;mu&#39;</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add_free_variable</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add_logp_term</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">logp</span><span class="p">(</span><span class="n">mu</span><span class="p">))</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">add_logp_term</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">logp</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>So calling <cite>pm.Normal()</cite> modifies the model: It changes the logp function
+of the model. If the <cite>observed</cite> keyword isn’t set it also creates a new
+free variable. In contrast, <cite>pm.Normal.dist()</cite> doesn’t care about the model,
+it just creates an object that represents the normal distribution. Calling
+<cite>logp</cite> on this object creates a theano variable for the logp probability
+or log probability density of the distribution, but again without changing
+the model in any way.</p>
+<p>Continuous variables with support only on a subset of the real numbers
+are treated a bit differently. We create a transformed variable
+that has support on the reals and then modify this variable. For
+example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;mu&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">sd</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfNormal</span><span class="p">(</span><span class="s1">&#39;sd&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">sd</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>is roughly equivalent to this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># For illustration only, not real code!</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span>
+<span class="n">mu</span> <span class="o">=</span> <span class="n">tt</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="s1">&#39;mu&#39;</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add_free_variable</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add_logp_term</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">logp</span><span class="p">(</span><span class="n">mu</span><span class="p">))</span>
+
+<span class="n">sd_log__</span> <span class="o">=</span> <span class="n">tt</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="s1">&#39;sd_log__&#39;</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add_free_variable</span><span class="p">(</span><span class="n">sd_log__</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add_logp_term</span><span class="p">(</span><span class="n">corrected_logp_half_normal</span><span class="p">(</span><span class="n">sd_log__</span><span class="p">))</span>
+
+<span class="n">sd</span> <span class="o">=</span> <span class="n">tt</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sd_log__</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add_deterministic_variable</span><span class="p">(</span><span class="n">sd</span><span class="p">)</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">add_logp_term</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sd</span><span class="p">)</span><span class="o">.</span><span class="n">logp</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The return values of the variable constructors are subclasses
+of theano variables, so when we define a variable we can use any
+theano operation on them:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">design_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">...</span><span class="p">]])</span>
+<span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">model</span><span class="p">:</span>
+    <span class="c1"># beta is a tt.dvector</span>
+    <span class="n">beta</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;beta&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">design_matrix</span><span class="p">))</span>
+    <span class="n">predict</span> <span class="o">=</span> <span class="n">tt</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">design_matrix</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
+    <span class="n">sd</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfCauchy</span><span class="p">(</span><span class="s1">&#39;sd&#39;</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mf">2.5</span><span class="p">)</span>
+    <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">predict</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">sd</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/pymc3_logo.jpg" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="index.html">PyMC3</a></h1>
+
+
+
+<p class="blurb">Probabilistic Programming in Python: Bayesian Modeling and Probabilistic Machine Learning with Theano</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="getting_started.html">Getting started</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="notebooks/getting_started.html">Getting started with PyMC3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/api_quickstart.html">API quickstart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/variational_api_quickstart.html">Variational API quickstart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gp.html">Gaussian Processes</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">PyMC3 and Theano</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#what-is-theano">What is Theano</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-pymc3-uses-theano">How PyMC3 uses Theano</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="advanced_theano.html">Advanced usage of Theano in PyMC3</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="prob_dists.html">Probability Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, The PyMC Development Team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="_sources/theano.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

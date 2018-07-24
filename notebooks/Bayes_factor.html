@@ -1,0 +1,772 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Bayes Factors and Marginal Likelihood &#8212; PyMC3 3.5 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="shortcut icon" href="../_static/PyMC3.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="How to debug a model" href="howto_debugging.html" />
+    <link rel="prev" title="Model averaging" href="model_averaging.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #303F9F;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #D84315;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 8ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #cfcfcf;
+    border-radius: 2px;
+    background: #f7f7f7;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.pngmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+</style>
+<div class="section" id="Bayes-Factors-and-Marginal-Likelihood">
+<h1>Bayes Factors and Marginal Likelihood<a class="headerlink" href="#Bayes-Factors-and-Marginal-Likelihood" title="Permalink to this headline">¶</a></h1>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="kn">import</span> <span class="nn">pymc3</span> <span class="kn">as</span> <span class="nn">pm</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="nn">scipy.special</span> <span class="kn">import</span> <span class="n">betaln</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">beta</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;seaborn-darkgrid&#39;</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Running on PyMC3 v{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">__version__</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Running on PyMC3 v3.4.1
+</pre></div></div>
+</div>
+<p>The “Bayesian way” to compare models is to compute the <em>marginal
+likelihood</em> of each model <span class="math notranslate nohighlight">\(p(y \mid M_k)\)</span>, <em>i.e.</em> the probability
+of the observed data <span class="math notranslate nohighlight">\(y\)</span> given the <span class="math notranslate nohighlight">\(M_k\)</span> model. This
+quantity, the marginal likelihood, is just the normalizing constant of
+Bayes’ theorem. We can see this if we write Bayes’ theorem and make
+explicit the fact that all inferences are model-dependant.</p>
+<div class="math notranslate nohighlight">
+\[p (\theta \mid y, M_k ) = \frac{p(y \mid \theta, M_k) p(\theta \mid M_k)}{p( y \mid M_k)}\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><span class="math notranslate nohighlight">\(y\)</span> is the data</li>
+<li><span class="math notranslate nohighlight">\(\theta\)</span> the parameters</li>
+<li><span class="math notranslate nohighlight">\(M_k\)</span> one model out of K competing models</li>
+</ul>
+<p>Usually when doing inference we do not need to compute this normalizing
+constant, so in practice we often compute the posterior up to a constant
+factor, that is:</p>
+<div class="math notranslate nohighlight">
+\[p (\theta \mid y, M_k ) \propto p(y \mid \theta, M_k) p(\theta \mid M_k)\]</div>
+<p>However, for model comparison and model averaging the marginal
+likelihood is an important quantity. Although, it’s not the only way to
+perform these tasks, you can read about model averaging and model
+selection using alternative methods <a class="reference internal" href="model_comparison.html"><span class="doc">here</span></a>,
+<a class="reference internal" href="model_averaging.html"><span class="doc">there</span></a> and
+elsewhere.</p>
+<div class="section" id="Bayesian-model-selection">
+<h2>Bayesian model selection<a class="headerlink" href="#Bayesian-model-selection" title="Permalink to this headline">¶</a></h2>
+<p>If our main objective is to choose only one model, the <em>best</em> one, from
+a set of models we can just choose the one with the largest
+<span class="math notranslate nohighlight">\(p(y \mid M_k)\)</span>. This is totally fine if all models are assumed to
+have the same <em>a priori</em> probability. Otherwise, we have to take into
+account that not all models are equally likely <em>a priori</em> and compute:</p>
+<div class="math notranslate nohighlight">
+\[p(M_k \mid y) \propto p(y \mid M_k) p(M_k)\]</div>
+<p>Sometimes the main objective is not to just keep a single model but
+instead to compare models to determine which ones are more likely and by
+how much. This can be achieved using Bayes factors:</p>
+<div class="math notranslate nohighlight">
+\[BF =  \frac{p(y \mid M_0)}{p(y \mid M_1)}\]</div>
+<p>that is, the ratio between the marginal likelihood of two models. The
+larger the BF the <em>better</em> the model in the numerator (<span class="math notranslate nohighlight">\(M_0\)</span> in
+this example). To ease the interpretation of BFs some authors have
+proposed tables with levels of <em>support</em> or <em>strength</em>, just a way to
+put numbers into words.</p>
+<ul class="simple">
+<li>1-3: anecdotal</li>
+<li>3-10: moderate</li>
+<li>10-30: strong</li>
+<li>30-100: very strong</li>
+<li><span class="math notranslate nohighlight">\(&gt;\)</span> 100: extreme</li>
+</ul>
+<p>Notice that if you get numbers below 1 then the support is for the model
+in the denominator, tables for those cases are also available. Of
+course, you can also just take the inverse of the values in the above
+table or take the inverse of the BF value and you will be OK.</p>
+<p>Is very important to remember that these rules are just conventions,
+simple guides at best. Results should always be put into context of our
+problems and should be accompanied with enough details so others could
+evaluate by themselves if they agree with our conclusions. The evidence
+necessary to make a claim is not the same in particle physics, or a
+court, or to evacuate a town to prevent hundreds of deaths.</p>
+</div>
+<div class="section" id="Bayesian-model-averaging">
+<h2>Bayesian model averaging<a class="headerlink" href="#Bayesian-model-averaging" title="Permalink to this headline">¶</a></h2>
+<p>Instead of choosing one single model from a set of candidate models,
+model averaging is about getting one meta-model by averaging the
+separate models. The Bayesian version of this weights each model by its
+marginal posterior probability.</p>
+<div class="math notranslate nohighlight">
+\[p(\theta \mid y) = \sum_{k=1}^K p(\theta \mid y, M_k) p(M_k \mid y)\]</div>
+<p>This is the optimal way to average models if the prior is <em>correct</em> and
+the <em>correct</em> model is one of the <span class="math notranslate nohighlight">\(M_k\)</span> models in our set.
+Otherwise, <em>bayesian model averaging</em> will asymptotically select the one
+single model in the set of compared models that is closest in
+<a class="reference external" href="https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence">Kullback-Leibler
+divergence</a>.</p>
+<p>Check this <a class="reference internal" href="model_averaging.html"><span class="doc">example</span></a> as an alternative way to
+perform model averaging.</p>
+</div>
+<div class="section" id="Some-remarks">
+<h2>Some remarks<a class="headerlink" href="#Some-remarks" title="Permalink to this headline">¶</a></h2>
+<p>Now we will briefly discuss some key facts about the <em>marginal
+likelihood</em></p>
+<ul class="simple">
+<li>The good<ul>
+<li><strong>Occam Razor included</strong>: Models with more parameters have a
+larger penalization than models with fewer parameters. The
+intuitive reason is that the larger the number of parameters the
+more <em>spread</em> the <em>prior</em> with respect to the likelihood.</li>
+</ul>
+</li>
+<li>The bad<ul>
+<li>Computing the marginal likelihood is, generally, a hard task
+because it’s an integral of a highly variable function over a high
+dimensional parameter space. In general this integral needs to be
+solved numerically using more or less sophisticated methods.</li>
+</ul>
+</li>
+</ul>
+<div class="math notranslate nohighlight">
+\[p(y \mid M_k) = \int_{\theta_k} p(y \mid \theta_k, M_k) p(\theta_k, M_k) d\theta_k\]</div>
+<ul class="simple">
+<li>The ugly<ul>
+<li>The marginal likelihood depends <strong>sensitively</strong> on the specified
+prior <span class="math notranslate nohighlight">\(p(\theta_k \mid M_k)\)</span> for each model.</li>
+</ul>
+</li>
+</ul>
+<p>Notice that <em>the good</em> and <em>the ugly</em> are related. Using the marginal
+likelihood to compare models is a good idea because a penalization for
+complex models is already included (thus preventing us from overfitting)
+and, at the same time, a change in the prior will affect the
+computations of the <em>marginal likelihood</em>. At first this sounds a little
+bit silly we already know that priors affect computations (otherwise we
+could simply avoid them), but the point here is the word
+<strong>sensitively</strong>. We are talking about changes in the prior that will
+keep inference of <span class="math notranslate nohighlight">\(\theta\)</span> more or less the same, but could have a
+big impact in the value of the marginal likelihood.</p>
+</div>
+<div class="section" id="Computing-Bayes-factors">
+<h2>Computing Bayes factors<a class="headerlink" href="#Computing-Bayes-factors" title="Permalink to this headline">¶</a></h2>
+<p>The <em>marginal likelihood</em> is generally not available in closed-form
+except for some restricted models. For this reason many methods have
+been devised to compute the <em>marginal likelihood</em> and the derived Bayes
+factors, some of these methods are so simple and
+<a class="reference external" href="https://radfordneal.wordpress.com/2008/08/17/the-harmonic-mean-of-the-likelihood-worst-monte-carlo-method-ever/">naive</a>
+that works very bad in practice. Most of the useful methods have been
+originally proposed in the field of Statistical Mechanics. This
+connection is explained because the marginal likelihood is analogous to
+a central quantity in statistical physics known as the <em>partition
+function</em> which in turn is closely related to another very important
+quantity the <em>free-energy</em>. Many of the connections between Statistical
+Mechanics and Bayesian inference are summarized
+<a class="reference external" href="https://arxiv.org/abs/1706.01428">here</a>.</p>
+<div class="section" id="Using-a-hierarchical-model">
+<h3>Using a hierarchical model<a class="headerlink" href="#Using-a-hierarchical-model" title="Permalink to this headline">¶</a></h3>
+<p>Computation of Bayes factors can be framed as a hierarchical model,
+where the high-level parameter is an index assigned to each model and
+sampled from a categorical distribution. In other words, we perform
+inference for two (or more) competing models at the same time and we use
+a discrete <em>dummy</em> variable that <em>jumps</em> between models. How much time
+we spend sampling each model is proportional to <span class="math notranslate nohighlight">\(p(M_k \mid y)\)</span>.</p>
+<p>Some common problems when computing Bayes factors this way is that if
+one model is better than the other, by definition, we will spend more
+time sampling from it than from the other model. And this could lead to
+inaccuracies because we will be undersampling the less likely model.
+Another problem is that the values of the parameters get updated even
+when the parameters are not used to fit that model. That is, when model
+0 is chosen, parameters in model 1 are updated but since they are not
+used to explain the data, they only get restricted by the prior. If the
+prior is too vague, it is possible that when we choose model 1, the
+parameter values are too far away from the previous accepted values and
+hence the step is rejected. Therefore we end up having a problem with
+sampling.</p>
+<p>In case we find these problems, we can try to improve sampling by
+implementing two modifications to our model:</p>
+<ul class="simple">
+<li>Ideally, we can get a better sampling of both models if they are
+visited equally, so we can adjust the prior for each model in such a
+way to favour the less favourable model and disfavour the most
+favourable one. This will not affect the computation of the Bayes
+factor because we have to include the priors in the computation.</li>
+<li>Use pseudo priors, as suggested by Kruschke and others. The idea is
+simple: if the problem is that the parameters drift away
+unrestricted, when the model they belong to is not selected, then one
+solution is to try to restrict them artificially, but only when not
+used! You can find an example of using pseudo priors in a model used
+by Kruschke in his book and
+<a class="reference external" href="https://github.com/aloctavodia/Doing_bayesian_%20data_analysis.">ported</a>
+to Python/PyMC3.</li>
+</ul>
+<p>If you want to learn more about this approach to the computation of the
+marginal likelihood see <a class="reference external" href="http://www.sciencedirect.com/science/book/9780124058880">Chapter 12 of Doing Bayesian Data
+Analysis</a>.
+This chapter also discuss how to use Bayes Factors as a Bayesian
+alternative to classical hypothesis testing.</p>
+</div>
+<div class="section" id="Analytically">
+<h3>Analytically<a class="headerlink" href="#Analytically" title="Permalink to this headline">¶</a></h3>
+<p>For some models, like the beta-binomial model (AKA the <em>coin-flipping</em>
+model) we can compute the marginal likelihood analytically. If we write
+this model as:</p>
+<div class="math notranslate nohighlight">
+\[\theta \sim Beta(\alpha, \beta)\]</div>
+<div class="math notranslate nohighlight">
+\[y \sim Bin(n=1, p=\theta)\]</div>
+<p>the <em>marginal likelihood</em> will be:</p>
+<div class="math notranslate nohighlight">
+\[p(y) = \binom {n}{h}  \frac{B(\alpha + h,\ \beta + n - h)} {B(\alpha, \beta)}\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><span class="math notranslate nohighlight">\(B\)</span> is the <a class="reference external" href="https://en.wikipedia.org/wiki/Beta_function">beta
+function</a> not to get
+confused with the <span class="math notranslate nohighlight">\(Beta\)</span> distribution</li>
+<li><span class="math notranslate nohighlight">\(n\)</span> is the number of trials</li>
+<li><span class="math notranslate nohighlight">\(h\)</span> is the number of success</li>
+</ul>
+<p>Since we only care about the relative value of the <em>marginal likelihood</em>
+under two different models (for the same data), we can omit the binomial
+coefficient <span class="math notranslate nohighlight">\(\binom {n}{h}\)</span>, thus we can write:</p>
+<div class="math notranslate nohighlight">
+\[p(y) \propto \frac{B(\alpha + h,\ \beta + n - h)} {B(\alpha, \beta)}\]</div>
+<p>This have been coded in the following cell, with a twist we will be
+using the <code class="docutils literal notranslate"><span class="pre">betaln</span></code> function instead of the <code class="docutils literal notranslate"><span class="pre">beta</span></code> function, this is
+done to prevent underflow.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">def</span> <span class="nf">beta_binom</span><span class="p">(</span><span class="n">prior</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the marginal likelihood, analytically, for a beta-binomial model.</span>
+
+<span class="sd">    prior : tuple</span>
+<span class="sd">        tuple of alpha and beta parameter for the prior (beta distribution)</span>
+<span class="sd">    y : array</span>
+<span class="sd">        array with &quot;1&quot; and &quot;0&quot; corresponding to the success and fails respectively</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span> <span class="o">=</span> <span class="n">prior</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">p_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">betaln</span><span class="p">(</span><span class="n">alpha</span> <span class="o">+</span> <span class="n">h</span><span class="p">,</span> <span class="n">beta</span><span class="o">+</span><span class="n">n</span><span class="o">-</span><span class="n">h</span><span class="p">)</span> <span class="o">-</span> <span class="n">betaln</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">p_y</span>
+</pre></div>
+</div>
+</div>
+<p>Our data for this example consist on 100 “flips of a coin” and the same
+number of observed “heads” and “tails”. We will compare two models one
+with a uniform prior and one with a <em>more concentrated</em> prior around
+<span class="math notranslate nohighlight">\(\theta = 0.5\)</span></p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">])</span>  <span class="c1"># 50 &quot;heads&quot; and 50 &quot;tails&quot;</span>
+<span class="n">priors</span> <span class="o">=</span> <span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">priors</span><span class="p">:</span>
+    <span class="n">distri</span> <span class="o">=</span> <span class="n">beta</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="n">x_pdf</span> <span class="o">=</span> <span class="n">distri</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x_pdf</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$\alpha$ = {:d}, $\beta$ = {:d}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">([])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">theta$&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Bayes_factor_12_0.png" src="../_images/notebooks_Bayes_factor_12_0.png" />
+</div>
+</div>
+<p>The following cell returns the Bayes factor</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">BF</span> <span class="o">=</span> <span class="p">(</span><span class="n">beta_binom</span><span class="p">(</span><span class="n">priors</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">y</span><span class="p">)</span> <span class="o">/</span> <span class="n">beta_binom</span><span class="p">(</span><span class="n">priors</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">y</span><span class="p">))</span>
+<span class="k">print</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">BF</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+5.0
+</pre></div></div>
+</div>
+<p>We see that the model with the more concentrated prior
+<span class="math notranslate nohighlight">\(Beta(30, 30)\)</span> has <span class="math notranslate nohighlight">\(\approx 5\)</span> times more support than the
+model with the more extended prior <span class="math notranslate nohighlight">\(Beta(1, 1)\)</span>. Besides the exact
+numerical value this should not be surprising since the prior for the
+most favoured model is concentrated around <span class="math notranslate nohighlight">\(\theta = 0.5\)</span> and the
+data <span class="math notranslate nohighlight">\(y\)</span> has equal number of head and tails, consintent with a
+value of <span class="math notranslate nohighlight">\(\theta\)</span> around 0.5.</p>
+</div>
+</div>
+<div class="section" id="Bayes-factors-and-inference">
+<h2>Bayes factors and inference<a class="headerlink" href="#Bayes-factors-and-inference" title="Permalink to this headline">¶</a></h2>
+<p>In this example we have used Bayes factors to judge which model seems to
+be better at explaining the data, and we get that one of the models is
+<span class="math notranslate nohighlight">\(\approx 5\)</span> <em>better</em> than the other.</p>
+<p>But what about the posterior we get from these models? How different
+they are?</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pm</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">traces</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">varnames</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[12]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>mc_error</th>
+      <th>hpd_2.5</th>
+      <th>hpd_97.5</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>a</th>
+      <td>0.5</td>
+      <td>0.05</td>
+      <td>0.0</td>
+      <td>0.41</td>
+      <td>0.6</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pm</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">traces</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">varnames</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[13]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>mc_error</th>
+      <th>hpd_2.5</th>
+      <th>hpd_97.5</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>a</th>
+      <td>0.5</td>
+      <td>0.03</td>
+      <td>0.0</td>
+      <td>0.44</td>
+      <td>0.57</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>We may argue that the results are pretty similar, we have the same mean
+value for <span class="math notranslate nohighlight">\(\theta\)</span>, and a slightly wider posterior for
+<code class="docutils literal notranslate"><span class="pre">model_0</span></code>, as expected since this model has a wider prior. We can also
+check the posterior predictive distribution to see how similar they are.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="n">ppc_0</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample_ppc</span><span class="p">(</span><span class="n">traces</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="mi">20</span><span class="p">))</span>
+<span class="n">ppc_1</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample_ppc</span><span class="p">(</span><span class="n">traces</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">models</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="mi">20</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">m_0</span><span class="p">,</span> <span class="n">m_1</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ppc_0</span><span class="p">[</span><span class="s1">&#39;yl&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">ppc_1</span><span class="p">[</span><span class="s1">&#39;yl&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">):</span>
+    <span class="n">pm</span><span class="o">.</span><span class="n">kdeplot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">m_0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C0&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;model 0&#39;</span><span class="p">)</span>
+    <span class="n">pm</span><span class="o">.</span><span class="n">kdeplot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">m_1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C1&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;model 1&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;θ&#39;</span><span class="p">)</span>  <span class="c1"># matplotlib might have issues with displaying &#39;theta&#39; string</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">([]);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+100%|██████████| 1000/1000 [00:02&lt;00:00, 490.58it/s]
+100%|██████████| 1000/1000 [00:01&lt;00:00, 554.74it/s]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Bayes_factor_20_1.png" src="../_images/notebooks_Bayes_factor_20_1.png" />
+</div>
+</div>
+<p>Summarizing, while is true that the observed data <span class="math notranslate nohighlight">\(y\)</span> is more
+consistent with <code class="docutils literal notranslate"><span class="pre">model_1</span></code> than <code class="docutils literal notranslate"><span class="pre">model_0</span></code>, the posteriors
+distributions we got from both models are similar and hence if we use
+these posteriors to make predictions we will get similar results.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/pymc3_logo.jpg" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="../index.html">PyMC3</a></h1>
+
+
+
+<p class="blurb">Probabilistic Programming in Python: Bayesian Modeling and Probabilistic Machine Learning with Theano</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../prob_dists.html">Probability Distributions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../examples.html">Examples</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../examples.html#howto">Howto</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="sampler-stats.html">Sampler statistics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Diagnosing_biased_Inference_with_Divergences.html">Diagnosing Biased Inference with Divergences</a></li>
+<li class="toctree-l3"><a class="reference internal" href="posterior_predictive.html">Posterior Predictive Checks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="model_comparison.html">Model comparison</a></li>
+<li class="toctree-l3"><a class="reference internal" href="model_averaging.html">Model averaging</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Bayes Factors and Marginal Likelihood</a></li>
+<li class="toctree-l3"><a class="reference internal" href="howto_debugging.html">How to debug a model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="PyMC3_tips_and_heuristic.html">PyMC3 Modeling tips and heuristic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="LKJ.html">LKJ Cholesky Covariance Priors for Multivariate Normal Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="live_sample_plots.html">Live sample plots</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#applied">Applied</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#glm">GLM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#survival-analysis">Survival Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#gaussian-processes">Gaussian Processes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#mixture-models">Mixture Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#variational-inference">Variational Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#stochastic-gradient">Stochastic Gradient</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, The PyMC Development Team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="../_sources/notebooks/Bayes_factor.ipynb.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

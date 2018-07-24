@@ -1,0 +1,217 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Introduction &#8212; PyMC3 3.5 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="shortcut icon" href="_static/PyMC3.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Getting started" href="getting_started.html" />
+    <link rel="prev" title="Welcome to PyMC3’s documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="introduction">
+<span id="intro"></span><h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="purpose">
+<h2>Purpose<a class="headerlink" href="#purpose" title="Permalink to this headline">¶</a></h2>
+<p>PyMC3 is a probabilistic programming module for Python that allows users to fit Bayesian models using a variety of numerical methods, most notably Markov chain Monte Carlo (MCMC) and variational inference (VI). Its flexibility and extensibility make it applicable to a large suite of problems. Along with core model specification and fitting functionality, PyMC3 includes functionality for summarizing output and for model diagnostics.</p>
+</div>
+<div class="section" id="features">
+<h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
+<p>PyMC3 strives to make Bayesian modeling as simple and painless as possible,  allowing users to focus on their scientific problem, rather than on the methods used to solve it. Here is a partial list of its features:</p>
+<ul class="simple">
+<li>Modern methods for fitting Bayesian models, including MCMC and VI.</li>
+<li>Includes a large suite of well-documented statistical distributions.</li>
+<li>Uses Theano as the computational backend, allowing for fast expression evaluation, automatic gradient calculation, and GPU computing.</li>
+<li>Built-in support for Gaussian process modeling.</li>
+<li>Model summarization and plotting.</li>
+<li>Model checking and convergence detection.</li>
+<li>Extensible: easily incorporates custom step methods and unusual probability
+distributions.</li>
+<li>Bayesian models can be embedded in larger programs, and results can be analyzed
+with the full power of Python.</li>
+</ul>
+</div>
+<div class="section" id="what-s-new-in-version-3">
+<h2>What’s new in version 3<a class="headerlink" href="#what-s-new-in-version-3" title="Permalink to this headline">¶</a></h2>
+<p>The third major version of PyMC has benefitted from being re-written from scratch. Substantial improvements in the user interface and performance have resulted from this. While PyMC2 relied on Fortran extensions (via f2py) for most of the computational heavy-lifting, PyMC3 leverages Theano, a library from the Montréal Institute for Learning Algorithms (MILA), for array-based expression evaluation, to perform its computation. What this provides, above all else, is fast automatic differentiation, which is at the heart of the gradient-based sampling and optimization methods currently providing inference for probabilistic programming.</p>
+<p>Major changes from previous versions:</p>
+<ul class="simple">
+<li>New flexible object model and syntax (not backward-compatible with PyMC2).</li>
+<li>Gradient-based MCMC methods, including Hamiltonian Monte Carlo (HMC), the No U-turn Sampler (NUTS), and Stein Variational Gradient Descent.</li>
+<li>Variational inference methods, including automatic differentiation variational inference (ADVI) and operator variational inference (OPVI).</li>
+<li>An interface for easy formula-based specification of generalized linear models (GLM).</li>
+<li>Elliptical slice sampling.</li>
+<li>Specialized distributions for representing time series.</li>
+<li>A library of Jupyter notebooks that provide case studies and fully developed usage examples.</li>
+<li>Much more!</li>
+</ul>
+<p>While the addition of Theano adds a level of complexity to the development of PyMC, fundamentally altering how the underlying computation is performed, we have worked hard to maintain the elegant simplicity of the original PyMC model specification syntax.</p>
+</div>
+<div class="section" id="history">
+<h2>History<a class="headerlink" href="#history" title="Permalink to this headline">¶</a></h2>
+<p>PyMC began development in 2003, as an effort to generalize the process of
+building Metropolis-Hastings samplers, with an aim to making Markov chain Monte
+Carlo (MCMC) more accessible to applied scientists.
+The choice to develop PyMC as a python module, rather than a standalone
+application, allowed the use of MCMC methods in a larger modeling framework. By
+2005, PyMC was reliable enough for version 1.0 to be released to the public. A
+small group of regular users, most associated with the University of Georgia,
+provided much of the feedback necessary for the refinement of PyMC to a usable
+state.</p>
+<p>In 2006, David Huard and Anand Patil joined Chris Fonnesbeck on the development
+team for PyMC 2.0. This iteration of the software strives for more flexibility,
+better performance and a better end-user experience than any previous version
+of PyMC. PyMC 2.2 was released in April 2012. It contained numerous bugfixes and
+optimizations, as well as a few new features, including improved output
+plotting, csv table output, improved imputation syntax, and posterior
+predictive check plots. PyMC 2.3 was released on October 31, 2013. It included
+Python 3 compatibility, improved summary plots, and some important bug fixes.</p>
+<p>In 2011, John Salvatier began thinking about implementing gradient-based MCMC samplers, and developed the <code class="docutils literal notranslate"><span class="pre">mcex</span></code> package to experiment with his ideas. The following year, John was invited by the team to re-engineer PyMC to accomodate Hamiltonian Monte Carlo sampling. This led to the adoption of Theano as the computational back end, and marked the beginning of PyMC3’s development. The first alpha version of PyMC3 was released in June 2015. Over the following 2 years, the core development team grew to 12 members, and the first release, PyMC3 3.0, was launched in January 2017.</p>
+</div>
+<div class="section" id="usage-overview">
+<h2>Usage Overview<a class="headerlink" href="#usage-overview" title="Permalink to this headline">¶</a></h2>
+<p>For a detailed overview of building models in PyMC3, please read the appropriate sections in the rest of the documentation. For a flavor of what PyMC3 models look like, here is a quick example.</p>
+<p>First, import the PyMC3 functions and classes you will need for building your model. You can import the entire module via <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pymc3</span> <span class="pre">as</span> <span class="pre">pm</span></code>, or just bring in what you need:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pymc3</span> <span class="k">import</span> <span class="n">Model</span><span class="p">,</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">invlogit</span><span class="p">,</span> <span class="n">Binomial</span><span class="p">,</span> <span class="n">sample</span><span class="p">,</span> <span class="n">forestplot</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+<p>Models are defined using a context manager (<code class="docutils literal notranslate"><span class="pre">with</span></code> statement). The model is specified declaratively inside the context manager, instantiating model variables and transforming them as necessary. Here is an example of a model for a bioassay experiment.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Data</span>
+<span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">*</span><span class="mi">5</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+<span class="n">dose</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-.</span><span class="mi">86</span><span class="p">,</span><span class="o">-.</span><span class="mi">3</span><span class="p">,</span><span class="o">-.</span><span class="mi">05</span><span class="p">,</span><span class="o">.</span><span class="mi">73</span><span class="p">])</span>
+
+<span class="k">with</span> <span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">bioassay_model</span><span class="p">:</span>
+
+    <span class="c1"># Prior distributions for latent variables</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">beta</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;beta&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+    <span class="c1"># Linear combinations of parameters</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">invlogit</span><span class="p">(</span><span class="n">alpha</span> <span class="o">+</span> <span class="n">beta</span><span class="o">*</span><span class="n">dose</span><span class="p">)</span>
+
+    <span class="c1"># Model likelihood</span>
+    <span class="n">deaths</span> <span class="o">=</span> <span class="n">Binomial</span><span class="p">(</span><span class="s1">&#39;deaths&#39;</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Save this file, then from a python shell (or another file in the same directory), call.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">bioassay_model</span><span class="p">:</span>
+
+    <span class="c1"># Draw wamples</span>
+    <span class="n">trace</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">njobs</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="c1"># Plot two parameters</span>
+    <span class="n">forestplot</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span> <span class="n">varnames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">,</span> <span class="s1">&#39;beta&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>This example will generate 1000 posterior samples on each of two cores using the NUTS algorithm, preceded by 500 tuning samples (the default number). The sampler is also initialized using variational inference.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Auto-assigning NUTS sampler...
+Initializing NUTS using ADVI...
+Average Loss = 12.562:   6%|▌         | 11412/200000 [00:00&lt;00:14, 12815.82it/s]
+Convergence archived at 11900
+Interrupted at 11,900 [5%]: Average Loss = 15.168
+100%|██████████████████████████████████████| 1500/1500 [00:01&lt;00:00, 787.56it/s]
+</pre></div>
+</div>
+<p>The sample is returned as arrays inside of a <code class="docutils literal notranslate"><span class="pre">MultiTrace</span></code> object, which is then passed to a plotting function. The resulting graphic shows a forest plot of the random variables in the model, along with a convergence diagnostic (R-hat) that indicates our model has converged.</p>
+<img alt="_images/forestplot.png" src="_images/forestplot.png" />
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/pymc3_logo.jpg" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="index.html">PyMC3</a></h1>
+
+
+
+<p class="blurb">Probabilistic Programming in Python: Bayesian Modeling and Probabilistic Machine Learning with Theano</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#purpose">Purpose</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#features">Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-s-new-in-version-3">What’s new in version 3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#history">History</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usage-overview">Usage Overview</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prob_dists.html">Probability Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, The PyMC Development Team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="_sources/intro.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

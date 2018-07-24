@@ -1,0 +1,549 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Sequential Monte Carlo with two gaussians &#8212; PyMC3 3.5 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="shortcut icon" href="../_static/PyMC3.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #303F9F;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #D84315;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 8ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #cfcfcf;
+    border-radius: 2px;
+    background: #f7f7f7;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.pngmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+</style>
+<div class="section" id="Sequential-Monte-Carlo-with-two-gaussians">
+<h1>Sequential Monte Carlo with two gaussians<a class="headerlink" href="#Sequential-Monte-Carlo-with-two-gaussians" title="Permalink to this headline">¶</a></h1>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="kn">import</span> <span class="nn">pymc3</span> <span class="kn">as</span> <span class="nn">pm</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+
+<span class="kn">from</span> <span class="nn">pymc3.step_methods</span> <span class="kn">import</span> <span class="n">smc</span>
+<span class="kn">import</span> <span class="nn">theano.tensor</span> <span class="kn">as</span> <span class="nn">tt</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;seaborn-darkgrid&#39;</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Running on PyMC3 v{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">__version__</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Running on PyMC3 v3.4.1
+</pre></div></div>
+</div>
+<p>Sampling from <span class="math notranslate nohighlight">\(n\)</span>-dimensional distributions with multiple peaks
+with a standard Metropolis-Hastings algorithm can be difficult, if not
+impossible, as the Markov chain often gets stuck in either of the
+minima.</p>
+<p>A Sequential Monte Carlo sampler (SMC) is a way to overcome this
+problem, or at least to ameliorate it. SMC samplers are very similar to
+genetic algorithms, which are biologically-inspired algorithms that can
+be summarized as follows:</p>
+<ol class="arabic simple">
+<li>Initialization: set a population of individuals</li>
+<li>Mutation: individuals are somehow modified or perturbed</li>
+<li>Selection: individuals with high <em>fitness</em> have higher chance to
+generate <em>offspring</em>.</li>
+<li>Iterate by using individuals from 3 to set the population in 1.</li>
+</ol>
+<p>If each <em>individual</em> is a particular solution to a problem, then a
+genetic algorithm will eventually produce good solutions to that
+problem. One key aspect is to generate enough diversity (mutation step)
+to explore the solution space avoiding getting trap in local minima and
+then apply <em>selection</em> to <em>probabilistically</em> keep reasonable solutions
+while also keeping some diversity. Being too greedy and short-sighted
+could be problematic, <em>bad</em> solutions in a given moment could lead to
+<em>good</em> solutions in the future.</p>
+<p>Moving into the realm of Bayesian statistics each individual is a point
+in the <em>posterior space</em>, mutations can be done in several ways, a
+general solution is to use a MCMC method (like Metropolis-Hastings) and
+run many Markov chains in parallel. The <em>fitness</em> is given by the
+posterior, points with low posterior density will be removed and points
+high posterior density will be used as the starting point of a next
+round of Markov chains (This step is known as <em>reweighting</em> in the SMC
+literature). The size of the population is kept fixed at some predefined
+value, so if a point is removed some other point should be used to start
+at least two new Markov chains.</p>
+<p>The previous paragraph is summarized in the next figure, the first
+subplot show 5 samples (orange dots) at some particular stage. The
+second subplots show how this samples are reweighted according to the
+their posterior density (blue Gaussian curve). The third subplot shows
+the result of running a certain number of Metropolis steps, starting
+from the <em>selected/reweighting</em> samples in the second subplots, notice
+how the two samples with the lower posterior density (smaller circles)
+are discarded and not used to seed Markov chains.</p>
+<p>So far we have that the SMC sampler is just a bunch of parallel Markov
+chains, not very impressive, right? Well not that fast. SMC proceed by
+moving <em>sequentially</em> trough a series of stages, starting from a simple
+to sample distribution until it get to the posterior distribution. All
+this intermediate distribution (or <em>tempered posterior distributions</em>)
+are controlled by <em>tempering</em> parameter called <span class="math notranslate nohighlight">\(\beta\)</span>. SMC takes
+this idea from other <em>tempering</em> methods originated from a branch of
+physics known as <em>statistical mechanics</em>. The idea is as follow the
+number of accessible states a <em>real physical</em> system can reach is
+controlled by the temperature, if the temperature is the lowest possible
+(<span class="math notranslate nohighlight">\(0\)</span> Kelvin) the system is trapped in a single state, on the
+contrary if the temperature is <span class="math notranslate nohighlight">\(\infty\)</span> all states are equally
+accessible! In the <em>statistical mechanics</em> literature <span class="math notranslate nohighlight">\(\beta\)</span> is
+know as the inverse temperature, the higher the more constrained the
+system is. Going back to the Bayesian statistics context a <em>natural</em>
+analogy to these physical systems is given by the following formula:</p>
+<div class="math notranslate nohighlight">
+\[p(\theta \mid y)_{\beta} \propto p(y \mid \theta)^{\beta} p(\theta)\]</div>
+<p>When <span class="math notranslate nohighlight">\(\beta = 0\)</span>, the <em>tempered posterior</em> is just the prior and
+when <span class="math notranslate nohighlight">\(\beta=1\)</span> the <em>tempered posterior</em> is the true posterior. SMC
+starts with <span class="math notranslate nohighlight">\(\beta = 0\)</span> and progress by always increasing the
+value of <span class="math notranslate nohighlight">\(\beta\)</span>, at each stage, until it reach 1. This is
+represented in the avobe figure by a narrower Gaussian distribution in
+the third subplot.</p>
+<p>At each stage SMC will use <code class="docutils literal notranslate"><span class="pre">chains</span></code> independent Markov chains to
+explore the <em>tempered posterior</em> (the black arrow in the figure). The
+final samples, <em>i.e</em> those stored in the <code class="docutils literal notranslate"><span class="pre">trace</span></code>, will be taken
+exclusively from the final stage (<span class="math notranslate nohighlight">\(\beta = 1\)</span>), i.e. the true
+posterior. The final samples are taken from all the <code class="docutils literal notranslate"><span class="pre">chains</span></code>, thus if
+you used 100 <code class="docutils literal notranslate"><span class="pre">chains</span></code> and want 2000 final <code class="docutils literal notranslate"><span class="pre">samples</span></code>, SMC will use
+100 <code class="docutils literal notranslate"><span class="pre">chains</span></code>, by sampling with replacement, to seed 2000 Markov
+chains. Those chains will runs for <code class="docutils literal notranslate"><span class="pre">n_steps</span></code> steps and the end points
+will be included in the final trace.</p>
+<p>The successive values of <span class="math notranslate nohighlight">\(\beta\)</span> are determined automatically from
+the sampling results of the previous intermediate distribution. SMC will
+try to keep the effective samples size (ESS) constant. Thus, the harder
+the distribution is to sample the larger the number of stages SMC will
+take. In other words the <em>cooling</em> will be slow and the successive
+values of <span class="math notranslate nohighlight">\(\beta\)</span> will change in small steps.</p>
+<p>Two more parameters that are automatically determined are: * The number
+of steps each Markov chain takes to explore the <em>tempered posterior</em>
+(<code class="docutils literal notranslate"><span class="pre">n_steps</span></code>) is determined from the acceptance rate at each stage, SMC
+use a <em>tune</em>interval_ to do this. * The width of the proposal
+distribution (<code class="docutils literal notranslate"><span class="pre">MultivariateProposal</span></code>) is also adjusted adaptively
+based on the acceptance rate at each stage.</p>
+<p>Even when SMC uses the Metropolis-Hasting algorithm under the hood, it
+has several advantages over it:</p>
+<ul class="simple">
+<li>It can sample from <span class="math notranslate nohighlight">\(n\)</span>-dimensional distributions with multiple
+peaks.</li>
+<li>It does not have a burn-in period, it starts by sampling directly
+from the prior and then at each stage the starting points are already
+distributed according to the tempered posterior (due to the
+re-weighting step).</li>
+<li>It is inherently parallel.</li>
+</ul>
+<p>The number of Markov chains and the number of steps each Markov chain is
+sampling has to be defined, as well as the <code class="docutils literal notranslate"><span class="pre">tune_interval</span></code> and the
+number of processors to be used in the parallel sampling. In this very
+simple example using only one processor is faster than forking the
+interpreter. However, if the calculation cost of the model increases it
+becomes more efficient to use many processors.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">chains</span> <span class="o">=</span> <span class="mi">500</span>
+</pre></div>
+</div>
+</div>
+<p>Define the number of dimensions for the multivariate gaussians, their
+weights and the covariance matrix.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">4</span>
+
+<span class="n">mu1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">mu2</span> <span class="o">=</span> <span class="o">-</span><span class="n">mu1</span>
+
+<span class="n">stdev</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">stdev</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="n">isigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+<span class="n">dsigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+
+<span class="n">w1</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="n">w2</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">w1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>The PyMC3 model. Note that we are making two gaussians, where one has
+<code class="docutils literal notranslate"><span class="pre">w1</span></code> (90%) of the mass:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">def</span> <span class="nf">two_gaussians</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="n">log_like1</span> <span class="o">=</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">n</span> <span class="o">*</span> <span class="n">tt</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> \
+                <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">tt</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">dsigma</span><span class="p">)</span> \
+                <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">mu1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">isigma</span><span class="p">)</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">mu1</span><span class="p">)</span>
+    <span class="n">log_like2</span> <span class="o">=</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">n</span> <span class="o">*</span> <span class="n">tt</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> \
+                <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">tt</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">dsigma</span><span class="p">)</span> \
+                <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">mu2</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">isigma</span><span class="p">)</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">mu2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tt</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">w1</span> <span class="o">*</span> <span class="n">tt</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_like1</span><span class="p">)</span> <span class="o">+</span> <span class="n">w2</span> <span class="o">*</span> <span class="n">tt</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_like2</span><span class="p">))</span>
+
+
+<span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">ATMIP_test</span><span class="p">:</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span>
+                   <span class="n">shape</span><span class="o">=</span><span class="n">n</span><span class="p">,</span>
+                   <span class="n">lower</span><span class="o">=-</span><span class="mf">2.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">mu1</span><span class="p">),</span>
+                   <span class="n">upper</span><span class="o">=</span><span class="mf">2.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">mu1</span><span class="p">),</span>
+                   <span class="n">testval</span><span class="o">=-</span><span class="mf">1.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">mu1</span><span class="p">))</span>
+    <span class="n">llk</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Potential</span><span class="p">(</span><span class="s1">&#39;llk&#39;</span><span class="p">,</span> <span class="n">two_gaussians</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<p>Note: In contrast to other pymc3 samplers here we have to define a
+random variable <code class="docutils literal notranslate"><span class="pre">like</span></code> that contains the model likelihood. The
+likelihood has to be stored in the sampling traces along with the model
+parameter samples, in order to determine the coefficient of variation
+[COV] in each transition stage.</p>
+<p>Finally, we initialise the sampler and execute the sampling:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">ATMIP_test</span><span class="p">:</span>
+    <span class="n">trace</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">5000</span><span class="p">,</span> <span class="n">chains</span><span class="o">=</span><span class="n">chains</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">pm</span><span class="o">.</span><span class="n">SMC</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+Adding model likelihood to RVs!
+Init new trace!
+Sample initial stage: ...
+Beta: 0.000000 Stage: 0
+Initializing chain traces ...
+Sampling ...
+100%|██████████| 500/500 [00:00&lt;00:00, 6000.71it/s]
+Beta: 0.009674 Stage: 1
+Initializing chain traces ...
+Sampling ...
+100%|██████████| 500/500 [00:01&lt;00:00, 334.09it/s]
+Beta: 0.019848 Stage: 2
+Initializing chain traces ...
+Sampling ...
+100%|██████████| 500/500 [00:00&lt;00:00, 1059.23it/s]
+Beta: 0.035439 Stage: 3
+Initializing chain traces ...
+Sampling ...
+100%|██████████| 500/500 [00:00&lt;00:00, 624.93it/s]
+Beta: 0.065176 Stage: 4
+Initializing chain traces ...
+Sampling ...
+100%|██████████| 500/500 [00:00&lt;00:00, 736.17it/s]
+Beta: 0.132725 Stage: 5
+Initializing chain traces ...
+Sampling ...
+100%|██████████| 500/500 [00:01&lt;00:00, 254.47it/s]
+Beta: 0.285900 Stage: 6
+Initializing chain traces ...
+Sampling ...
+100%|██████████| 500/500 [00:01&lt;00:00, 256.10it/s]
+Beta: 0.593902 Stage: 7
+Initializing chain traces ...
+Sampling ...
+100%|██████████| 500/500 [00:01&lt;00:00, 253.74it/s]
+Beta &gt; 1.: 1.189846
+Sample final stage
+Initializing chain traces ...
+Sampling ...
+100%|██████████| 5000/5000 [00:15&lt;00:00, 313.25it/s]
+</pre></div></div>
+</div>
+<p>Note: Complex models run for a long time and might stop for some reason
+during the sampling. In order to restart the sampling in the stage when
+the sampler stopped, set the stage argument to the right stage
+number(<code class="docutils literal notranslate"><span class="pre">stage=4</span></code>). The <code class="docutils literal notranslate"><span class="pre">rm_flag</span></code> determines whether existing
+results are deleted - there is NO additional warning, so the user should
+pay attention to that one!</p>
+<p>Plotting the results using the traceplot:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pm</span><span class="o">.</span><span class="n">traceplot</span><span class="p">(</span><span class="n">trace</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_SMC2_gaussians_14_0.png" src="../_images/notebooks_SMC2_gaussians_14_0.png" />
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/pymc3_logo.jpg" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="../index.html">PyMC3</a></h1>
+
+
+
+<p class="blurb">Probabilistic Programming in Python: Bayesian Modeling and Probabilistic Machine Learning with Theano</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../prob_dists.html">Probability Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, The PyMC Development Team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="../_sources/notebooks/SMC2_gaussians.ipynb.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

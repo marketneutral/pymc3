@@ -1,0 +1,663 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Model &#8212; PyMC3 3.5 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="shortcut icon" href="../_static/PyMC3.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Data" href="data.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pymc3.model">
+<span id="model"></span><h1>Model<a class="headerlink" href="#module-pymc3.model" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="pymc3.model.Model">
+<em class="property">class </em><code class="descclassname">pymc3.model.</code><code class="descname">Model</code><span class="sig-paren">(</span><em>name=''</em>, <em>model=None</em>, <em>theano_config=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.model.Model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encapsulates the variables and likelihood factors of a model.</p>
+<p>Model class can be used for creating class based models. To create
+a class based model you should inherit from <a class="reference internal" href="#pymc3.model.Model" title="pymc3.model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a> and
+override <code class="xref py py-meth docutils literal notranslate"><span class="pre">__init__()</span></code> with arbitrary definitions (do not
+forget to call base class <code class="xref py py-meth docutils literal notranslate"><span class="pre">__init__()</span></code> first).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>str</em>) – name that will be used as prefix for names of all random
+variables defined within model</li>
+<li><strong>model</strong> (<a class="reference internal" href="#pymc3.model.Model" title="pymc3.model.Model"><em>Model</em></a>) – instance of Model that is supposed to be a parent for the new
+instance. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, context will be used. All variables
+defined within instance will be passed to the parent instance.
+So that ‘nested’ model contributes to the variables and
+likelihood factors of parent model.</li>
+<li><strong>theano_config</strong> (<em>dict</em>) – A dictionary of theano config values that should be set
+temporarily in the model context. See the documentation
+of theano for a complete list. Set config key
+<code class="docutils literal notranslate"><span class="pre">compute_test_value</span></code> to <cite>raise</cite> if it is None.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<p>How to define a custom model</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">CustomModel</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="c1"># 1) override init</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="c1"># 2) call super&#39;s init first, passing model and name</span>
+        <span class="c1"># to it name will be prefix for all variables here if</span>
+        <span class="c1"># no name specified for model there will be no prefix</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CustomModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+        <span class="c1"># now you are in the context of instance,</span>
+        <span class="c1"># `modelcontext` will return self you can define</span>
+        <span class="c1"># variables in several ways note, that all variables</span>
+        <span class="c1"># will get model&#39;s name prefix</span>
+
+        <span class="c1"># 3) you can create variables with Var method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Var</span><span class="p">(</span><span class="s1">&#39;v1&#39;</span><span class="p">,</span> <span class="n">Normal</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">mu</span><span class="o">=</span><span class="n">mean</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">sd</span><span class="p">))</span>
+        <span class="c1"># this will create variable named like &#39;{prefix_}v1&#39;</span>
+        <span class="c1"># and assign attribute &#39;v1&#39; to instance created</span>
+        <span class="c1"># variable can be accessed with self.v1 or self[&#39;v1&#39;]</span>
+
+        <span class="c1"># 4) this syntax will also work as we are in the</span>
+        <span class="c1"># context of instance itself, names are given as usual</span>
+        <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;v2&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mean</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">sd</span><span class="p">)</span>
+
+        <span class="c1"># something more complex is allowed, too</span>
+        <span class="n">half_cauchy</span> <span class="o">=</span> <span class="n">HalfCauchy</span><span class="p">(</span><span class="s1">&#39;sd&#39;</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">testval</span><span class="o">=</span><span class="mf">1.</span><span class="p">)</span>
+        <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;v3&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mean</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">half_cauchy</span><span class="p">)</span>
+
+        <span class="c1"># Deterministic variables can be used in usual way</span>
+        <span class="n">Deterministic</span><span class="p">(</span><span class="s1">&#39;v3_sq&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">v3</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># Potentials too</span>
+        <span class="n">Potential</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">,</span> <span class="n">tt</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+
+<span class="c1"># After defining a class CustomModel you can use it in several</span>
+<span class="c1"># ways</span>
+
+<span class="c1"># I:</span>
+<span class="c1">#   state the model within a context</span>
+<span class="k">with</span> <span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">CustomModel</span><span class="p">()</span>
+    <span class="c1"># arbitrary actions</span>
+
+<span class="c1"># II:</span>
+<span class="c1">#   use new class as entering point in context</span>
+<span class="k">with</span> <span class="n">CustomModel</span><span class="p">()</span> <span class="k">as</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;new_normal_var&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># III:</span>
+<span class="c1">#   just get model instance with all that was defined in it</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">CustomModel</span><span class="p">()</span>
+
+<span class="c1"># IV:</span>
+<span class="c1">#   use many custom models within one context</span>
+<span class="k">with</span> <span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">CustomModel</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">)</span>
+    <span class="n">CustomModel</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;second&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="pymc3.model.Model.Var">
+<code class="descname">Var</code><span class="sig-paren">(</span><em>name</em>, <em>dist</em>, <em>data=None</em>, <em>total_size=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.model.Model.Var" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create and add (un)observed random variable to the model with an
+appropriate prior distribution.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>str</em>) – </li>
+<li><strong>dist</strong> (<em>distribution for the random variable</em>) – </li>
+<li><strong>data</strong> (<em>array_like</em><em> (</em><em>optional</em><em>)</em>) – If data is provided, the variable is observed. If None,
+the variable is unobserved.</li>
+<li><strong>total_size</strong> (<em>scalar</em>) – upscales logp of variable with <code class="docutils literal notranslate"><span class="pre">coef</span> <span class="pre">=</span> <span class="pre">total_size/var.shape[0]</span></code></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><em>FreeRV or ObservedRV</em></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymc3.model.Model.add_random_variable">
+<code class="descname">add_random_variable</code><span class="sig-paren">(</span><em>var</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.model.Model.add_random_variable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a random variable to the named variables of the model.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pymc3.model.Model.basic_RVs">
+<code class="descname">basic_RVs</code><a class="headerlink" href="#pymc3.model.Model.basic_RVs" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of random variables the model is defined in terms of
+(which excludes deterministics).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymc3.model.Model.check_test_point">
+<code class="descname">check_test_point</code><span class="sig-paren">(</span><em>test_point=None</em>, <em>round_vals=2</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.model.Model.check_test_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks log probability of test_point for all random variables in the model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>test_point</strong> (<em>Point</em>) – Point to be evaluated.
+if None, then all model.test_point is used</li>
+<li><strong>round_vals</strong> (<em>int</em>) – Number of decimals to round log-probabilities</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><em>Pandas Series</em></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pymc3.model.Model.cont_vars">
+<code class="descname">cont_vars</code><a class="headerlink" href="#pymc3.model.Model.cont_vars" title="Permalink to this definition">¶</a></dt>
+<dd><p>All the continuous variables in the model</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pymc3.model.Model.disc_vars">
+<code class="descname">disc_vars</code><a class="headerlink" href="#pymc3.model.Model.disc_vars" title="Permalink to this definition">¶</a></dt>
+<dd><p>All the discrete variables in the model</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymc3.model.Model.fastfn">
+<code class="descname">fastfn</code><span class="sig-paren">(</span><em>outs</em>, <em>mode=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.model.Model.fastfn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compiles a Theano function which returns <code class="docutils literal notranslate"><span class="pre">outs</span></code> and takes values
+of model vars as a dict as an argument.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>outs</strong> (<em>Theano variable</em><em> or </em><em>iterable of Theano variables</em>) – </li>
+<li><strong>mode</strong> (<em>Theano compilation mode</em>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><em>Compiled Theano function as point function.</em></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymc3.model.Model.flatten">
+<code class="descname">flatten</code><span class="sig-paren">(</span><em>vars=None</em>, <em>order=None</em>, <em>inputvar=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.model.Model.flatten" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flattens model’s input and returns:</p>
+<dl class="docutils">
+<dt>FlatView with</dt>
+<dd><ul class="first last simple">
+<li>input vector variable</li>
+<li>replacements <code class="docutils literal notranslate"><span class="pre">input_var</span> <span class="pre">-&gt;</span> <span class="pre">vars</span></code></li>
+<li>view <cite>{variable: VarMap}</cite></li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vars</strong> (<em>list of variables</em><em> or </em><em>None</em>) – if None, then all model.free_RVs are used for flattening input</li>
+<li><strong>order</strong> (<em>ArrayOrdering</em>) – Optional, use predefined ordering</li>
+<li><strong>inputvar</strong> (<em>tt.vector</em>) – Optional, use predefined inputvar</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><em>flat_view</em></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymc3.model.Model.fn">
+<code class="descname">fn</code><span class="sig-paren">(</span><em>outs</em>, <em>mode=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.model.Model.fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compiles a Theano function which returns the values of <code class="docutils literal notranslate"><span class="pre">outs</span></code>
+and takes values of model vars as arguments.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>outs</strong> (<em>Theano variable</em><em> or </em><em>iterable of Theano variables</em>) – </li>
+<li><strong>mode</strong> (<em>Theano compilation mode</em>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><em>Compiled Theano function</em></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pymc3.model.Model.logp_nojact">
+<code class="descname">logp_nojact</code><a class="headerlink" href="#pymc3.model.Model.logp_nojact" title="Permalink to this definition">¶</a></dt>
+<dd><p>Theano scalar of log-probability of the model</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pymc3.model.Model.logpt">
+<code class="descname">logpt</code><a class="headerlink" href="#pymc3.model.Model.logpt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Theano scalar of log-probability of the model</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymc3.model.Model.makefn">
+<code class="descname">makefn</code><span class="sig-paren">(</span><em>outs</em>, <em>mode=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.model.Model.makefn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compiles a Theano function which returns <code class="docutils literal notranslate"><span class="pre">outs</span></code> and takes the variable
+ancestors of <code class="docutils literal notranslate"><span class="pre">outs</span></code> as inputs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>outs</strong> (<em>Theano variable</em><em> or </em><em>iterable of Theano variables</em>) – </li>
+<li><strong>mode</strong> (<em>Theano compilation mode</em>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><em>Compiled Theano function</em></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymc3.model.Model.name_for">
+<code class="descname">name_for</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.model.Model.name_for" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if name has prefix and adds if needed</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymc3.model.Model.name_of">
+<code class="descname">name_of</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.model.Model.name_of" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if name has prefix and deletes if needed</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymc3.model.Model.profile">
+<code class="descname">profile</code><span class="sig-paren">(</span><em>outs</em>, <em>n=1000</em>, <em>point=None</em>, <em>profile=True</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.model.Model.profile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compiles and profiles a Theano function which returns <code class="docutils literal notranslate"><span class="pre">outs</span></code> and
+takes values of model vars as a dict as an argument.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>outs</strong> (<em>Theano variable</em><em> or </em><em>iterable of Theano variables</em>) – </li>
+<li><strong>n</strong> (<em>int</em><em>, </em><em>default 1000</em>) – Number of iterations to run</li>
+<li><strong>point</strong> (<em>point</em>) – Point to pass to the function</li>
+<li><strong>profile</strong> (<em>True</em><em> or </em><em>ProfileStats</em>) – </li>
+<li><strong>kwargs</strong> (<em>args</em><em>,</em>) – Compilation args</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><em>ProfileStats</em> – Use .summary() to print stats.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pymc3.model.Model.test_point">
+<code class="descname">test_point</code><a class="headerlink" href="#pymc3.model.Model.test_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test point used to check that the model doesn’t generate errors</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pymc3.model.Model.unobserved_RVs">
+<code class="descname">unobserved_RVs</code><a class="headerlink" href="#pymc3.model.Model.unobserved_RVs" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of all random variable, including deterministic ones.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pymc3.model.Model.varlogpt">
+<code class="descname">varlogpt</code><a class="headerlink" href="#pymc3.model.Model.varlogpt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Theano scalar of log-probability of the unobserved random variables
+(excluding deterministic).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pymc3.model.Model.vars">
+<code class="descname">vars</code><a class="headerlink" href="#pymc3.model.Model.vars" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of unobserved random variables used as inputs to the model
+(which excludes deterministics).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pymc3.model.Factor">
+<em class="property">class </em><code class="descclassname">pymc3.model.</code><code class="descname">Factor</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.model.Factor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Common functionality for objects with a log probability density
+associated with them.</p>
+<dl class="method">
+<dt id="pymc3.model.Factor.d2logp">
+<code class="descname">d2logp</code><span class="sig-paren">(</span><em>vars=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.model.Factor.d2logp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compiled log probability density hessian function</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymc3.model.Factor.d2logp_nojac">
+<code class="descname">d2logp_nojac</code><span class="sig-paren">(</span><em>vars=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.model.Factor.d2logp_nojac" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compiled log density hessian function, without jacobian terms.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymc3.model.Factor.dlogp">
+<code class="descname">dlogp</code><span class="sig-paren">(</span><em>vars=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.model.Factor.dlogp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compiled log probability density gradient function</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymc3.model.Factor.dlogp_nojac">
+<code class="descname">dlogp_nojac</code><span class="sig-paren">(</span><em>vars=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.model.Factor.dlogp_nojac" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compiled log density gradient function, without jacobian terms.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymc3.model.Factor.fastd2logp">
+<code class="descname">fastd2logp</code><span class="sig-paren">(</span><em>vars=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.model.Factor.fastd2logp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compiled log probability density hessian function</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymc3.model.Factor.fastd2logp_nojac">
+<code class="descname">fastd2logp_nojac</code><span class="sig-paren">(</span><em>vars=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.model.Factor.fastd2logp_nojac" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compiled log density hessian function, without jacobian terms.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymc3.model.Factor.fastdlogp">
+<code class="descname">fastdlogp</code><span class="sig-paren">(</span><em>vars=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.model.Factor.fastdlogp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compiled log probability density gradient function</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymc3.model.Factor.fastdlogp_nojac">
+<code class="descname">fastdlogp_nojac</code><span class="sig-paren">(</span><em>vars=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.model.Factor.fastdlogp_nojac" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compiled log density gradient function, without jacobian terms.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pymc3.model.Factor.fastlogp">
+<code class="descname">fastlogp</code><a class="headerlink" href="#pymc3.model.Factor.fastlogp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compiled log probability density function</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pymc3.model.Factor.logp">
+<code class="descname">logp</code><a class="headerlink" href="#pymc3.model.Factor.logp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compiled log probability density function</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pymc3.model.Factor.logp_nojact">
+<code class="descname">logp_nojact</code><a class="headerlink" href="#pymc3.model.Factor.logp_nojact" title="Permalink to this definition">¶</a></dt>
+<dd><p>Theano scalar of log-probability, excluding jacobian terms.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pymc3.model.Factor.logpt">
+<code class="descname">logpt</code><a class="headerlink" href="#pymc3.model.Factor.logpt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Theano scalar of log-probability of the model</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="pymc3.model.compilef">
+<code class="descclassname">pymc3.model.</code><code class="descname">compilef</code><span class="sig-paren">(</span><em>outs</em>, <em>mode=None</em>, <em>model=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.model.compilef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compiles a Theano function which returns <code class="docutils literal notranslate"><span class="pre">outs</span></code> and takes values of model
+vars as a dict as an argument.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>outs</strong> (<em>Theano variable</em><em> or </em><em>iterable of Theano variables</em>) – </li>
+<li><strong>mode</strong> (<em>Theano compilation mode</em>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><em>Compiled Theano function as point function.</em></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymc3.model.fn">
+<code class="descclassname">pymc3.model.</code><code class="descname">fn</code><span class="sig-paren">(</span><em>outs</em>, <em>mode=None</em>, <em>model=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.model.fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compiles a Theano function which returns the values of <code class="docutils literal notranslate"><span class="pre">outs</span></code> and
+takes values of model vars as arguments.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>outs</strong> (<em>Theano variable</em><em> or </em><em>iterable of Theano variables</em>) – </li>
+<li><strong>mode</strong> (<em>Theano compilation mode</em>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><em>Compiled Theano function</em></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymc3.model.fastfn">
+<code class="descclassname">pymc3.model.</code><code class="descname">fastfn</code><span class="sig-paren">(</span><em>outs</em>, <em>mode=None</em>, <em>model=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.model.fastfn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compiles a Theano function which returns <code class="docutils literal notranslate"><span class="pre">outs</span></code> and takes values of model
+vars as a dict as an argument.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>outs</strong> (<em>Theano variable</em><em> or </em><em>iterable of Theano variables</em>) – </li>
+<li><strong>mode</strong> (<em>Theano compilation mode</em>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><em>Compiled Theano function as point function.</em></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymc3.model.modelcontext">
+<code class="descclassname">pymc3.model.</code><code class="descname">modelcontext</code><span class="sig-paren">(</span><em>model</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.model.modelcontext" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the given model or try to find it in the context if there was
+none supplied.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymc3.model.Point">
+<code class="descclassname">pymc3.model.</code><code class="descname">Point</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.model.Point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a point. Uses same args as dict() does.
+Filters out variables not in the model. All keys are strings.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> (<em>args</em><em>,</em>) – arguments to build a dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymc3.model.Deterministic">
+<code class="descclassname">pymc3.model.</code><code class="descname">Deterministic</code><span class="sig-paren">(</span><em>name</em>, <em>var</em>, <em>model=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.model.Deterministic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a named deterministic variable</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>str</em>) – </li>
+<li><strong>var</strong> (<em>theano variables</em>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>var</strong> (<em>var, with name attribute</em>)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymc3.model.Potential">
+<code class="descclassname">pymc3.model.</code><code class="descname">Potential</code><span class="sig-paren">(</span><em>name</em>, <em>var</em>, <em>model=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.model.Potential" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an arbitrary factor potential to the model likelihood</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>str</em>) – </li>
+<li><strong>var</strong> (<em>theano variables</em>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>var</strong> (<em>var, with name attribute</em>)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/pymc3_logo.jpg" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="../index.html">PyMC3</a></h1>
+
+
+
+<p class="blurb">Probabilistic Programming in Python: Bayesian Modeling and Probabilistic Machine Learning with Theano</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../prob_dists.html">Probability Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="distributions.html">Distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bounds.html">Bounded Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inference.html">Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glm.html">Generalized Linear Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gp.html">GP Implementations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gp.html#mean-functions">Mean Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gp.html#covariance-functions">Covariance Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plots.html">Plots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stats.html">Stats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="diagnostics.html">Diagnostics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html">Backends</a></li>
+<li class="toctree-l2"><a class="reference internal" href="math.html">Math</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html">Data</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Model</a></li>
+</ul>
+</li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, The PyMC Development Team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="../_sources/api/model.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

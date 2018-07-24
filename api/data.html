@@ -1,0 +1,275 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Data &#8212; PyMC3 3.5 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="shortcut icon" href="../_static/PyMC3.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Model" href="model.html" />
+    <link rel="prev" title="Math" href="math.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pymc3.data">
+<span id="data"></span><h1>Data<a class="headerlink" href="#module-pymc3.data" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="pymc3.data.get_data">
+<code class="descclassname">pymc3.data.</code><code class="descname">get_data</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.data.get_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a BytesIO object for a package data file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<em>str</em>) – file to load</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><em>BytesIO of the data</em></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pymc3.data.GeneratorAdapter">
+<em class="property">class </em><code class="descclassname">pymc3.data.</code><code class="descname">GeneratorAdapter</code><span class="sig-paren">(</span><em>generator</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.data.GeneratorAdapter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper class that helps to infer data type of generator with looking
+at the first item, preserving the order of the resulting generator</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pymc3.data.Minibatch">
+<em class="property">class </em><code class="descclassname">pymc3.data.</code><code class="descname">Minibatch</code><span class="sig-paren">(</span><em>data</em>, <em>batch_size=128</em>, <em>dtype=None</em>, <em>broadcastable=None</em>, <em>name='Minibatch'</em>, <em>random_seed=42</em>, <em>update_shared_f=None</em>, <em>in_memory_size=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.data.Minibatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multidimensional minibatch that is pure TensorVariable</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – initial data</li>
+<li><strong>batch_size</strong> (<cite>int</cite> or <cite>List[int|tuple(size, random_seed)]</cite>) – batch size for inference, random seed is needed
+for child random generators</li>
+<li><strong>dtype</strong> (<cite>str</cite>) – cast data to specific type</li>
+<li><strong>broadcastable</strong> (<em>tuple</em><em>[</em><em>bool</em><em>]</em>) – change broadcastable pattern that defaults to <cite>(False, ) * ndim</cite></li>
+<li><strong>name</strong> (<cite>str</cite>) – name for tensor, defaults to “Minibatch”</li>
+<li><strong>random_seed</strong> (<cite>int</cite>) – random seed that is used by default</li>
+<li><strong>update_shared_f</strong> (<cite>callable</cite>) – returns <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code> that will be carefully
+stored to underlying shared variable
+you can use it to change source of
+minibatches programmatically</li>
+<li><strong>in_memory_size</strong> (<cite>int</cite> or <cite>List[int|slice|Ellipsis]</cite>) – data size for storing in theano.shared</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="pymc3.data.Minibatch.shared">
+<code class="descname">shared</code><a class="headerlink" href="#pymc3.data.Minibatch.shared" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>shared tensor</em> – Used for storing data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pymc3.data.Minibatch.minibatch">
+<code class="descname">minibatch</code><a class="headerlink" href="#pymc3.data.Minibatch.minibatch" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>minibatch tensor</em> – Used for training</p>
+</dd></dl>
+
+<p class="rubric">Examples</p>
+<p>Consider we have data
+&gt;&gt;&gt; data = np.random.rand(100, 100)</p>
+<p>if we want 1d slice of size 10 we do
+&gt;&gt;&gt; x = Minibatch(data, batch_size=10)</p>
+<p>Note, that your data is cast to <cite>floatX</cite> if it is not integer type
+But you still can add <cite>dtype</cite> kwarg for <a class="reference internal" href="#pymc3.data.Minibatch" title="pymc3.data.Minibatch"><code class="xref py py-class docutils literal notranslate"><span class="pre">Minibatch</span></code></a></p>
+<p>in case we want 10 sampled rows and columns
+<cite>[(size, seed), (size, seed)]</cite> it is
+&gt;&gt;&gt; x = Minibatch(data, batch_size=[(10, 42), (10, 42)], dtype=’int32’)
+&gt;&gt;&gt; assert str(x.dtype) == ‘int32’</p>
+<p>or simpler with default random seed = 42
+<cite>[size, size]</cite>
+&gt;&gt;&gt; x = Minibatch(data, batch_size=[10, 10])</p>
+<p>x is a regular <code class="xref py py-class docutils literal notranslate"><span class="pre">TensorVariable</span></code> that supports any math
+&gt;&gt;&gt; assert x.eval().shape == (10, 10)</p>
+<p>You can pass it to your desired model
+&gt;&gt;&gt; with pm.Model() as model:
+…     mu = pm.Flat(‘mu’)
+…     sd = pm.HalfNormal(‘sd’)
+…     lik = pm.Normal(‘lik’, mu, sd, observed=x, total_size=(100, 100))</p>
+<p>Then you can perform regular Variational Inference out of the box
+&gt;&gt;&gt; with model:
+…     approx = pm.fit()</p>
+<p>Notable thing is that <a class="reference internal" href="#pymc3.data.Minibatch" title="pymc3.data.Minibatch"><code class="xref py py-class docutils literal notranslate"><span class="pre">Minibatch</span></code></a> has <cite>shared</cite>, <cite>minibatch</cite>, attributes
+you can call later
+&gt;&gt;&gt; x.set_value(np.random.laplace(size=(100, 100)))</p>
+<p>and minibatches will be then from new storage
+it directly affects <cite>x.shared</cite>.
+the same thing would be but less convenient
+&gt;&gt;&gt; x.shared.set_value(pm.floatX(np.random.laplace(size=(100, 100))))</p>
+<p>programmatic way to change storage is as follows
+I import <cite>partial</cite> for simplicity
+&gt;&gt;&gt; from functools import partial
+&gt;&gt;&gt; datagen = partial(np.random.laplace, size=(100, 100))
+&gt;&gt;&gt; x = Minibatch(datagen(), batch_size=10, update_shared_f=datagen)
+&gt;&gt;&gt; x.update_shared()</p>
+<p>To be more concrete about how we get minibatch, here is a demo
+1) create shared variable
+&gt;&gt;&gt; shared = theano.shared(data)</p>
+<p>2) create random slice of size 10
+&gt;&gt;&gt; ridx = pm.tt_rng().uniform(size=(10,), low=0, high=data.shape[0]-1e-10).astype(‘int64’)</p>
+<p>3) take that slice
+&gt;&gt;&gt; minibatch = shared[ridx]</p>
+<p>That’s done. Next you can use this minibatch somewhere else.
+You can see that implementation does not require fixed shape
+for shared variable. Feel free to use that if needed.</p>
+<p>Suppose you need some replacements in the graph, e.g. change minibatch to testdata
+&gt;&gt;&gt; node = x ** 2  # arbitrary expressions on minibatch <cite>x</cite>
+&gt;&gt;&gt; testdata = pm.floatX(np.random.laplace(size=(1000, 10)))</p>
+<p>Then you should create a dict with replacements
+&gt;&gt;&gt; replacements = {x: testdata}
+&gt;&gt;&gt; rnode = theano.clone(node, replacements)
+&gt;&gt;&gt; assert (testdata ** 2 == rnode.eval()).all()</p>
+<p>To replace minibatch with it’s shared variable you should do
+the same things. Minibatch variable is accessible as an attribute
+as well as shared, associated with minibatch
+&gt;&gt;&gt; replacements = {x.minibatch: x.shared}
+&gt;&gt;&gt; rnode = theano.clone(node, replacements)</p>
+<p>For more complex slices some more code is needed that can seem not so clear
+&gt;&gt;&gt; moredata = np.random.rand(10, 20, 30, 40, 50)</p>
+<p>default <cite>total_size</cite> that can be passed to <cite>PyMC3</cite> random node
+is then <cite>(10, 20, 30, 40, 50)</cite> but can be less verbose in some cases</p>
+<p>1) Advanced indexing, <cite>total_size = (10, Ellipsis, 50)</cite>
+&gt;&gt;&gt; x = Minibatch(moredata, [2, Ellipsis, 10])</p>
+<p>We take slice only for the first and last dimension
+&gt;&gt;&gt; assert x.eval().shape == (2, 20, 30, 40, 10)</p>
+<p>2) Skipping particular dimension, <cite>total_size = (10, None, 30)</cite>
+&gt;&gt;&gt; x = Minibatch(moredata, [2, None, 20])
+&gt;&gt;&gt; assert x.eval().shape == (2, 20, 20, 40, 50)</p>
+<p>3) Mixing that all, <cite>total_size = (10, None, 30, Ellipsis, 50)</cite>
+&gt;&gt;&gt; x = Minibatch(moredata, [2, None, 20, Ellipsis, 10])
+&gt;&gt;&gt; assert x.eval().shape == (2, 20, 20, 40, 10)</p>
+<dl class="method">
+<dt id="pymc3.data.Minibatch.clone">
+<code class="descname">clone</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.data.Minibatch.clone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new Variable like self.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><em>Variable instance</em> – A new Variable instance (or subclass instance) with no owner or
+index.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Tags are copied to the returned instance.</p>
+<p>Name is copied to the returned instance.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/pymc3_logo.jpg" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="../index.html">PyMC3</a></h1>
+
+
+
+<p class="blurb">Probabilistic Programming in Python: Bayesian Modeling and Probabilistic Machine Learning with Theano</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../prob_dists.html">Probability Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="distributions.html">Distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bounds.html">Bounded Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inference.html">Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glm.html">Generalized Linear Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gp.html">GP Implementations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gp.html#mean-functions">Mean Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gp.html#covariance-functions">Covariance Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plots.html">Plots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stats.html">Stats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="diagnostics.html">Diagnostics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html">Backends</a></li>
+<li class="toctree-l2"><a class="reference internal" href="math.html">Math</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html">Model</a></li>
+</ul>
+</li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, The PyMC Development Team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="../_sources/api/data.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

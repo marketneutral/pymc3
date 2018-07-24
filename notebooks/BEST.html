@@ -1,0 +1,751 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Bayesian Estimation Supersedes the T-Test &#8212; PyMC3 3.5 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="shortcut icon" href="../_static/PyMC3.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="A Primer on Bayesian Methods for Multilevel Modeling" href="multilevel_modeling.html" />
+    <link rel="prev" title="Live sample plots" href="live_sample_plots.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #303F9F;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #D84315;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 8ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #cfcfcf;
+    border-radius: 2px;
+    background: #f7f7f7;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.pngmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+</style>
+<div class="section" id="Bayesian-Estimation-Supersedes-the-T-Test">
+<h1>Bayesian Estimation Supersedes the T-Test<a class="headerlink" href="#Bayesian-Estimation-Supersedes-the-T-Test" title="Permalink to this headline">¶</a></h1>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pymc3</span> <span class="kn">as</span> <span class="nn">pm</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;seaborn-darkgrid&#39;</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Running on PyMC3 v{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">__version__</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Running on PyMC3 v3.3
+</pre></div></div>
+</div>
+<p>This model replicates the example used in: Kruschke, John. (2012)
+<strong>Bayesian estimation supersedes the t-test</strong>. <em>Journal of Experimental
+Psychology</em>: General.</p>
+<div class="section" id="The-Problem">
+<h2>The Problem<a class="headerlink" href="#The-Problem" title="Permalink to this headline">¶</a></h2>
+<p>Several statistical inference procedures involve the comparison of two
+groups. We may be interested in whether one group is larger than
+another, or simply different from the other. We require a statistical
+model for this because true differences are usually accompanied by
+measurement or stochastic noise that prevent us from drawing conclusions
+simply from differences calculated from the observed data.</p>
+<p>The <em>de facto</em> standard for statistically comparing two (or more)
+samples is to use a statistical test. This involves expressing a null
+hypothesis, which typically claims that there is no difference between
+the groups, and using a chosen test statistic to determine whether the
+distribution of the observed data is plausible under the hypothesis.
+This rejection occurs when the calculated test statistic is higher than
+some pre-specified threshold value.</p>
+<p>Unfortunately, it is not easy to conduct hypothesis tests correctly, and
+their results are very easy to misinterpret. Setting up a statistical
+test involves several subjective choices (<em>e.g.</em> statistical test to
+use, null hypothesis to test, significance level) by the user that are
+rarely justified based on the problem or decision at hand, but rather,
+are usually based on traditional choices that are entirely arbitrary
+(Johnson 1999). The evidence that it provides to the user is indirect,
+incomplete, and typically overstates the evidence against the null
+hypothesis (Goodman 1999).</p>
+<p>A more informative and effective approach for comparing groups is one
+based on <strong>estimation</strong> rather than <strong>testing</strong>, and is driven by
+Bayesian probability rather than frequentist. That is, rather than
+testing whether two groups are different, we instead pursue an estimate
+of how different they are, which is fundamentally more informative.
+Moreover, we include an estimate of uncertainty associated with that
+difference which includes uncertainty due to our lack of knowledge of
+the model parameters (epistemic uncertainty) and uncertainty due to the
+inherent stochasticity of the system (aleatory uncertainty).</p>
+<div class="section" id="Example:-Drug-trial-evaluation">
+<h3>Example: Drug trial evaluation<a class="headerlink" href="#Example:-Drug-trial-evaluation" title="Permalink to this headline">¶</a></h3>
+<p>To illustrate how this Bayesian estimation approach works in practice,
+we will use a fictitious example from Kruschke (2012) concerning the
+evaluation of a clinical trial for drug evaluation. The trial aims to
+evaluate the efficacy of a “smart drug” that is supposed to increase
+intelligence by comparing IQ scores of individuals in a treatment arm
+(those receiving the drug) to those in a control arm (those recieving a
+placebo). There are 47 individuals and 42 individuals in the treatment
+and control arms, respectively.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">drug</span> <span class="o">=</span> <span class="p">(</span><span class="mi">101</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">102</span><span class="p">,</span><span class="mi">104</span><span class="p">,</span><span class="mi">102</span><span class="p">,</span><span class="mi">97</span><span class="p">,</span><span class="mi">105</span><span class="p">,</span><span class="mi">105</span><span class="p">,</span><span class="mi">98</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">123</span><span class="p">,</span><span class="mi">105</span><span class="p">,</span><span class="mi">103</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">95</span><span class="p">,</span><span class="mi">102</span><span class="p">,</span><span class="mi">106</span><span class="p">,</span>
+        <span class="mi">109</span><span class="p">,</span><span class="mi">102</span><span class="p">,</span><span class="mi">82</span><span class="p">,</span><span class="mi">102</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">102</span><span class="p">,</span><span class="mi">102</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span><span class="mi">102</span><span class="p">,</span><span class="mi">102</span><span class="p">,</span><span class="mi">103</span><span class="p">,</span><span class="mi">103</span><span class="p">,</span><span class="mi">97</span><span class="p">,</span><span class="mi">97</span><span class="p">,</span><span class="mi">103</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span><span class="mi">97</span><span class="p">,</span><span class="mi">104</span><span class="p">,</span>
+        <span class="mi">96</span><span class="p">,</span><span class="mi">103</span><span class="p">,</span><span class="mi">124</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span><span class="mi">104</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">101</span><span class="p">)</span>
+<span class="n">placebo</span> <span class="o">=</span> <span class="p">(</span><span class="mi">99</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span><span class="mi">102</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">97</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span><span class="mi">104</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span><span class="mi">102</span><span class="p">,</span><span class="mi">102</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">105</span><span class="p">,</span><span class="mi">88</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span>
+           <span class="mi">104</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span><span class="mi">102</span><span class="p">,</span><span class="mi">103</span><span class="p">,</span><span class="mi">97</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span><span class="mi">99</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span>
+           <span class="mi">101</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">99</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">102</span><span class="p">,</span><span class="mi">99</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">99</span><span class="p">)</span>
+
+<span class="n">y1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">drug</span><span class="p">)</span>
+<span class="n">y2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">placebo</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">y1</span><span class="p">,</span> <span class="n">y2</span><span class="p">],</span> <span class="n">group</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[[</span><span class="s1">&#39;drug&#39;</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">drug</span><span class="p">),</span> <span class="p">[</span><span class="s1">&#39;placebo&#39;</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">placebo</span><span class="p">)]))</span>
+
+<span class="n">y</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="n">by</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_BEST_5_0.png" src="../_images/notebooks_BEST_5_0.png" />
+</div>
+</div>
+<p>The first step in a Bayesian approach to inference is to specify the
+full probability model that corresponds to the problem. For this
+example, Kruschke chooses a Student-t distribution to describe the
+distributions of the scores in each group. This choice adds robustness
+to the analysis, as a T distribution is less sensitive to outlier
+observations, relative to a normal distribution. The three-parameter
+Student-t distribution allows for the specification of a mean
+<span class="math notranslate nohighlight">\(\mu\)</span>, a precision (inverse-variance) <span class="math notranslate nohighlight">\(\lambda\)</span> and a
+degrees-of-freedom parameter <span class="math notranslate nohighlight">\(\nu\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[f(x|\mu,\lambda,\nu) = \frac{\Gamma(\frac{\nu + 1}{2})}{\Gamma(\frac{\nu}{2})} \left(\frac{\lambda}{\pi\nu}\right)^{\frac{1}{2}} \left[1+\frac{\lambda(x-\mu)^2}{\nu}\right]^{-\frac{\nu+1}{2}}\]</div>
+<p>the degrees-of-freedom parameter essentially specifies the “normality”
+of the data, since larger values of <span class="math notranslate nohighlight">\(\nu\)</span> make the distribution
+converge to a normal distribution, while small values (close to zero)
+result in heavier tails.</p>
+<p>Thus, the likelihood functions of our model are specified as follows:</p>
+<div class="math notranslate nohighlight">
+\[y^{(treat)}_i \sim T(\nu, \mu_1, \sigma_1)\]</div>
+<div class="math notranslate nohighlight">
+\[y^{(placebo)}_i \sim T(\nu, \mu_2, \sigma_2)\]</div>
+<p>As a simplifying assumption, we will assume that the degree of normality
+<span class="math notranslate nohighlight">\(\nu\)</span> is the same for both groups. We will, of course, have
+separate parameters for the means <span class="math notranslate nohighlight">\(\mu_k, k=1,2\)</span> and standard
+deviations <span class="math notranslate nohighlight">\(\sigma_k\)</span>.</p>
+<p>Since the means are real-valued, we will apply normal priors on them,
+and arbitrarily set the hyperparameters to the pooled empirical mean of
+the data and twice the pooled empirical standard deviation, which
+applies very diffuse information to these quantities (and importantly,
+does not favor one or the other <em>a priori</em>).</p>
+<div class="math notranslate nohighlight">
+\[\mu_k \sim N(\bar{x}, 2s)\]</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="err">μ</span><span class="n">_m</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="err">μ</span><span class="n">_s</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="o">*</span> <span class="mi">2</span>
+
+<span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">group1_mean</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;group1_mean&#39;</span><span class="p">,</span> <span class="err">μ</span><span class="n">_m</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="err">μ</span><span class="n">_s</span><span class="p">)</span>
+    <span class="n">group2_mean</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;group2_mean&#39;</span><span class="p">,</span> <span class="err">μ</span><span class="n">_m</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="err">μ</span><span class="n">_s</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>The group standard deviations will be given a uniform prior over a
+plausible range of values for the variability of the outcome variable,
+IQ.</p>
+<p>In Kruschke’s original model, he uses a very wide uniform prior for the
+group standard deviations, from the pooled empirical standard deviation
+divided by 1000 to the pooled standard deviation multiplied by 1000.
+This is a poor choice of prior, because very basic prior knowledge about
+measures of human coginition dictate that the variation cannot ever be
+as high as this upper bound. IQ is a standardized measure, and hence
+this constrains how variable a given population’s IQ values can be. When
+you place such a wide uniform prior on these values, you are essentially
+giving a lot of prior weight on inadmissable values. In this example,
+there is little practical difference, but in general it is best to apply
+as much prior information that you have available to the
+parameterization of prior distributions.</p>
+<p>We will instead set the group standard deviations to have a
+<span class="math notranslate nohighlight">\(\text{Uniform}(1,10)\)</span> prior:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="err">σ</span><span class="n">_low</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="err">σ</span><span class="n">_high</span> <span class="o">=</span> <span class="mi">10</span>
+
+<span class="k">with</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">group1_std</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="s1">&#39;group1_std&#39;</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="err">σ</span><span class="n">_low</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="err">σ</span><span class="n">_high</span><span class="p">)</span>
+    <span class="n">group2_std</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="s1">&#39;group2_std&#39;</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="err">σ</span><span class="n">_low</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="err">σ</span><span class="n">_high</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>We follow Kruschke by making the prior for <span class="math notranslate nohighlight">\(\nu\)</span> exponentially
+distributed with a mean of 30; this allocates high prior probability
+over the regions of the parameter that describe the range from normal to
+heavy-tailed data under the Student-T distribution.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">model</span><span class="p">:</span>
+    <span class="err">ν</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Exponential</span><span class="p">(</span><span class="s1">&#39;ν_minus_one&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mf">29.</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+<span class="n">pm</span><span class="o">.</span><span class="n">kdeplot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">exponential</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10000</span><span class="p">),</span> <span class="n">shade</span><span class="o">=</span><span class="mf">0.5</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_BEST_11_0.png" src="../_images/notebooks_BEST_11_0.png" />
+</div>
+</div>
+<p>Since PyMC3 parameterizes the Student-T in terms of precision, rather
+than standard deviation, we must transform the standard deviations
+before specifying our likelihoods.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">model</span><span class="p">:</span>
+    <span class="err">λ</span><span class="mi">1</span> <span class="o">=</span> <span class="n">group1_std</span><span class="o">**-</span><span class="mi">2</span>
+    <span class="err">λ</span><span class="mi">2</span> <span class="o">=</span> <span class="n">group2_std</span><span class="o">**-</span><span class="mi">2</span>
+
+    <span class="n">group1</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">StudentT</span><span class="p">(</span><span class="s1">&#39;drug&#39;</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="err">ν</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">group1_mean</span><span class="p">,</span> <span class="n">lam</span><span class="o">=</span><span class="err">λ</span><span class="mi">1</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">y1</span><span class="p">)</span>
+    <span class="n">group2</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">StudentT</span><span class="p">(</span><span class="s1">&#39;placebo&#39;</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="err">ν</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">group2_mean</span><span class="p">,</span> <span class="n">lam</span><span class="o">=</span><span class="err">λ</span><span class="mi">2</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">y2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Having fully specified our probabilistic model, we can turn our
+attention to calculating the comparisons of interest in order to
+evaluate the effect of the drug. To this end, we can specify
+deterministic nodes in our model for the difference between the group
+means and the difference between the group standard deviations. Wrapping
+them in named <code class="docutils literal notranslate"><span class="pre">Deterministic</span></code> objects signals to PyMC that we wish to
+record the sampled values as part of the output.</p>
+<p>As a joint measure of the groups, we will also estimate the “effect
+size”, which is the difference in means scaled by the pooled estimates
+of standard deviation. This quantity can be harder to interpret, since
+it is no longer in the same units as our data, but the quantity is a
+function of all four estimated parameters.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">diff_of_means</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Deterministic</span><span class="p">(</span><span class="s1">&#39;difference of means&#39;</span><span class="p">,</span> <span class="n">group1_mean</span> <span class="o">-</span> <span class="n">group2_mean</span><span class="p">)</span>
+    <span class="n">diff_of_stds</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Deterministic</span><span class="p">(</span><span class="s1">&#39;difference of stds&#39;</span><span class="p">,</span> <span class="n">group1_std</span> <span class="o">-</span> <span class="n">group2_std</span><span class="p">)</span>
+    <span class="n">effect_size</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Deterministic</span><span class="p">(</span><span class="s1">&#39;effect size&#39;</span><span class="p">,</span>
+                                   <span class="n">diff_of_means</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">group1_std</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">group2_std</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+
+</pre></div>
+</div>
+</div>
+<p>Now, we can fit the model and evaluate its output.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">trace</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">2000</span><span class="p">,</span> <span class="n">cores</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (2 chains in 2 jobs)
+NUTS: [ν_minus_one_log__, group2_std_interval__, group1_std_interval__, group2_mean, group1_mean]
+100%|██████████| 2500/2500 [00:03&lt;00:00, 727.76it/s]
+</pre></div></div>
+</div>
+<p>We can plot the stochastic parameters of the model. PyMC’s
+<code class="docutils literal notranslate"><span class="pre">plot_posterior</span></code> function replicates the informative histograms
+portrayed in Kruschke (2012). These summarize the posterior
+distributions of the parameters, and present a 95% credible interval and
+the posterior mean. The plots below are constructed with the final 1000
+samples from each of the 2 chains, pooled together.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pm</span><span class="o">.</span><span class="n">plot_posterior</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span> <span class="n">varnames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;group1_mean&#39;</span><span class="p">,</span><span class="s1">&#39;group2_mean&#39;</span><span class="p">,</span> <span class="s1">&#39;group1_std&#39;</span><span class="p">,</span> <span class="s1">&#39;group2_std&#39;</span><span class="p">,</span> <span class="s1">&#39;ν_minus_one&#39;</span><span class="p">],</span>
+                  <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#87ceeb&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_BEST_19_0.png" src="../_images/notebooks_BEST_19_0.png" />
+</div>
+</div>
+<p>Looking at the group differences, we can conclude that there are
+meaningful differences between the two groups for all three measures.
+For these comparisons, it is useful to use zero as a reference value
+(<code class="docutils literal notranslate"><span class="pre">ref_val</span></code>); providing this reference value yields cumulative
+probabilities for the posterior distribution on either side of the
+value. Thus, for the difference in means, 99.4% of the posterior
+probability is greater than zero, which suggests the group means are
+credibly different. The effect size and differences in standard
+deviation are similarly positive.</p>
+<p>These estimates suggest that the “smart drug” increased both the
+expected scores, but also the variability in scores across the sample.
+So, this does not rule out the possibility that some recipients may be
+adversely affected by the drug at the same time others benefit.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pm</span><span class="o">.</span><span class="n">plot_posterior</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span> <span class="n">varnames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;difference of means&#39;</span><span class="p">,</span><span class="s1">&#39;difference of stds&#39;</span><span class="p">,</span> <span class="s1">&#39;effect size&#39;</span><span class="p">],</span>
+                  <span class="n">ref_val</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                  <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#87ceeb&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_BEST_21_0.png" src="../_images/notebooks_BEST_21_0.png" />
+</div>
+</div>
+<p>When <code class="docutils literal notranslate"><span class="pre">forestplot</span></code> is called on a trace with more than one chain, it
+also plots the potential scale reduction parameter, which is used to
+reveal evidence for lack of convergence; values near one, as we have
+here, suggest that the model has converged.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pm</span><span class="o">.</span><span class="n">forestplot</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span> <span class="n">varnames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;group1_mean&#39;</span><span class="p">,</span>
+                               <span class="s1">&#39;group2_mean&#39;</span><span class="p">]);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_BEST_23_0.png" src="../_images/notebooks_BEST_23_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pm</span><span class="o">.</span><span class="n">forestplot</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span> <span class="n">varnames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;group1_std&#39;</span><span class="p">,</span>
+                               <span class="s1">&#39;group2_std&#39;</span><span class="p">,</span>
+                               <span class="s1">&#39;ν_minus_one&#39;</span><span class="p">]);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_BEST_24_0.png" src="../_images/notebooks_BEST_24_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pm</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span><span class="n">varnames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;difference of means&#39;</span><span class="p">,</span> <span class="s1">&#39;difference of stds&#39;</span><span class="p">,</span> <span class="s1">&#39;effect size&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[13]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>mc_error</th>
+      <th>hpd_2.5</th>
+      <th>hpd_97.5</th>
+      <th>n_eff</th>
+      <th>Rhat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>difference of means</th>
+      <td>1.003488</td>
+      <td>0.464556</td>
+      <td>0.008673</td>
+      <td>0.110008</td>
+      <td>1.929636</td>
+      <td>2618.006985</td>
+      <td>0.999933</td>
+    </tr>
+    <tr>
+      <th>difference of stds</th>
+      <td>0.944355</td>
+      <td>0.450525</td>
+      <td>0.006941</td>
+      <td>0.152468</td>
+      <td>1.885434</td>
+      <td>3567.953258</td>
+      <td>0.999944</td>
+    </tr>
+    <tr>
+      <th>effect size</th>
+      <td>0.595406</td>
+      <td>0.289738</td>
+      <td>0.005166</td>
+      <td>0.040975</td>
+      <td>1.175411</td>
+      <td>2756.596339</td>
+      <td>0.999857</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</div>
+<div class="section" id="References">
+<h3>References<a class="headerlink" href="#References" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li>Goodman SN. Toward evidence-based medical statistics. 1: The P value
+fallacy. Annals of Internal Medicine. 1999;130(12):995-1004.
+doi:10.7326/0003-4819-130-12-199906150-00008.</li>
+<li>Johnson D. The insignificance of statistical significance testing.
+Journal of Wildlife Management. 1999;63(3):763-772.</li>
+<li>Kruschke JK. Bayesian estimation supersedes the t test. J Exp Psychol
+Gen. 2013;142(2):573-603. doi:10.1037/a0029146.</li>
+</ol>
+<p>The original pymc2 implementation was written by Andrew Straw and can be
+found here: <a class="reference external" href="https://github.com/strawlab/best">https://github.com/strawlab/best</a></p>
+<p>Ported to PyMC3 by <a class="reference external" href="https://twitter.com/twiecki">Thomas Wiecki</a> (c)
+2015, updated by Chris Fonnesbeck.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/pymc3_logo.jpg" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="../index.html">PyMC3</a></h1>
+
+
+
+<p class="blurb">Probabilistic Programming in Python: Bayesian Modeling and Probabilistic Machine Learning with Theano</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../prob_dists.html">Probability Distributions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../examples.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#howto">Howto</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../examples.html#applied">Applied</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Bayesian Estimation Supersedes the T-Test</a></li>
+<li class="toctree-l3"><a class="reference internal" href="multilevel_modeling.html">A Primer on Bayesian Methods for Multilevel Modeling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stochastic_volatility.html">Stochastic Volatility model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="probabilistic_matrix_factorization.html">Probabilistic Matrix Factorization for Making Personalized Recommendations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rugby_analytics.html">A Hierarchical model for Rugby prediction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dawid-skene.html">The Dawid-Skene model with priors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#glm">GLM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#survival-analysis">Survival Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#gaussian-processes">Gaussian Processes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#mixture-models">Mixture Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#variational-inference">Variational Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#stochastic-gradient">Stochastic Gradient</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, The PyMC Development Team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="../_sources/notebooks/BEST.ipynb.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

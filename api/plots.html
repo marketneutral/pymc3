@@ -1,0 +1,436 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Plots &#8212; PyMC3 3.5 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="shortcut icon" href="../_static/PyMC3.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Stats" href="stats.html" />
+    <link rel="prev" title="GP Implementations" href="gp.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pymc3.plots">
+<span id="plots"></span><h1>Plots<a class="headerlink" href="#module-pymc3.plots" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="pymc3.plots.traceplot">
+<code class="descclassname">pymc3.plots.</code><code class="descname">traceplot</code><span class="sig-paren">(</span><em>trace</em>, <em>varnames=None</em>, <em>transform=&lt;function identity_transform&gt;</em>, <em>figsize=None</em>, <em>lines=None</em>, <em>combined=False</em>, <em>plot_transformed=False</em>, <em>grid=False</em>, <em>alpha=0.35</em>, <em>priors=None</em>, <em>prior_alpha=1</em>, <em>prior_style='--'</em>, <em>bw=4.5</em>, <em>ax=None</em>, <em>live_plot=False</em>, <em>skip_first=0</em>, <em>refresh_every=100</em>, <em>roll_over=1000</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.plots.traceplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot samples histograms and values.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>trace</strong> (<em>result of MCMC run</em>) – </li>
+<li><strong>varnames</strong> (<em>list of variable names</em>) – Variables to be plotted, if None all variable are plotted</li>
+<li><strong>transform</strong> (<em>callable</em>) – Function to transform data (defaults to identity)</li>
+<li><strong>figsize</strong> (<em>figure size tuple</em>) – If None, size is (12, num of variables * 2) inch</li>
+<li><strong>lines</strong> (<em>dict</em>) – Dictionary of variable name / value  to be overplotted as vertical
+lines to the posteriors and horizontal lines on sample values
+e.g. mean of posteriors, true values of a simulation.
+If an array of values, line colors are matched to posterior colors.
+Otherwise, a default red line</li>
+<li><strong>combined</strong> (<em>bool</em>) – Flag for combining multiple chains into a single chain. If False
+(default), chains will be plotted separately.</li>
+<li><strong>plot_transformed</strong> (<em>bool</em>) – Flag for plotting automatically transformed variables in addition to
+original variables (defaults to False).</li>
+<li><strong>grid</strong> (<em>bool</em>) – Flag for adding gridlines to histogram. Defaults to True.</li>
+<li><strong>alpha</strong> (<em>float</em>) – Alpha value for plot line. Defaults to 0.35.</li>
+<li><strong>priors</strong> (<em>iterable of PyMC distributions</em>) – PyMC prior distribution(s) to be plotted alongside posterior. Defaults
+to None (no prior plots).</li>
+<li><strong>prior_alpha</strong> (<em>float</em>) – Alpha value for prior plot. Defaults to 1.</li>
+<li><strong>prior_style</strong> (<em>str</em>) – Line style for prior plot. Defaults to ‘–’ (dashed line).</li>
+<li><strong>bw</strong> (<em>float</em>) – Bandwidth scaling factor for the KDE. Should be larger than 0. The higher this number the
+smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott’s rule
+of thumb (the default rule used by SciPy).</li>
+<li><strong>ax</strong> (<em>axes</em>) – Matplotlib axes. Accepts an array of axes, e.g.:</li>
+<li><strong>live_plot</strong> (<em>bool</em>) – Flag for updating the current figure while sampling</li>
+<li><strong>skip_first</strong> (<em>int</em>) – Number of first samples not shown in plots (burn-in). This affects
+frequency and stream plots.</li>
+<li><strong>refresh_every</strong> (<em>int</em>) – Period of plot updates (in sample number)</li>
+<li><strong>roll_over</strong> (<em>int</em>) – <p>Width of the sliding window for the sample stream plots: last roll_over
+samples are shown (no effect on frequency plots).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="c1"># 3 RVs</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pymc3</span><span class="o">.</span><span class="n">traceplot</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Creates own axes by default.</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>ax</strong> (<em>matplotlib axes</em>)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymc3.plots.plot_posterior">
+<code class="descclassname">pymc3.plots.</code><code class="descname">plot_posterior</code><span class="sig-paren">(</span><em>trace</em>, <em>varnames=None</em>, <em>transform=&lt;function identity_transform&gt;</em>, <em>figsize=None</em>, <em>text_size=None</em>, <em>alpha_level=0.05</em>, <em>round_to=3</em>, <em>point_estimate='mean'</em>, <em>rope=None</em>, <em>ref_val=None</em>, <em>kde_plot=False</em>, <em>plot_transformed=False</em>, <em>bw=4.5</em>, <em>ax=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.plots.plot_posterior" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot Posterior densities in style of John K. Kruschke book.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>trace</strong> (<em>result of MCMC run</em>) – </li>
+<li><strong>varnames</strong> (<em>list of variable names</em>) – Variables to be plotted, if None all variable are plotted</li>
+<li><strong>transform</strong> (<em>callable</em>) – Function to transform data (defaults to identity)</li>
+<li><strong>figsize</strong> (<em>figure size tuple</em>) – If None, size is (12, num of variables * 2) inch</li>
+<li><strong>text_size</strong> (<em>int</em>) – Text size of the point_estimates, axis ticks, and HPD (Default:16)</li>
+<li><strong>alpha_level</strong> (<em>float</em>) – Defines range for High Posterior Density</li>
+<li><strong>round_to</strong> (<em>int</em>) – Controls formatting for floating point numbers</li>
+<li><strong>point_estimate</strong> (<em>str</em>) – Must be in (‘mode’, ‘mean’, ‘median’)</li>
+<li><strong>rope</strong> (<em>list</em><em> or </em><em>numpy array</em>) – Lower and upper values of the Region Of Practical Equivalence</li>
+<li><strong>ref_val</strong> (<em>float</em><em> or </em><em>list-like</em>) – display the percentage below and above the values in ref_val.
+If a list is provided, its length should match the number of variables.</li>
+<li><strong>kde_plot</strong> (<em>bool</em>) – if True plot a KDE instead of a histogram. For discrete variables this
+argument is ignored.</li>
+<li><strong>plot_transformed</strong> (<em>bool</em>) – Flag for plotting automatically transformed variables in addition to
+original variables (defaults to False).</li>
+<li><strong>bw</strong> (<em>float</em>) – Bandwidth scaling factor for the KDE. Should be larger than 0. The higher this number the
+smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott’s rule
+of thumb (the default rule used by SciPy). Only works if <cite>kde_plot</cite> is True.</li>
+<li><strong>ax</strong> (<em>axes</em>) – Matplotlib axes. Defaults to None.</li>
+<li><strong>**kwargs</strong> – Passed as-is to plt.hist() or plt.plot() function, depending on the
+value of the argument kde_plot
+Some defaults are added, if not specified
+color=’#87ceeb’ will match the style in the book</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>ax</strong> (<em>matplotlib axes</em>)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymc3.plots.forestplot">
+<code class="descclassname">pymc3.plots.</code><code class="descname">forestplot</code><span class="sig-paren">(</span><em>trace</em>, <em>models=None</em>, <em>varnames=None</em>, <em>transform=&lt;function identity_transform&gt;</em>, <em>alpha=0.05</em>, <em>quartiles=True</em>, <em>rhat=True</em>, <em>main=None</em>, <em>xtitle=None</em>, <em>xlim=None</em>, <em>ylabels=None</em>, <em>colors='C0'</em>, <em>chain_spacing=0.1</em>, <em>vline=0</em>, <em>gs=None</em>, <em>plot_transformed=False</em>, <em>plot_kwargs=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.plots.forestplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forest plot (model summary plot).</p>
+<p>Generates a “forest plot” of 100*(1-alpha)% credible intervals from a trace
+or list of traces.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>trace</strong> (<em>trace</em><em> or </em><em>list of traces</em>) – Trace(s) from an MCMC sample.</li>
+<li><strong>models</strong> (<em>list</em><em> (</em><em>optional</em><em>)</em>) – List with names for the models in the list of traces. Useful when
+plotting more that one trace.</li>
+<li><strong>varnames</strong> (<em>list</em>) – List of variables to plot (defaults to None, which results in all
+variables plotted).</li>
+<li><strong>transform</strong> (<em>callable</em>) – Function to transform data (defaults to identity)</li>
+<li><strong>alpha</strong> (<em>float</em><em>, </em><em>optional</em>) – Alpha value for (1-alpha)*100% credible intervals (defaults to 0.05).</li>
+<li><strong>quartiles</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag for plotting the interquartile range, in addition to the
+(1-alpha)*100% intervals (defaults to True).</li>
+<li><strong>rhat</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag for plotting Gelman-Rubin statistics. Requires 2 or more chains
+(defaults to True).</li>
+<li><strong>main</strong> (<em>string</em><em>, </em><em>optional</em>) – Title for main plot. Passing False results in titles being suppressed;
+passing None (default) results in default titles.</li>
+<li><strong>xtitle</strong> (<em>string</em><em>, </em><em>optional</em>) – Label for x-axis. Defaults to no label</li>
+<li><strong>xlim</strong> (<em>list</em><em> or </em><em>tuple</em><em>, </em><em>optional</em>) – Range for x-axis. Defaults to matplotlib’s best guess.</li>
+<li><strong>ylabels</strong> (<em>list</em><em> or </em><em>array</em><em>, </em><em>optional</em>) – User-defined labels for each variable. If not provided, the node
+__name__ attributes are used.</li>
+<li><strong>colors</strong> (<em>list</em><em> or </em><em>string</em><em>, </em><em>optional</em>) – list with valid matplotlib colors, one color per model. Alternative a
+string can be passed. If the string is <a href="#id1"><span class="problematic" id="id2">`</span></a>cycle <a href="#id3"><span class="problematic" id="id4">`</span></a>, it will automatically
+chose a color per model from the matyplolib’s cycle. If a single color
+is passed, eg ‘k’, ‘C2’, ‘red’ this color will be used for all models.
+Defauls to ‘C0’ (blueish in most matplotlib styles)</li>
+<li><strong>chain_spacing</strong> (<em>float</em><em>, </em><em>optional</em>) – Plot spacing between chains (defaults to 0.1).</li>
+<li><strong>vline</strong> (<em>numeric</em><em>, </em><em>optional</em>) – Location of vertical reference line (defaults to 0).</li>
+<li><strong>gs</strong> (<em>GridSpec</em>) – Matplotlib GridSpec object. Defaults to None.</li>
+<li><strong>plot_transformed</strong> (<em>bool</em>) – Flag for plotting automatically transformed variables in addition to
+original variables (defaults to False).</li>
+<li><strong>plot_kwargs</strong> (<em>dict</em>) – Optional arguments for plot elements. Currently accepts ‘fontsize’,
+‘linewidth’, ‘marker’, and ‘markersize’.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>gs</strong> (<em>matplotlib GridSpec</em>)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymc3.plots.compareplot">
+<code class="descclassname">pymc3.plots.</code><code class="descname">compareplot</code><span class="sig-paren">(</span><em>comp_df</em>, <em>insample_dev=True</em>, <em>se=True</em>, <em>dse=True</em>, <em>ax=None</em>, <em>plot_kwargs=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.plots.compareplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model comparison summary plot in the style of the one used in the book
+Statistical Rethinking by Richard McElreath.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>comp_df</strong> (<em>DataFrame</em>) – the result of the <cite>pm.compare()</cite> function</li>
+<li><strong>insample_dev</strong> (<em>bool</em>) – plot the in-sample deviance, that is the value of the IC without the
+penalization given by the effective number of parameters (pIC).
+Defaults to True</li>
+<li><strong>se</strong> (<em>bool</em>) – plot the standard error of the IC estimate. Defaults to True</li>
+<li><strong>dse</strong> (<em>bool</em>) – plot standard error of the difference in IC between each model and the
+top-ranked model. Defaults to True</li>
+<li><strong>plot_kwargs</strong> (<em>dict</em>) – Optional arguments for plot elements. Currently accepts ‘color_ic’,
+‘marker_ic’, ‘color_insample_dev’, ‘marker_insample_dev’, ‘color_dse’,
+‘marker_dse’, ‘ls_min_ic’ ‘color_ls_min_ic’,  ‘fontsize’</li>
+<li><strong>ax</strong> (<em>axes</em>) – Matplotlib axes. Defaults to None</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>ax</strong> (<em>matplotlib axes</em>)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymc3.plots.autocorrplot">
+<code class="descclassname">pymc3.plots.</code><code class="descname">autocorrplot</code><span class="sig-paren">(</span><em>trace</em>, <em>varnames=None</em>, <em>max_lag=100</em>, <em>burn=0</em>, <em>plot_transformed=False</em>, <em>symmetric_plot=False</em>, <em>ax=None</em>, <em>figsize=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.plots.autocorrplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bar plot of the autocorrelation function for a trace.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>trace</strong> (<em>result of MCMC run</em>) – </li>
+<li><strong>varnames</strong> (<em>list of variable names</em>) – Variables to be plotted, if None all variable are plotted.
+Vector-value stochastics are handled automatically.</li>
+<li><strong>max_lag</strong> (<em>int</em>) – Maximum lag to calculate autocorrelation. Defaults to 100.</li>
+<li><strong>burn</strong> (<em>int</em>) – Number of samples to discard from the beginning of the trace.
+Defaults to 0.</li>
+<li><strong>plot_transformed</strong> (<em>bool</em>) – Flag for plotting automatically transformed variables in addition to
+original variables (defaults to False).</li>
+<li><strong>symmetric_plot</strong> (<em>boolean</em>) – Plot from either [0, +lag] or [-lag, lag]. Defaults to False, [-, +lag].</li>
+<li><strong>ax</strong> (<em>axes</em>) – Matplotlib axes. Defaults to None.</li>
+<li><strong>figsize</strong> (<em>figure size tuple</em>) – If None, size is (12, num of variables * 2) inches.
+Note this is not used if ax is supplied.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>ax</strong> (<em>matplotlib axes</em>)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymc3.plots.energyplot">
+<code class="descclassname">pymc3.plots.</code><code class="descname">energyplot</code><span class="sig-paren">(</span><em>trace</em>, <em>kind='kde'</em>, <em>figsize=None</em>, <em>ax=None</em>, <em>legend=True</em>, <em>shade=0.35</em>, <em>bw=4.5</em>, <em>frame=True</em>, <em>kwargs_shade=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.plots.energyplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot energy transition distribution and marginal energy distribution in
+order to diagnose poor exploration by HMC algorithms.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>trace</strong> (<em>result of MCMC run</em>) – </li>
+<li><strong>kind</strong> (<em>str</em>) – Type of plot to display (kde or histogram)</li>
+<li><strong>figsize</strong> (<em>figure size tuple</em>) – If None, size is (8 x 6)</li>
+<li><strong>ax</strong> (<em>axes</em>) – Matplotlib axes.</li>
+<li><strong>legend</strong> (<em>bool</em>) – Flag for plotting legend (defaults to True)</li>
+<li><strong>shade</strong> (<em>float</em>) – Alpha blending value for the shaded area under the curve, between 0
+(no shade) and 1 (opaque). Defaults to 0.35</li>
+<li><strong>bw</strong> (<em>float</em>) – Bandwidth scaling factor for the KDE. Should be larger than 0. The higher this number the
+smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott’s rule
+of thumb (the default rule used by SciPy). Only works if <cite>kind=’kde’</cite>.</li>
+<li><strong>frame</strong> (<em>bool</em>) – Flag for plotting frame around figure.</li>
+<li><strong>kwargs_shade</strong> (<em>dicts</em><em>, </em><em>optional</em>) – Additional keywords passed to <cite>fill_between</cite> (to control the shade)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>ax</strong> (<em>matplotlib axes</em>)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymc3.plots.kdeplot">
+<code class="descclassname">pymc3.plots.</code><code class="descname">kdeplot</code><span class="sig-paren">(</span><em>values</em>, <em>label=None</em>, <em>shade=0</em>, <em>bw=4.5</em>, <em>ax=None</em>, <em>kwargs_shade=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.plots.kdeplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>1D KDE plot taking into account boundary conditions</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>values</strong> (<em>array-like</em>) – Values to plot</li>
+<li><strong>label</strong> (<em>string</em>) – Text to include as part of the legend</li>
+<li><strong>shade</strong> (<em>float</em>) – Alpha blending value for the shaded area under the curve, between 0
+(no shade) and 1 (opaque). Defaults to 0</li>
+<li><strong>bw</strong> (<em>float</em>) – Bandwidth scaling factor. Should be larger than 0. The higher this number the smoother the
+KDE will be. Defaults to 4.5 which is essentially the same as the Scott’s rule of thumb
+(the default rule used by SciPy).</li>
+<li><strong>ax</strong> (<em>matplotlib axes</em>) – </li>
+<li><strong>kwargs_shade</strong> (<em>dicts</em><em>, </em><em>optional</em>) – Additional keywords passed to <cite>matplotlib.axes.Axes.fill_between</cite>
+(to control the shade)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>ax</strong> (<em>matplotlib axes</em>)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymc3.plots.densityplot">
+<code class="descclassname">pymc3.plots.</code><code class="descname">densityplot</code><span class="sig-paren">(</span><em>trace</em>, <em>models=None</em>, <em>varnames=None</em>, <em>alpha=0.05</em>, <em>point_estimate='mean'</em>, <em>colors='cycle'</em>, <em>outline=True</em>, <em>hpd_markers=''</em>, <em>shade=0.0</em>, <em>bw=4.5</em>, <em>figsize=None</em>, <em>textsize=12</em>, <em>plot_transformed=False</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.plots.densityplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates KDE plots for continuous variables and histograms for discretes ones.
+Plots are truncated at their 100*(1-alpha)% credible intervals. Plots are grouped
+per variable and colors assigned to models.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>trace</strong> (<em>trace</em><em> or </em><em>list of traces</em>) – Trace(s) from an MCMC sample.</li>
+<li><strong>models</strong> (<em>list</em>) – List with names for the models in the list of traces. Useful when
+plotting more that one trace.</li>
+<li><strong>varnames</strong> (<em>list</em>) – List of variables to plot (defaults to None, which results in all
+variables plotted).</li>
+<li><strong>alpha</strong> (<em>float</em>) – Alpha value for (1-alpha)*100% credible intervals (defaults to 0.05).</li>
+<li><strong>point_estimate</strong> (<em>str</em><em> or </em><em>None</em>) – Plot point estimate per variable. Values should be ‘mean’, ‘median’ or None.
+Defaults to ‘mean’.</li>
+<li><strong>colors</strong> (<em>list</em><em> or </em><em>string</em><em>, </em><em>optional</em>) – List with valid matplotlib colors, one color per model. Alternative a string can be passed.
+If the string is <cite>cycle</cite>, it will automatically choose a color per model from matplolib’s
+cycle. If a single color is passed, e.g. ‘k’, ‘C2’ or ‘red’ this color will be used for all
+models. Defaults to <cite>cycle</cite>.</li>
+<li><strong>outline</strong> (<em>boolean</em>) – Use a line to draw KDEs and histograms. Default to True</li>
+<li><strong>hpd_markers</strong> (<em>str</em>) – A valid <cite>matplotlib.markers</cite> like ‘v’, used to indicate the limits of the hpd interval.
+Defaults to empty string (no marker).</li>
+<li><strong>shade</strong> (<em>float</em>) – Alpha blending value for the shaded area under the curve, between 0 (no shade) and 1
+(opaque). Defaults to 0.</li>
+<li><strong>bw</strong> (<em>float</em>) – Bandwidth scaling factor for the KDE. Should be larger than 0. The higher this number the
+smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott’s rule
+of thumb (the default rule used by SciPy).</li>
+<li><strong>figsize</strong> (<em>tuple</em>) – Figure size. If None, size is (6, number of variables * 2)</li>
+<li><strong>textsize</strong> (<em>int</em>) – Text size of the legend. Default 12.</li>
+<li><strong>plot_transformed</strong> (<em>bool</em>) – Flag for plotting automatically transformed variables in addition to original variables
+Defaults to False.</li>
+<li><strong>ax</strong> (<em>axes</em>) – Matplotlib axes.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>ax</strong> (<em>Matplotlib axes</em>)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/pymc3_logo.jpg" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="../index.html">PyMC3</a></h1>
+
+
+
+<p class="blurb">Probabilistic Programming in Python: Bayesian Modeling and Probabilistic Machine Learning with Theano</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../prob_dists.html">Probability Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="distributions.html">Distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bounds.html">Bounded Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inference.html">Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glm.html">Generalized Linear Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gp.html">GP Implementations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gp.html#mean-functions">Mean Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gp.html#covariance-functions">Covariance Functions</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Plots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stats.html">Stats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="diagnostics.html">Diagnostics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html">Backends</a></li>
+<li class="toctree-l2"><a class="reference internal" href="math.html">Math</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html">Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html">Model</a></li>
+</ul>
+</li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, The PyMC Development Team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="../_sources/api/plots.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,587 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Math &#8212; PyMC3 3.5 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="shortcut icon" href="../_static/PyMC3.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Data" href="data.html" />
+    <link rel="prev" title="Backends" href="backends.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="math">
+<h1>Math<a class="headerlink" href="#math" title="Permalink to this headline">¶</a></h1>
+<p>This submodule contains various mathematical functions. Most of them are imported directly
+from theano.tensor (see there for more details). Doing any kind of math with PyMC3 random
+variables, or defining custom likelihoods or priors requires you to use these theano
+expressions rather than NumPy or Python code.</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">dot</span></code>(a,&nbsp;b)</td>
+<td>Computes the dot product of two variables.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">constant</span></code>(x[,&nbsp;name,&nbsp;ndim,&nbsp;dtype])</td>
+<td>Return a symbolic <cite>Constant</cite> with value <cite>x</cite>.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">flatten</span></code>(x[,&nbsp;ndim,&nbsp;outdim])</td>
+<td>Reshapes the variable x by keeping the first outdim-1 dimension size(s) of x the same, and making the last dimension size of x equal to the multiplication of its remaining dimension size(s).</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">zeros_like</span></code>(model[,&nbsp;dtype,&nbsp;opt])</td>
+<td>equivalent of numpy.zeros_like :param model: :type model: tensor :param dtype: :type dtype: data-type, optional :param opt: Useful for Theano optimization, not for user building a graph as this             have the consequence that model isn’t always in the graph.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">ones_like</span></code>(model[,&nbsp;dtype,&nbsp;opt])</td>
+<td>equivalent of numpy.ones_like :param model: :type model: tensor :param dtype: :type dtype: data-type, optional :param opt: Useful for Theano optimization, not for user building a graph as this             have the consequence that model isn’t always in the graph.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">stack</span></code>(*tensors,&nbsp;**kwargs)</td>
+<td>Stack tensors in sequence on given axis (default is 0).</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">concatenate</span></code>(tensor_list[,&nbsp;axis])</td>
+<td>Alias for <a href="#id1"><span class="problematic" id="id2">`</span></a>join`(axis, <a href="#id3"><span class="problematic" id="id4">*</span></a>tensor_list).</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">sum</span></code>(input[,&nbsp;axis,&nbsp;dtype,&nbsp;keepdims,&nbsp;acc_dtype])</td>
+<td>Computes the sum along the given axis(es) of a tensor <cite>input</cite>.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">prod</span></code>(input[,&nbsp;axis,&nbsp;dtype,&nbsp;keepdims,&nbsp;…])</td>
+<td>Computes the product along the given axis(es) of a tensor <cite>input</cite>.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">lt</span></code></td>
+<td>a &lt; b</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">gt</span></code></td>
+<td>a &gt; b</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">le</span></code></td>
+<td>a &lt;= b</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">ge</span></code></td>
+<td>a &gt;= b</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">eq</span></code></td>
+<td>a == b</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">neq</span></code></td>
+<td>a != b</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">switch</span></code></td>
+<td>if cond then ift else iff</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">clip</span></code></td>
+<td>Clip x to be between min and max.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">where</span></code></td>
+<td>if cond then ift else iff</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">and_</span></code></td>
+<td>bitwise a &amp; b</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">or_</span></code></td>
+<td>bitwise a | b</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">abs_</span></code></td>
+<td><a href="#id5"><span class="problematic" id="id6">|`a`|</span></a></td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">exp</span></code></td>
+<td>e^`a`</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">log</span></code></td>
+<td>base e logarithm of a</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">cos</span></code></td>
+<td>cosine of a</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">sin</span></code></td>
+<td>sine of a</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">tan</span></code></td>
+<td>tangent of a</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosh</span></code></td>
+<td>hyperbolic cosine of a</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">sinh</span></code></td>
+<td>hyperbolic sine of a</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">tanh</span></code></td>
+<td>hyperbolic tangent of a</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">sqr</span></code></td>
+<td>square of a</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">sqrt</span></code></td>
+<td>square root of a</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">erf</span></code></td>
+<td>error function</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">erfinv</span></code></td>
+<td>inverse error function</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">dot</span></code>(a,&nbsp;b)</td>
+<td>Computes the dot product of two variables.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">maximum</span></code></td>
+<td>elemwise maximum.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">minimum</span></code></td>
+<td>elemwise minimum.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">sgn</span></code></td>
+<td>sign of a</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">ceil</span></code></td>
+<td>ceiling of a</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">floor</span></code></td>
+<td>floor of a</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">det</span></code></td>
+<td>Matrix determinant.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">matrix_inverse</span></code></td>
+<td>Computes the inverse of a matrix <span class="math notranslate nohighlight">\(A\)</span>.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_diag</span></code></td>
+<td>Return specified diagonals.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">matrix_dot</span></code>(*args)</td>
+<td>Shorthand for product between several dots.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">trace</span></code>(X)</td>
+<td>Returns the sum of diagonal elements of matrix X.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">sigmoid</span></code></td>
+<td>Generalizes a scalar op to tensors.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">logsumexp</span></code>(x[,&nbsp;axis])</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pymc3.math.invlogit" title="pymc3.math.invlogit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">invlogit</span></code></a>(x[,&nbsp;eps])</td>
+<td>The inverse of the logit function, 1 / (1 + exp(-x)).</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">logit</span></code>(p)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<span class="target" id="module-pymc3.math"></span><dl class="class">
+<dt id="pymc3.math.BatchedDiag">
+<em class="property">class </em><code class="descclassname">pymc3.math.</code><code class="descname">BatchedDiag</code><a class="headerlink" href="#pymc3.math.BatchedDiag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fast BatchedDiag allocation</p>
+<dl class="method">
+<dt id="pymc3.math.BatchedDiag.make_node">
+<code class="descname">make_node</code><span class="sig-paren">(</span><em>diag</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.math.BatchedDiag.make_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a “apply” nodes for the inputs in that order.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymc3.math.BatchedDiag.perform">
+<code class="descname">perform</code><span class="sig-paren">(</span><em>node</em>, <em>ins</em>, <em>outs</em>, <em>params=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.math.BatchedDiag.perform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Required: Calculate the function on the inputs and put the variables in
+the output storage. Return None.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>node</strong> (<em>Apply instance</em>) – Contains the symbolic inputs and outputs.</li>
+<li><strong>inputs</strong> (<em>list</em>) – Sequence of inputs (immutable).</li>
+<li><strong>output_storage</strong> (<em>list</em>) – List of mutable 1-element lists (do not change the length of
+these lists)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>The <cite>output_storage</cite> list might contain data. If an element of
+output_storage is not None, it has to be of the right type,
+for instance, for a TensorVariable, it has to be a Numpy ndarray,
+with the right number of dimensions, and the correct dtype.
+Its shape and stride pattern, can be arbitrary. It not is
+guaranteed that it was produced by a previous call to impl. It
+could be allocated by another Op impl is free to reuse it as it
+sees fit, or to discard it and allocate new memory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal notranslate"><span class="pre">MethodNotDefined</span></code> – The subclass does not override this method.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pymc3.math.BlockDiagonalMatrix">
+<em class="property">class </em><code class="descclassname">pymc3.math.</code><code class="descname">BlockDiagonalMatrix</code><span class="sig-paren">(</span><em>sparse=False</em>, <em>format='csr'</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.math.BlockDiagonalMatrix" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pymc3.math.BlockDiagonalMatrix.make_node">
+<code class="descname">make_node</code><span class="sig-paren">(</span><em>*matrices</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.math.BlockDiagonalMatrix.make_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a “apply” nodes for the inputs in that order.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymc3.math.BlockDiagonalMatrix.perform">
+<code class="descname">perform</code><span class="sig-paren">(</span><em>node</em>, <em>inputs</em>, <em>output_storage</em>, <em>params=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.math.BlockDiagonalMatrix.perform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Required: Calculate the function on the inputs and put the variables in
+the output storage. Return None.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>node</strong> (<em>Apply instance</em>) – Contains the symbolic inputs and outputs.</li>
+<li><strong>inputs</strong> (<em>list</em>) – Sequence of inputs (immutable).</li>
+<li><strong>output_storage</strong> (<em>list</em>) – List of mutable 1-element lists (do not change the length of
+these lists)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>The <cite>output_storage</cite> list might contain data. If an element of
+output_storage is not None, it has to be of the right type,
+for instance, for a TensorVariable, it has to be a Numpy ndarray,
+with the right number of dimensions, and the correct dtype.
+Its shape and stride pattern, can be arbitrary. It not is
+guaranteed that it was produced by a previous call to impl. It
+could be allocated by another Op impl is free to reuse it as it
+sees fit, or to discard it and allocate new memory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal notranslate"><span class="pre">MethodNotDefined</span></code> – The subclass does not override this method.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pymc3.math.LogDet">
+<em class="property">class </em><code class="descclassname">pymc3.math.</code><code class="descname">LogDet</code><a class="headerlink" href="#pymc3.math.LogDet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the logarithm of the absolute determinant of a square
+matrix M, log(abs(det(M))) on the CPU. Avoids det(M) overflow/
+underflow.</p>
+<p class="rubric">Notes</p>
+<p>Once PR #3959 (<a class="reference external" href="https://github.com/Theano/Theano/pull/3959/">https://github.com/Theano/Theano/pull/3959/</a>) by harpone is merged,
+this must be removed.</p>
+<dl class="method">
+<dt id="pymc3.math.LogDet.make_node">
+<code class="descname">make_node</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.math.LogDet.make_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a “apply” nodes for the inputs in that order.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pymc3.math.LogDet.perform">
+<code class="descname">perform</code><span class="sig-paren">(</span><em>node</em>, <em>inputs</em>, <em>outputs</em>, <em>params=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.math.LogDet.perform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Required: Calculate the function on the inputs and put the variables in
+the output storage. Return None.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>node</strong> (<em>Apply instance</em>) – Contains the symbolic inputs and outputs.</li>
+<li><strong>inputs</strong> (<em>list</em>) – Sequence of inputs (immutable).</li>
+<li><strong>output_storage</strong> (<em>list</em>) – List of mutable 1-element lists (do not change the length of
+these lists)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>The <cite>output_storage</cite> list might contain data. If an element of
+output_storage is not None, it has to be of the right type,
+for instance, for a TensorVariable, it has to be a Numpy ndarray,
+with the right number of dimensions, and the correct dtype.
+Its shape and stride pattern, can be arbitrary. It not is
+guaranteed that it was produced by a previous call to impl. It
+could be allocated by another Op impl is free to reuse it as it
+sees fit, or to discard it and allocate new memory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal notranslate"><span class="pre">MethodNotDefined</span></code> – The subclass does not override this method.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="pymc3.math.block_diagonal">
+<code class="descclassname">pymc3.math.</code><code class="descname">block_diagonal</code><span class="sig-paren">(</span><em>matrices</em>, <em>sparse=False</em>, <em>format='csr'</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.math.block_diagonal" title="Permalink to this definition">¶</a></dt>
+<dd><p>See scipy.sparse.block_diag or
+scipy.linalg.block_diag for reference</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>matrices</strong> (<em>tensors</em>) – </li>
+<li><strong>format</strong> (<em>str</em><em> (</em><em>default 'csr'</em><em>)</em>) – must be one of: ‘csr’, ‘csc’</li>
+<li><strong>sparse</strong> (<em>bool</em><em> (</em><em>default False</em><em>)</em>) – if True return sparse format</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><em>matrix</em></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymc3.math.cartesian">
+<code class="descclassname">pymc3.math.</code><code class="descname">cartesian</code><span class="sig-paren">(</span><em>*arrays</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.math.cartesian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes the Cartesian product of arrays.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>arrays</strong> (<em>1D array-like</em>) – 1D arrays where earlier arrays loop more slowly than later ones</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymc3.math.expand_packed_triangular">
+<code class="descclassname">pymc3.math.</code><code class="descname">expand_packed_triangular</code><span class="sig-paren">(</span><em>n</em>, <em>packed</em>, <em>lower=True</em>, <em>diagonal_only=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.math.expand_packed_triangular" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a packed triangular matrix into a two dimensional array.</p>
+<p>Triangular matrices can be stored with better space efficiancy by
+storing the non-zero values in a one-dimensional array. We number
+the elements by row like this (for lower or upper triangular matrices):</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>[[0 - - -]     [[0 1 2 3]</dt>
+<dd>[1 2 - -]      [- 4 5 6]
+[3 4 5 -]      [- - 7 8]
+[6 7 8 9]]     [- - - 9]</dd>
+</dl>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>n</strong> (<em>int</em>) – The number of rows of the triangular matrix.</li>
+<li><strong>packed</strong> (<em>theano.vector</em>) – The matrix in packed format.</li>
+<li><strong>lower</strong> (<em>bool</em><em>, </em><em>default=True</em>) – If true, assume that the matrix is lower triangular.</li>
+<li><strong>diagonal_only</strong> (<em>bool</em>) – If true, return only the diagonal of the matrix.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymc3.math.invlogit">
+<code class="descclassname">pymc3.math.</code><code class="descname">invlogit</code><span class="sig-paren">(</span><em>x</em>, <em>eps=2.220446049250313e-16</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.math.invlogit" title="Permalink to this definition">¶</a></dt>
+<dd><p>The inverse of the logit function, 1 / (1 + exp(-x)).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymc3.math.kron_diag">
+<code class="descclassname">pymc3.math.</code><code class="descname">kron_diag</code><span class="sig-paren">(</span><em>*diags</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.math.kron_diag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns diagonal of a kronecker product.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>diags</strong> (<em>1D arrays</em>) – The diagonals of matrices that are to be Kroneckered</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymc3.math.kron_matrix_op">
+<code class="descclassname">pymc3.math.</code><code class="descname">kron_matrix_op</code><span class="sig-paren">(</span><em>krons</em>, <em>m</em>, <em>op</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.math.kron_matrix_op" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply op to krons and m in a way that reproduces <code class="docutils literal notranslate"><span class="pre">op(kronecker(*krons),</span> <span class="pre">m)</span></code></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>krons</strong> (<em>list of square 2D array-like objects</em>) – <dl class="docutils">
+<dt>D square matrices [A_1, A_2, …, A_D] to be Kronecker’ed:</dt>
+<dd>A = A_1 otimes A_2 otimes … otimes A_D</dd>
+</dl>
+<p>Product of column dimensions must be N</p>
+</li>
+<li><strong>m</strong> (<em>NxM array</em><em> or </em><em>1D array</em><em> (</em><em>treated as Nx1</em><em>)</em>) – Object that krons act upon</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymc3.math.kronecker">
+<code class="descclassname">pymc3.math.</code><code class="descname">kronecker</code><span class="sig-paren">(</span><em>*Ks</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.math.kronecker" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Return the Kronecker product of arguments:</dt>
+<dd><span class="math notranslate nohighlight">\(K_1 \otimes K_2 \otimes ... \otimes K_D\)</span></dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>Ks</strong> (<em>2D array-like</em>) – </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymc3.math.log1mexp">
+<code class="descclassname">pymc3.math.</code><code class="descname">log1mexp</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.math.log1mexp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return log(1 - exp(-x)).</p>
+<p>This function is numerically more stable than the naive approch.</p>
+<p>For details, see
+<a class="reference external" href="https://cran.r-project.org/web/packages/Rmpfr/vignettes/log1mexp-note.pdf">https://cran.r-project.org/web/packages/Rmpfr/vignettes/log1mexp-note.pdf</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymc3.math.log1pexp">
+<code class="descclassname">pymc3.math.</code><code class="descname">log1pexp</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.math.log1pexp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return log(1 + exp(x)), also called softplus.</p>
+<p>This function is numerically more stable than the naive approch.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymc3.math.logdiffexp">
+<code class="descclassname">pymc3.math.</code><code class="descname">logdiffexp</code><span class="sig-paren">(</span><em>exp(a) - exp(b)</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.math.logdiffexp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pymc3.math.tround">
+<code class="descclassname">pymc3.math.</code><code class="descname">tround</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pymc3.math.tround" title="Permalink to this definition">¶</a></dt>
+<dd><p>Temporary function to silence round warning in Theano. Please remove
+when the warning disappears.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/pymc3_logo.jpg" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="../index.html">PyMC3</a></h1>
+
+
+
+<p class="blurb">Probabilistic Programming in Python: Bayesian Modeling and Probabilistic Machine Learning with Theano</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../prob_dists.html">Probability Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="distributions.html">Distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bounds.html">Bounded Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inference.html">Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glm.html">Generalized Linear Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gp.html">GP Implementations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gp.html#mean-functions">Mean Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gp.html#covariance-functions">Covariance Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plots.html">Plots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stats.html">Stats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="diagnostics.html">Diagnostics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html">Backends</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Math</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html">Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html">Model</a></li>
+</ul>
+</li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, The PyMC Development Team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="../_sources/api/math.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

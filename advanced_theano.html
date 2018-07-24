@@ -1,0 +1,313 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Advanced usage of Theano in PyMC3 &#8212; PyMC3 3.5 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="shortcut icon" href="_static/PyMC3.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Probability Distributions" href="prob_dists.html" />
+    <link rel="prev" title="PyMC3 and Theano" href="theano.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="advanced-usage-of-theano-in-pymc3">
+<h1>Advanced usage of Theano in PyMC3<a class="headerlink" href="#advanced-usage-of-theano-in-pymc3" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="using-shared-variables">
+<h2>Using shared variables<a class="headerlink" href="#using-shared-variables" title="Permalink to this headline">¶</a></h2>
+<p>Shared variables allow us to use values in theano functions that are
+not considered an input to the function, but can still be changed
+later. They are very similar to global variables in may ways:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">tt</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+<span class="c1"># Create a new shared variable with initial value of 0.1</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">shared</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="n">func</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">function</span><span class="p">([</span><span class="n">a</span><span class="p">],</span> <span class="n">a</span> <span class="o">*</span> <span class="n">b</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">func</span><span class="p">(</span><span class="mf">2.</span><span class="p">)</span> <span class="o">==</span> <span class="mf">0.2</span>
+
+<span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="mf">10.</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">func</span><span class="p">(</span><span class="mf">2.</span><span class="p">)</span> <span class="o">==</span> <span class="mf">20.</span>
+</pre></div>
+</div>
+<p>Shared variables can also contain arrays, and are allowed to change
+their shape as long as the number of dimensions stays the same.</p>
+<p>We can use shared variables in PyMC3 to fit the same model to several
+datasets without the need to recreate the model each time (which can
+be time consuming if the number of datasets is large):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># We generate 10 datasets</span>
+<span class="n">true_mu</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+<span class="n">observed_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">mu</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span> <span class="k">for</span> <span class="n">mu</span> <span class="ow">in</span> <span class="n">true_mu</span><span class="p">]</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">shared</span><span class="p">(</span><span class="n">observed_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;mu&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+
+<span class="c1"># Generate one trace for each dataset</span>
+<span class="n">traces</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">data_vals</span> <span class="ow">in</span> <span class="n">observed_data</span><span class="p">:</span>
+    <span class="c1"># Switch out the observed dataset</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">data_vals</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">model</span><span class="p">:</span>
+        <span class="n">traces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>We can also sometimes use shared variables to work around limitations
+in the current PyMC3 api. A common task in Machine Learning is to predict
+values for unseen data, and one way to achieve this is to use a shared
+variable for our observations:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span>
+
+<span class="n">x_shared</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">shared</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">model</span><span class="p">:</span>
+  <span class="n">coeff</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+  <span class="n">logistic</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">coeff</span> <span class="o">*</span> <span class="n">x_shared</span><span class="p">)</span>
+  <span class="n">pm</span><span class="o">.</span><span class="n">Bernoulli</span><span class="p">(</span><span class="s1">&#39;obs&#39;</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">logistic</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+
+  <span class="c1"># fit the model</span>
+  <span class="n">trace</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span>
+
+  <span class="c1"># Switch out the observations and use `sample_ppc` to predict</span>
+  <span class="n">x_shared</span><span class="o">.</span><span class="n">set_value</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.</span><span class="p">])</span>
+  <span class="n">post_pred</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample_ppc</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>However, due to the way we handle shapes at the moment, it is
+not possible to change the shape of a shared variable if that would
+also change the shape of one of the variables.</p>
+</div>
+<div class="section" id="writing-custom-theano-ops">
+<h2>Writing custom Theano Ops<a class="headerlink" href="#writing-custom-theano-ops" title="Permalink to this headline">¶</a></h2>
+<p>While Theano includes a wide range of operations, there are cases where
+it makes sense to write your own. But before doing this it is a good
+idea to think hard if it is actually necessary. Especially if you want
+to use algorithms that need gradient information — this includes NUTS and
+all variational methods, and you probably <em>should</em> want to use those —
+this is often quite a bit of work and also requires some math and
+debugging skills for the gradients.</p>
+<p>Good reasons for defining a custom Op might be the following:</p>
+<ul class="simple">
+<li>You require an operation that is not available in Theano and can’t
+be build up out of existing Theano operations. This could for example
+include models where you need to solve differential equations or
+integrals, or find a root or minimum of a function that depends
+on your parameters.</li>
+<li>You want to connect your PyMC3 model to some existing external code.</li>
+<li>After carefully considering different parametrizations and a lot
+of profiling your model is still too slow, but you know of a faster
+way to compute the gradient than what theano is doing. This faster
+way might be anything from clever maths to using more hardware.
+There is nothing stopping anyone from using a cluster via MPI in
+a custom node, if a part of the gradient computation is slow enough
+and sufficiently parallelizable to make the cost worth it.
+We would definitely like to hear about any such examples.</li>
+</ul>
+<p>Theano has extensive <a class="reference external" href="http://deeplearning.net/software/theano/extending/index.html">documentation,</a>
+about how to write new Ops.</p>
+<div class="section" id="finding-the-root-of-a-function">
+<h3>Finding the root of a function<a class="headerlink" href="#finding-the-root-of-a-function" title="Permalink to this headline">¶</a></h3>
+<p>We’ll use finding the root of a function as a simple example.
+Let’s say we want to define a model where a parameter is defined
+implicitly as the root of a function, that depends on another
+parameter:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\theta \sim N^+(0, 1)\\
+\text{$\mu\in \mathbb{R}^+$ such that $R(\mu, \theta)
+      = \mu + \mu e^{\theta \mu} - 1= 0$}\\
+y \sim N(\mu, 0.1^2)\end{split}\]</div>
+<p>First, we observe that this problem is well-defined, because
+<span class="math notranslate nohighlight">\(R(\cdot, \theta)\)</span> is monotone and has the image <span class="math notranslate nohighlight">\((-1, \infty)\)</span>
+for <span class="math notranslate nohighlight">\(\mu, \theta \in \mathbb{R}^+\)</span>. To avoid overflows in
+<span class="math notranslate nohighlight">\(\exp(\mu \theta)\)</span> for large
+values of <span class="math notranslate nohighlight">\(\mu\theta\)</span> we instead find the root of</p>
+<div class="math notranslate nohighlight">
+\[R'(\mu, \theta)
+    = \log(R(\mu, \theta) + 1)
+    = \log(\mu) + \log(1 + e^{\theta\mu}).\]</div>
+<p>Also, we have</p>
+<div class="math notranslate nohighlight">
+\[\frac{\partial}{\partial\mu}R'(\mu, \theta)
+    = \theta\, \text{logit}^{-1}(\theta\mu) + \mu^{-1}.\]</div>
+<p>We can now use <cite>scipy.optimize.newton</cite> to find the root:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">optimize</span><span class="p">,</span> <span class="n">special</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
+    <span class="n">thetamu</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">*</span> <span class="n">mu</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">logaddexp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">thetamu</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+<span class="k">def</span> <span class="nf">jac</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
+    <span class="n">thetamu</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">*</span> <span class="n">mu</span>
+    <span class="n">jac</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">*</span> <span class="n">special</span><span class="o">.</span><span class="n">expit</span><span class="p">(</span><span class="n">thetamu</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">mu</span>
+    <span class="k">return</span> <span class="n">jac</span>
+
+<span class="k">def</span> <span class="nf">mu_from_theta</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">optimize</span><span class="o">.</span><span class="n">newton</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">fprime</span><span class="o">=</span><span class="n">jac</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,))</span>
+</pre></div>
+</div>
+<p>We could wrap <cite>mu_from_theta</cite> with <cite>tt.as_op</cite> and use gradient-free
+methods like Metropolis, but to get NUTS and ADVI working, we also
+need to define the derivative of <cite>mu_from_theta</cite>. We can find this
+derivative using the implicit function theorem, or equivalently we
+take the derivative with respect of <span class="math notranslate nohighlight">\(\theta\)</span> for both sides of
+<span class="math notranslate nohighlight">\(R(\mu(\theta), \theta) = 0\)</span> and solve for <span class="math notranslate nohighlight">\(\frac{d\mu}{d\theta}\)</span>.
+This isn’t hard to do by hand, but for the fun of it, let’s do it using
+sympy:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sympy</span>
+
+<span class="n">mu</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="s1">&#39;mu&#39;</span><span class="p">)</span>
+<span class="n">theta</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;theta&#39;</span><span class="p">)</span>
+<span class="n">R</span> <span class="o">=</span> <span class="n">mu</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">+</span> <span class="n">mu</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">sympy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">theta</span> <span class="o">*</span> <span class="n">mu</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span>
+<span class="n">solution</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">R</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">mu</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">theta</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>We get</p>
+<div class="math notranslate nohighlight">
+\[\frac{d}{d\theta}\mu(\theta)
+    = - \frac{\mu(\theta)^2}{1 + \theta\mu(\theta) + e^{-\theta\mu(\theta)}}\]</div>
+<p>Now, we use this to define a theano op, that also computes the gradient:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">theano</span>
+<span class="kn">import</span> <span class="nn">theano.tensor</span> <span class="k">as</span> <span class="nn">tt</span>
+<span class="kn">import</span> <span class="nn">theano.tests.unittest_tools</span>
+
+<span class="k">class</span> <span class="nc">MuFromTheta</span><span class="p">(</span><span class="n">tt</span><span class="o">.</span><span class="n">Op</span><span class="p">):</span>
+    <span class="n">itypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">tt</span><span class="o">.</span><span class="n">dscalar</span><span class="p">]</span>
+    <span class="n">otypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">tt</span><span class="o">.</span><span class="n">dscalar</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">):</span>
+        <span class="n">theta</span><span class="p">,</span> <span class="o">=</span> <span class="n">inputs</span>
+        <span class="n">mu</span> <span class="o">=</span> <span class="n">mu_from_theta</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">grad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
+        <span class="n">theta</span><span class="p">,</span> <span class="o">=</span> <span class="n">inputs</span>
+        <span class="n">mu</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="n">thetamu</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">*</span> <span class="n">mu</span>
+        <span class="k">return</span> <span class="p">[</span><span class="o">-</span> <span class="n">g</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">mu</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">thetamu</span> <span class="o">+</span> <span class="n">tt</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">thetamu</span><span class="p">))]</span>
+</pre></div>
+</div>
+<p>If you value your sanity, always check that the gradient is ok:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">theano</span><span class="o">.</span><span class="n">tests</span><span class="o">.</span><span class="n">unittest_tools</span><span class="o">.</span><span class="n">verify_grad</span><span class="p">(</span><span class="n">MuFromTheta</span><span class="p">(),</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)])</span>
+<span class="n">theano</span><span class="o">.</span><span class="n">tests</span><span class="o">.</span><span class="n">unittest_tools</span><span class="o">.</span><span class="n">verify_grad</span><span class="p">(</span><span class="n">MuFromTheta</span><span class="p">(),</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1e-5</span><span class="p">)])</span>
+<span class="n">theano</span><span class="o">.</span><span class="n">tests</span><span class="o">.</span><span class="n">unittest_tools</span><span class="o">.</span><span class="n">verify_grad</span><span class="p">(</span><span class="n">MuFromTheta</span><span class="p">(),</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1e5</span><span class="p">)])</span>
+</pre></div>
+</div>
+<p>We can now define our model using this new op:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pymc3</span> <span class="k">as</span> <span class="nn">pm</span>
+
+<span class="n">tt_mu_from_theta</span> <span class="o">=</span> <span class="n">MuFromTheta</span><span class="p">()</span>
+
+<span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfNormal</span><span class="p">(</span><span class="s1">&#39;theta&#39;</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Deterministic</span><span class="p">(</span><span class="s1">&#39;mu&#39;</span><span class="p">,</span> <span class="n">tt_mu_from_theta</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span>
+    <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.21</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">])</span>
+
+    <span class="n">trace</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/pymc3_logo.jpg" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="index.html">PyMC3</a></h1>
+
+
+
+<p class="blurb">Probabilistic Programming in Python: Bayesian Modeling and Probabilistic Machine Learning with Theano</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="getting_started.html">Getting started</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="notebooks/getting_started.html">Getting started with PyMC3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/api_quickstart.html">API quickstart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/variational_api_quickstart.html">Variational API quickstart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gp.html">Gaussian Processes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="theano.html">PyMC3 and Theano</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Advanced usage of Theano in PyMC3</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#using-shared-variables">Using shared variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing-custom-theano-ops">Writing custom Theano Ops</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="prob_dists.html">Probability Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, The PyMC Development Team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="_sources/advanced_theano.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
